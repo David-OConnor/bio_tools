@@ -1,0 +1,1 @@
+//! A descriptor of CLI input arguments to a program.

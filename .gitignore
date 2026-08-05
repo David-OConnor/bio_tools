@@ -1,0 +1,15 @@
+# IDE
+*.iws
+.idea/workspace.xml
+
+# Rust
+/target
+Cargo.lock
+
+
+
+# Related to intallations of tools
+*.zip
+applications
+
+/.claude
