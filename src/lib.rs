@@ -1,16 +1,16 @@
 //! Much of this module is adapted from `bio_web`; ideally it replaces it.
 
-use std::{fmt, io};
+use std::{fmt, io, path::Path};
 
 use crate::input::InputField;
 
 mod input;
-mod install;
+pub mod install;
 mod output;
 mod run;
 mod tool_definitions;
 
-pub const EXECUTABLES_PATH: &str = "./tool_executables"; // todo: A/R
+// pub const EXECUTABLES_PATH: &str = "./tool_executables"; // todo: A/R
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LaunchType {
@@ -137,7 +137,11 @@ pub enum License {
 
 impl fmt::Display for License {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // todo
+        f.write_str(match self {
+            Self::Mit => "MIT",
+            Self::ApacheV2 => "Apache-2.0",
+            Self::Other => "Other",
+        })
     }
 }
 
@@ -208,20 +212,32 @@ pub struct Process {
 }
 
 impl Process {
-    /// Details depend on the process. todo: Sort out how to implement this.
-    pub fn status(&self) -> io::Result<Status> {}
-
-    /// Install this process to the managed applications/tools directory.
-    pub fn install(&self) -> io::Result<()> {
-        if let Status::Pass(_) = self.status()? {
-            return Err(io::Error::other("Process is already installed"));
-        }
-
-        Ok(())
+    /// Status probing is tool-specific and is not yet described by [`Process`].
+    pub fn status(&self) -> io::Result<Status> {
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "this process does not define a status probe",
+        ))
     }
 
-    /// Uninstall this process from the managed applications/tools directory.
-    pub fn uninstall(&self) -> io::Result<()> {
+    /// Install this process to the managed applications/tools directory.
+    /// The caller sets the application path; this
+    /// is the outer path, e.g. likely the same for all that caller's tools.
+    pub fn install(&self, tools_path: &Path) -> io::Result<()> {
+        let tool = self
+            .executable_name
+            .parse::<install::Tool>()
+            .or_else(|_| self.name.parse::<install::Tool>())
+            .map_err(io::Error::other)?;
+        install::Installer::from_environment(tools_path)
+            .map_err(io::Error::other)?
+            .install(tool)
+            .map_err(io::Error::other)
+    }
+
+    /// Uninstall this process from the managed applications/tools directory. The caller sets the application path; this
+    /// is the outer path, e.g. likely the same for all that caller's tools.
+    pub fn uninstall(&self, _tools_path: &Path) -> io::Result<()> {
         if let Status::NotFound = self.status()? {
             return Err(io::Error::other("Process not found"));
         }

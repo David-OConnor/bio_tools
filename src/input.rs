@@ -15,7 +15,7 @@ pub enum FieldType {
 }
 
 // todo: Repetative with FieldType. figure out how you use them. They may both have uses.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Field {
     /// todo: we could represent these as na_seq types, but they may include wildcards etc.
     /// todo: Would take some thought; text is fine for now.

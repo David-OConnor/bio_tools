@@ -13,6 +13,30 @@ can add many of them without repeating code
 Handles installing applications. Details depend on the tool; some work by placing application executables in the
 appropriate places. Since many of these use Python, it uses [uv](https://docs.astral.sh/uv/) to set up isolated environments 
 
+The Rust installer replaces application-owned shell and PowerShell orchestration. The caller owns
+the outer directory; `bio_tools` owns the stable per-tool layout, downloads, environments, GPU
+selection, and verification:
+
+```rust,no_run
+use bio_tools::install::{Installer, Tool};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut installer = Installer::from_environment("./tool_executables")?;
+    installer.install(Tool::OpenDde)?;
+
+    // Independent recipes continue after an upstream failure.
+    let report = installer.install_many([Tool::Boltz2, Tool::ProteinMpnn]);
+    if !report.is_success() {
+        eprintln!("Failed installs: {:?}", report.failed);
+    }
+    Ok(())
+}
+```
+
+`InstallLayout::split` supports consumers such as a web service that keep source/model assets and
+Python environments in separate roots. A progress callback can be attached with
+`Installer::with_reporter` for a GUI or structured setup log.
+
 
 ## Example uses
 - Building a GUI (Web or native) to these tools
