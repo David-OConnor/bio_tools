@@ -4,11 +4,11 @@ use std::{
     process::{Command, Output},
 };
 
-use super::{InstallError, Installer, StatusKind, Tool, ToolStatus};
+use crate::install::{InstallError, Installer, StatusKind, Tool, ToolStatus};
 
 const STATUS_DIRECTORY: &str = ".bio_tools";
 
-pub(super) fn record_install(installer: &Installer, tool: Tool) -> Result<(), InstallError> {
+pub(crate) fn record_install(installer: &Installer, tool: Tool) -> Result<(), InstallError> {
     let directory = installer
         .config
         .layout
@@ -29,7 +29,7 @@ pub(super) fn record_install(installer: &Installer, tool: Tool) -> Result<(), In
     })
 }
 
-pub(super) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
+pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
     if !tool.is_supported() {
         return error(format!(
             "{} is not supported on this operating system.",

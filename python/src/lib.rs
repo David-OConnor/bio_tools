@@ -1,6 +1,9 @@
 use std::{env, path::PathBuf, process::Command};
 
-use bio_tools_rs::install::{Installer as RustInstaller, StatusKind, Tool, ToolStatus};
+use bio_tools_rs::{
+    install::{Installer as RustInstaller, Tool},
+    status::{ToolStatus, StatusKind}
+};
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
 
 #[pyclass(name = "Status", frozen, skip_from_py_object)]

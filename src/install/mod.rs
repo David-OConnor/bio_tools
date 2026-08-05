@@ -16,6 +16,7 @@ use std::{
     str::FromStr,
     sync::Arc,
 };
+use crate::status;
 
 mod alphafold3;
 mod boltz2;
@@ -26,7 +27,6 @@ mod igblast;
 mod opendde;
 mod protein_mpnn;
 mod python_tools;
-mod status;
 
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

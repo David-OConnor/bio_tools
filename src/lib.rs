@@ -9,7 +9,7 @@ pub mod install;
 mod output;
 mod run;
 mod tool_definitions;
-
+mod status;
 // pub const EXECUTABLES_PATH: &str = "./tool_executables"; // todo: A/R
 
 #[derive(Clone, Copy, Debug, PartialEq)]
