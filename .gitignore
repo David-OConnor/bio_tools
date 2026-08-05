@@ -6,6 +6,7 @@
 /target
 Cargo.lock
 
+/python/target/
 
 
 # Related to intallations of tools

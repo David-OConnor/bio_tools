@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+ureq = "3.3.0"
+url = "2.5.8"
+#webbrowser = "1.2.1"
+#na_seq = "0.3.15"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+serde-aux = "4.7.0"  # Deser num from string.
