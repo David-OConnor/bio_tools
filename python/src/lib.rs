@@ -1,419 +1,299 @@
-use std::str::FromStr;
+use std::{env, path::PathBuf, process::Command};
 
-use bio_files_rs;
-use lin_alg::f64::Vec3;
-use pyo3::{exceptions::PyValueError, prelude::*, types::PyType};
+use bio_tools_rs::install::{Installer as RustInstaller, StatusKind, Tool, ToolStatus};
+use pyo3::{exceptions::PyRuntimeError, prelude::*};
 
-mod cif_sf;
-mod gro;
-mod md_params;
-mod mmcif;
-mod mol2;
-mod orca;
-mod pdbqt;
-mod sdf;
-mod xyz;
-
-/// Candidate for standalone helper lib.
-#[macro_export]
-macro_rules! make_enum {
-    ($Py:ident, $Native:path, $( $Var:ident ),+ $(,)?) => {
-        #[pyclass]
-        #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-        pub enum $Py { $( $Var ),+ }
-
-        impl ::core::convert::From<$Py> for $Native {
-            fn from(v: $Py) -> Self { match v { $( $Py::$Var => <$Native>::$Var ),+ } }
-        }
-
-        impl ::core::convert::From<$Native> for $Py {
-            fn from(v: $Native) -> Self { match v { $( <$Native>::$Var => $Py::$Var ),+ } }
-        }
-
-        impl $Py {
-            pub fn to_native(self) -> $Native {
-                self.into()
-            }
-
-            pub fn from_native(native: $Native) -> Self {
-               native.into()
-            }
-        }
-    };
+#[pyclass(name = "Status", frozen, skip_from_py_object)]
+#[derive(Clone)]
+struct PyStatus {
+    #[pyo3(get)]
+    result: String,
+    #[pyo3(get)]
+    detail: String,
+    #[pyo3(get)]
+    device: Option<String>,
 }
 
-// todo: Blocked due to a restriction in PYO3
-/// Candidate for standalone helper lib.
-#[macro_export]
-macro_rules! field {
-    ($name:ident, $ty:ty) => {
-        #[getter]
-        fn $name(&self) -> $ty {
-            self.inner.$name.into()
-        }
-
-        // #[setter($name)]
-        // // todo: Do we need to use paste! here?
-        // fn $name##_set(&mut self, val: $ty) -> $ty {
-        //     self.inner.$name = val.into();
-        //     val
-        // }
-    };
-}
-
-#[pyclass]
-struct AtomGeneric {
-    inner: bio_files_rs::AtomGeneric,
-}
-
-#[pymethods]
-impl AtomGeneric {
-    #[getter]
-    fn serial_number(&self) -> u32 {
-        self.inner.serial_number
-    }
-
-    #[setter(serial_number)]
-    fn serial_number_set(&mut self, v: u32) {
-        self.inner.serial_number = v;
-    }
-
-    #[getter]
-    fn posit(&self) -> [f64; 3] {
-        self.inner.posit.to_arr()
-    }
-
-    #[setter(posit)]
-    fn posit_set(&mut self, v: [f64; 3]) -> PyResult<()> {
-        self.inner.posit = Vec3::from_slice(&v)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{e:?}")))?;
-        Ok(())
-    }
-
-    #[getter]
-    // todo: String for now
-    fn element(&self) -> String {
-        self.inner.element.to_string()
-    }
-
-    #[setter(element)]
-    fn element_set(&mut self, v: String) -> PyResult<()> {
-        self.inner.element = na_seq::Element::from_letter(&v)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
-        Ok(())
-    }
-
-    #[getter]
-    // todo: String for now
-    fn type_in_res(&self) -> Option<String> {
-        self.inner.type_in_res.as_ref().map(|v| v.to_string())
-    }
-
-    #[getter]
-    fn force_field_type(&self) -> Option<String> {
-        self.inner.force_field_type.clone()
-    }
-
-    #[setter(force_field_type)]
-    fn force_field_type_set(&mut self, v: Option<String>) {
-        self.inner.force_field_type = v;
-    }
-
-    #[getter]
-    fn partial_charge(&self) -> Option<f32> {
-        self.inner.partial_charge
-    }
-
-    #[setter(partial_charge)]
-    fn partial_charge_set(&mut self, v: Option<f32>) {
-        self.inner.partial_charge = v;
-    }
-
-    #[getter]
-    fn hetero(&self) -> bool {
-        self.inner.hetero
-    }
-
-    #[setter(hetero)]
-    fn hetero_set(&mut self, v: bool) {
-        self.inner.hetero = v;
-    }
-
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.inner)
-    }
-}
-
-make_enum!(
-    BondType,
-    bio_files_rs::BondType,
-    Single,
-    Double,
-    Triple,
-    Aromatic,
-    Amide,
-    Dummy,
-    Unknown,
-    NotConnected,
-    Quadruple,
-    Delocalized,
-    PolymericLink
-);
-
-#[pymethods]
-impl BondType {
-    fn to_str_sdf(&self) -> String {
-        self.to_native().to_str_sdf()
-    }
-
-    #[classmethod]
-    fn from_str(_cls: &Bound<'_, PyType>, str: &str) -> PyResult<Self> {
-        Ok(bio_files_rs::BondType::from_str(str)?.into())
-    }
-    fn __str__(&self) -> String {
-        self.to_native().to_string()
-    }
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.to_native())
-    }
-}
-
-#[pyclass]
-struct BondGeneric {
-    inner: bio_files_rs::BondGeneric,
-}
-
-#[pymethods]
-impl BondGeneric {
-    #[getter]
-    fn bond_type(&self) -> BondType {
-        self.bond_type().into()
-    }
-    #[setter(bond_type)]
-    fn bond_type_set(&mut self, val: BondType) {
-        self.inner.bond_type = val.into();
-    }
-
-    #[getter]
-    fn atom_0_sn(&self) -> u32 {
-        self.inner.atom_0_sn
-    }
-    #[setter(atom_0_sn)]
-    fn atom_0_sn_set(&mut self, val: u32) {
-        self.inner.atom_0_sn = val;
-    }
-
-    #[getter]
-    fn atom_1_sn(&self) -> u32 {
-        self.inner.atom_1_sn
-    }
-    #[setter(atom_1_sn)]
-    fn atom_1_sn_set(&mut self, val: u32) {
-        self.inner.atom_1_sn = val;
-    }
-
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.inner)
-    }
-}
-
-#[pyclass]
-struct ResidueType {
-    inner: bio_files_rs::ResidueType,
-}
-
-#[pymethods]
-impl ResidueType {
-    #[classmethod]
-    fn from_str(_cls: &Bound<'_, PyType>, str: &str) -> Self {
+impl From<ToolStatus> for PyStatus {
+    fn from(status: ToolStatus) -> Self {
+        let result = match status.result {
+            StatusKind::Pass => "Pass",
+            StatusKind::NotFound => "Can't find",
+            StatusKind::Error => "Error",
+        };
         Self {
-            inner: bio_files_rs::ResidueType::from_str(str),
+            result: result.to_owned(),
+            detail: status.detail,
+            device: status.device,
         }
     }
-    fn __str__(&self) -> String {
-        self.inner.to_string()
-    }
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.inner)
-    }
-}
-
-#[pyclass]
-struct ResidueGeneric {
-    inner: bio_files_rs::ResidueGeneric,
 }
 
 #[pymethods]
-impl ResidueGeneric {
-    #[getter]
-    fn serial_number(&self) -> u32 {
-        self.inner.serial_number
-    }
-    #[setter(serial_number)]
-    fn serial_number_set(&mut self, val: u32) {
-        self.inner.serial_number = val;
-    }
-
-    #[getter]
-    fn res_type<'py>(&self, py: Python<'py>) -> PyResult<Py<ResidueType>> {
-        Py::new(
-            py,
-            ResidueType {
-                inner: self.inner.res_type.clone(),
-            },
+impl PyStatus {
+    fn __repr__(&self) -> String {
+        format!(
+            "Status(result={:?}, detail={:?}, device={:?})",
+            self.result, self.detail, self.device
         )
     }
-
-    #[getter]
-    fn end(&self) -> ResidueEnd {
-        self.inner.end.into()
-    }
-    #[setter(end)]
-    fn end_set(&mut self, val: ResidueEnd) {
-        self.inner.end = val.into();
-    }
-
-    #[getter]
-    fn atom_sns(&self) -> Vec<u32> {
-        self.inner.atom_sns.clone()
-    }
-
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.inner)
-    }
 }
 
-make_enum!(
-    ResidueEnd,
-    crate::bio_files_rs::ResidueEnd,
-    Internal,
-    NTerminus,
-    CTerminus,
-    Hetero
-);
-
-#[pymethods]
-impl ResidueEnd {
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.to_native())
-    }
-}
-
-#[pyclass]
-struct ChainGeneric {
-    inner: bio_files_rs::ChainGeneric,
+#[pyclass(name = "Tool", frozen, skip_from_py_object)]
+#[derive(Clone)]
+struct PyTool {
+    slug: String,
+    inner: Option<Tool>,
 }
 
 #[pymethods]
-impl ChainGeneric {
-    #[getter]
-    fn id(&self) -> String {
-        self.inner.id.clone()
+impl PyTool {
+    #[new]
+    fn new(slug: &str) -> PyResult<Self> {
+        if let Ok(tool) = slug.parse::<Tool>() {
+            return Ok(Self {
+                slug: slug.to_owned(),
+                inner: Some(tool),
+            });
+        }
+        if matches!(slug, "rdkit" | "orca" | "pdbbind" | "tap") {
+            return Ok(Self {
+                slug: slug.to_owned(),
+                inner: None,
+            });
+        }
+        Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown biology tool slug {slug:?}"
+        )))
+    }
+
+    #[staticmethod]
+    fn all() -> Vec<Self> {
+        Tool::ALL
+            .into_iter()
+            .map(|tool| Self {
+                slug: tool.slug().to_owned(),
+                inner: Some(tool),
+            })
+            .collect()
     }
 
     #[getter]
-    fn residue_sns(&self) -> Vec<u32> {
-        self.inner.residue_sns.clone()
+    fn slug(&self) -> &str {
+        &self.slug
     }
 
     #[getter]
-    fn atom_sns(&self) -> Vec<u32> {
-        self.inner.atom_sns.clone()
+    fn name(&self) -> String {
+        self.inner
+            .map(|tool| tool.name().to_owned())
+            .unwrap_or_else(|| self.slug.clone())
+    }
+
+    fn install(
+        &self,
+        py: Python<'_>,
+        process_executables: PathBuf,
+        support_root: Option<PathBuf>,
+    ) -> PyResult<()> {
+        let tool = self.inner.ok_or_else(|| {
+            PyRuntimeError::new_err(format!(
+                "{} is externally managed and has no automatic install recipe",
+                self.slug
+            ))
+        })?;
+        py.detach(move || configured_installer(process_executables, support_root)?.install(tool))
+            .map_err(install_error)
+    }
+
+    #[pyo3(signature = (process_executables, support_root=None))]
+    fn status(
+        &self,
+        py: Python<'_>,
+        process_executables: PathBuf,
+        support_root: Option<PathBuf>,
+    ) -> PyResult<PyStatus> {
+        if let Some(tool) = self.inner {
+            return py
+                .detach(move || {
+                    let installer = configured_installer(process_executables, support_root)?;
+                    Ok::<_, bio_tools_rs::install::InstallError>(installer.status(tool))
+                })
+                .map(PyStatus::from)
+                .map_err(install_error);
+        }
+        let slug = self.slug.clone();
+        let python_executable = py
+            .import("sys")?
+            .getattr("executable")?
+            .extract::<PathBuf>()?;
+        Ok(py.detach(move || external_status(&slug, &process_executables, &python_executable)))
     }
 
     fn __repr__(&self) -> String {
-        format!("{:?}", self.inner)
+        format!("Tool({:?})", self.slug)
     }
 }
 
-make_enum!(
-    SecondaryStructure,
-    bio_files_rs::SecondaryStructure,
-    Helix,
-    Sheet,
-    Coil
-);
+#[pyclass(name = "Installer", unsendable)]
+struct PyInstaller {
+    inner: RustInstaller,
+}
 
 #[pymethods]
-impl SecondaryStructure {
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.to_native())
+impl PyInstaller {
+    #[new]
+    #[pyo3(signature = (process_executables, support_root=None))]
+    fn new(process_executables: PathBuf, support_root: Option<PathBuf>) -> PyResult<Self> {
+        Ok(Self {
+            inner: configured_installer(process_executables, support_root)
+                .map_err(install_error)?,
+        })
+    }
+
+    fn install(&mut self, py: Python<'_>, tool: &PyTool) -> PyResult<()> {
+        let tool = tool.inner.ok_or_else(|| {
+            PyRuntimeError::new_err(format!(
+                "{} is externally managed and has no automatic install recipe",
+                tool.slug
+            ))
+        })?;
+        py.detach(|| self.inner.install(tool))
+            .map_err(install_error)
+    }
+
+    fn status(&self, py: Python<'_>, tool: &PyTool) -> PyResult<PyStatus> {
+        let tool = tool.inner.ok_or_else(|| {
+            PyRuntimeError::new_err(format!(
+                "{} is externally managed; call Tool.status() for its external probe",
+                tool.slug
+            ))
+        })?;
+        Ok(PyStatus::from(py.detach(|| self.inner.status(tool))))
     }
 }
 
-#[pyclass]
-struct BackboneSS {
-    inner: bio_files_rs::BackboneSS,
+fn configured_installer(
+    process_executables: PathBuf,
+    support_root: Option<PathBuf>,
+) -> Result<RustInstaller, bio_tools_rs::install::InstallError> {
+    let mut installer = RustInstaller::for_process_executables(process_executables)?;
+    installer.config.support_root = support_root;
+    Ok(installer)
 }
 
-#[pymethods]
-impl BackboneSS {
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.inner)
+fn install_error(error: bio_tools_rs::install::InstallError) -> PyErr {
+    PyRuntimeError::new_err(error.to_string())
+}
+
+fn external_status(
+    slug: &str,
+    process_executables: &std::path::Path,
+    python_executable: &std::path::Path,
+) -> PyStatus {
+    match slug {
+        "rdkit" => command_status(
+            Command::new(python_executable)
+                .args(["-c", "import rdkit; print('RDKit', rdkit.__version__)"]),
+        ),
+        "orca" => {
+            let configured = env::var_os("ORCA_EXECUTABLE").map(PathBuf::from);
+            let executable = configured.filter(|path| path.is_file()).or_else(|| {
+                [
+                    process_executables.join("orca/orca"),
+                    process_executables.join("ORCA/orca"),
+                ]
+                .into_iter()
+                .find(|path| path.is_file())
+            });
+            let Some(executable) = executable else {
+                return missing(
+                    "ORCA is not configured under process_executables or ORCA_EXECUTABLE.",
+                );
+            };
+            command_status(Command::new(executable).arg("--help"))
+        }
+        "pdbbind" => {
+            let root = env::var_os("PDBBIND_ROOT")
+                .map(PathBuf::from)
+                .unwrap_or_else(|| process_executables.join("pdbbind"));
+            if root.is_dir() {
+                passing(format!("Dataset found at {}", root.display()), None)
+            } else {
+                missing(format!("No PDBBind release found at {}.", root.display()))
+            }
+        }
+        "tap" => {
+            let Some(python) = env::var_os("TAP_PYTHON").map(PathBuf::from) else {
+                return missing("TAP_PYTHON is not configured.");
+            };
+            let Some(runner) = env::var_os("TAP_RUNNER").map(PathBuf::from) else {
+                return missing("TAP_RUNNER is not configured.");
+            };
+            command_status(Command::new(python).arg(runner).arg("--help"))
+        }
+        _ => missing(format!("No status probe is defined for {slug}.")),
     }
 }
 
-make_enum!(
-    ExperimentalMethod,
-    bio_files_rs::ExperimentalMethod,
-    XRayDiffraction,
-    ElectronDiffraction,
-    NeutronDiffraction,
-    ElectronMicroscopy,
-    SolutionNmr
-);
+fn command_status(command: &mut Command) -> PyStatus {
+    match command.output() {
+        Ok(output) => {
+            let detail = format!(
+                "{}{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+            let detail = detail.trim();
+            if output.status.success() || (!detail.is_empty() && !detail.starts_with("Traceback")) {
+                passing(
+                    detail
+                        .lines()
+                        .next()
+                        .unwrap_or("The tool answered its status probe."),
+                    None,
+                )
+            } else {
+                failing(if detail.is_empty() {
+                    "The tool status probe exited unsuccessfully.".to_owned()
+                } else {
+                    detail.chars().take(200).collect()
+                })
+            }
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => missing(error.to_string()),
+        Err(error) => failing(error.to_string()),
+    }
+}
 
-#[pymethods]
-impl ExperimentalMethod {
-    fn to_str_short(&self) -> String {
-        self.to_native().to_str_short()
+fn passing(detail: impl Into<String>, device: Option<String>) -> PyStatus {
+    PyStatus {
+        result: "Pass".to_owned(),
+        detail: detail.into(),
+        device,
     }
+}
 
-    #[classmethod]
-    fn from_str(_cls: &Bound<'_, PyType>, str: &str) -> PyResult<Self> {
-        Ok(bio_files_rs::ExperimentalMethod::from_str(str)?.into())
+fn missing(detail: impl Into<String>) -> PyStatus {
+    PyStatus {
+        result: "Can't find".to_owned(),
+        detail: detail.into(),
+        device: None,
     }
-    fn __repr__(&self) -> String {
-        format!("{:?}", self.to_native())
-    }
-    fn __str__(&self) -> String {
-        self.to_native().to_string()
+}
+
+fn failing(detail: impl Into<String>) -> PyStatus {
+    PyStatus {
+        result: "Error".to_owned(),
+        detail: detail.into(),
+        device: None,
     }
 }
 
 #[pymodule]
-fn biology_files(_py: Python<'_>, m: &Bound<PyModule>) -> PyResult<()> {
-    // General
-    m.add_class::<AtomGeneric>()?;
-    m.add_class::<BondType>()?;
-    m.add_class::<BondGeneric>()?;
-    m.add_class::<ResidueType>()?;
-    m.add_class::<ResidueGeneric>()?;
-    m.add_class::<ChainGeneric>()?;
-    m.add_class::<SecondaryStructure>()?;
-    m.add_class::<BackboneSS>()?;
-    m.add_class::<ExperimentalMethod>()?;
-
-    m.add_class::<ResidueEnd>()?;
-
-    // Small molecules
-    m.add_class::<mmcif::MmCif>()?;
-    m.add_class::<mol2::Mol2>()?;
-    m.add_class::<sdf::Sdf>()?;
-    m.add_class::<xyz::Xyz>()?;
-    m.add_class::<gro::Gro>()?;
-    m.add_class::<pdbqt::Pdbqt>()?;
-
-    // Electron density;
-    // todo: Map
-    m.add_class::<cif_sf::CifStructureFactors>()?;
-
-    m.add_class::<mol2::MolType>()?;
-
-    m.add_class::<md_params::ForceFieldParams>()?;
-
-    m.add_function(wrap_pyfunction!(md_params::load_prmtop, m)?)?;
-    m.add_function(wrap_pyfunction!(md_params::save_prmtop, m)?)?;
-
+fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<PyTool>()?;
+    m.add_class::<PyStatus>()?;
+    m.add_class::<PyInstaller>()?;
     Ok(())
 }

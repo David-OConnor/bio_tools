@@ -21,7 +21,7 @@ selection, and verification:
 use bio_tools::install::{Installer, Tool};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut installer = Installer::from_environment("./tool_executables")?;
+    let mut installer = Installer::for_process_executables("./process_executables")?;
     installer.install(Tool::OpenDde)?;
 
     // Independent recipes continue after an upstream failure.
@@ -33,10 +33,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-`InstallLayout::split` supports consumers such as a web service that keep source/model assets and
-Python environments in separate roots. A progress callback can be attached with
+`InstallLayout::process_executables` standardizes both consumers on assets under
+`process_executables/` and environments under `process_executables/python_envs/`.
+`InstallLayout::split` remains available for custom roots. A progress callback can be attached with
 `Installer::with_reporter` for a GUI or structured setup log.
-
 
 ## Example uses
 - Building a GUI (Web or native) to these tools
@@ -44,6 +44,16 @@ Python environments in separate roots. A progress callback can be attached with
 
 
 ## Python bindings
-Available for both Python projects via `PyO3` nad `maturin`; available on PyPi.
 
-`pip install bio_tools`
+The `python/` package builds an ABI3 wheel with PyO3 and maturin. It exposes
+`Tool`, `Installer`, and `Status` using the same Rust recipes and probes:
+
+```python
+from pathlib import Path
+import bio_tools
+
+root = Path("process_executables")
+installer = bio_tools.Installer(root)
+installer.install(bio_tools.Tool("opendde"))
+print(bio_tools.Tool("opendde").status(root).result)
+```

@@ -26,6 +26,7 @@ mod igblast;
 mod opendde;
 mod protein_mpnn;
 mod python_tools;
+mod status;
 
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -317,6 +318,13 @@ impl InstallLayout {
         }
     }
 
+    /// Shared application layout: assets live directly under process_executables, while
+    /// isolated Python and Conda environments live under process_executables/python_envs.
+    pub fn process_executables(root: impl Into<PathBuf>) -> Self {
+        let root = root.into();
+        Self::split(root.clone(), root.join("python_envs"))
+    }
+
     pub fn environment(&self, slug: &str) -> PathBuf {
         self.environments_root
             .join(format!("{slug}{}", self.environment_suffix))
@@ -423,6 +431,23 @@ fn first_env(names: &[&str]) -> Option<String> {
 
 fn first_env_path(names: &[&str]) -> Option<PathBuf> {
     first_env(names).map(PathBuf::from)
+}
+
+/// Machine-readable outcome of a tool availability probe.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum StatusKind {
+    Pass,
+    NotFound,
+    Error,
+}
+
+/// Result returned by [Installer::status].
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ToolStatus {
+    pub result: StatusKind,
+    pub detail: String,
+    /// GPU or CPU when the installed runtime can report it.
+    pub device: Option<String>,
 }
 
 /// Progress emitted at stable tool/step boundaries.
@@ -537,6 +562,14 @@ impl Installer {
             InstallConfig::new(root).apply_environment()?,
         ))
     }
+    /// Construct an installer for the shared process_executables/python_envs layout.
+    pub fn for_process_executables(root: impl Into<PathBuf>) -> Result<Self, InstallError> {
+        let root = root.into();
+        let mut config = InstallConfig::new(&root).apply_environment()?;
+        config.layout = InstallLayout::process_executables(root);
+        Ok(Self::from_config(config))
+    }
+
     pub fn from_config(config: InstallConfig) -> Self {
         Self {
             config,
@@ -593,10 +626,18 @@ impl Installer {
             _ => python_tools::install(self, tool),
         };
         if result.is_ok() {
+            if let Err(error) = status::record_install(self, tool) {
+                self.note(format!("Unable to record installation status: {error}"));
+            }
             self.emit(InstallEvent::ToolFinished(tool));
         }
         self.current_tool = None;
         result
+    }
+
+    /// Probe an installed tool using the same layout used to install it.
+    pub fn status(&self, tool: Tool) -> ToolStatus {
+        status::check(self, tool)
     }
 
     /// Install several tools without letting one broken upstream release suppress the rest.

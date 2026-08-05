@@ -1,2 +1,2 @@
-maturin build
-pip install .
+maturin build --release
+maturin develop --release

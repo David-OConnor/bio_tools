@@ -1,15 +1,15 @@
 [build-system]
-requires = ["maturin>=1.9,<2.0"]  # todo: What? WHy thes versions? I'm showing 1.14 as the latest.
+requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "biology_files"
-description = "Save and load common biology file formats"
+name = "bio-tools"
+description = "Install and inspect computational biology tools using the bio_tools Rust library"
 requires-python = ">=3.10"
 authors = [{ name = "David O'Connor", email = "the_alchemist@fastmail.com" }]
 readme = "PYPI_README.md"
 license = { file = "PYPI_LICENSE" }
-keywords = ["mol2", "sdf", "mmcif", "amber", "biology"]
+keywords = ["biology", "bioinformatics", "installer", "scientific-computing"]
 dynamic = ["version"]
 
 classifiers = [
@@ -17,14 +17,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
 [project.urls]
-homepage = "https://github.com/David-OConnor/bio_files"
-repository = "https://github.com/David-OConnor/bio_files"
-documentation = "https://docs.rs/bio_files"
+homepage = "https://github.com/David-OConnor/bio_tools"
+repository = "https://github.com/David-OConnor/bio_tools"
 
 [tool.maturin]
-# Using ABI3 allows for this to work on any Python version > 3.10; not just 3.10.
+module-name = "bio_tools"
 features = ["pyo3/extension-module", "pyo3/abi3-py310"]
