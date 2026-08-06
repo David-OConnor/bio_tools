@@ -31,6 +31,7 @@ mod python_tools;
 mod uninstall;
 
 pub use uninstall::UninstallReport;
+
 use crate::tool_definitions::Tool;
 
 /// How per-tool environments and non-Python assets are laid out.
@@ -349,6 +350,11 @@ impl Installer {
 
     pub fn environment_path(&self, tool: Tool) -> PathBuf {
         self.config.layout.environment(tool.slug())
+    }
+
+    /// Locate a tool's installed console entry point in its managed environment.
+    pub fn executable_path(&self, tool: Tool) -> PathBuf {
+        self.venv_script(tool.slug(), tool.console_script())
     }
 
     pub fn tools_root(&self) -> &Path {

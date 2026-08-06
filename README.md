@@ -61,6 +61,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 `InstallLayout::split` remains available for custom roots. A progress callback can be attached with
 `Installer::with_reporter` for a GUI or structured setup log.
 
+## Standalone CLI
+
+The optional `bio_tools` executable wraps the same installer, status, and command-runner APIs for shell use:
+
+```sh
+cargo install bio_tools --features cli --bin bio_tools
+bio_tools install opendde
+bio_tools status opendde
+bio_tools run opendde -- --help
+bio_tools uninstall opendde
+```
+
+It uses `$BIO_TOOLS_ROOT`, or `./.bio_tools` when unset. `run` resolves an installed console entry point inside that managed environment, so it does not require the tool on `PATH`. Tools that only expose a Python module or checkout script still need a tool-specific library invocation.
 ## Example uses
 - Building a GUI (Web or native) to these tools
 - Setting up an API to programmatically interface.

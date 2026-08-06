@@ -8,8 +8,8 @@ pub use crate::install::{StatusKind, ToolStatus};
 use crate::{
     install::{InstallError, Installer},
     run::{CaptureLimits, CommandOutput, CommandSpec, ExitPolicy, RunError},
+    tool_definitions::Tool,
 };
-use crate::tool_definitions::Tool;
 
 const STATUS_DIRECTORY: &str = ".bio_tools";
 
@@ -230,7 +230,9 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
             return Some(CommandSpec::new(installer.venv_python(tool.slug())).arg("--version"));
         }
     };
-    Some(CommandSpec::new(installer.venv_script(tool.slug(), tool.console_script())).args(arguments))
+    Some(
+        CommandSpec::new(installer.venv_script(tool.slug(), tool.console_script())).args(arguments),
+    )
 }
 
 fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<CommandSpec> {

@@ -1,9 +1,10 @@
 use std::{fs, path::Path, process::Command};
-use crate::tool_definitions::Tool;
+
 use super::{
-    common::{PipOptions, ScratchDir}, InstallError,
-    Installer,
+    InstallError, Installer,
+    common::{PipOptions, ScratchDir},
 };
+use crate::tool_definitions::Tool;
 
 struct FetchedScript {
     name: &'static str,
@@ -59,7 +60,12 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                     "import torch; assert torch.cuda.is_available() and \
                      torch.cuda.is_bf16_supported(), 'Chai-1 requires a CUDA GPU with bfloat16'",
                 ),
-                ..UvRecipe::simple(Tool::Chai1.slug(), "3.11", &["chai_lab==0.6.1"], &["chai-lab"])
+                ..UvRecipe::simple(
+                    Tool::Chai1.slug(),
+                    "3.11",
+                    &["chai_lab==0.6.1"],
+                    &["chai-lab"],
+                )
             },
         ),
         Tool::Protenix => install_recipe(
@@ -153,7 +159,12 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             installer,
             UvRecipe {
                 torch: &["torch==2.7.1"],
-                ..UvRecipe::simple(Tool::DlkCat.slug(), "3.10", &["numpy<2", "rdkit", "scikit-learn"], &[])
+                ..UvRecipe::simple(
+                    Tool::DlkCat.slug(),
+                    "3.10",
+                    &["numpy<2", "rdkit", "scikit-learn"],
+                    &[],
+                )
             },
             "https://github.com/SysBioChalmers/DLKcat",
             "DLKcat",
@@ -435,7 +446,11 @@ fn install_igdesign(installer: &mut Installer) -> Result<(), InstallError> {
     installer.clone_or_update("https://github.com/AbSciBio/igdesign", &target)?;
     // Normal VCS installation exposes no modules; upstream documents an editable checkout.
     let target_argument = target.to_string_lossy().into_owned();
-    installer.pip_install(Tool::IgDesign.slug(), &["-e", &target_argument], PipOptions::default())?;
+    installer.pip_install(
+        Tool::IgDesign.slug(),
+        &["-e", &target_argument],
+        PipOptions::default(),
+    )?;
     let download = target.join("download_ckpts.sh");
     if download.is_file() {
         installer.run_upstream_script(&download, &[], &target)?;

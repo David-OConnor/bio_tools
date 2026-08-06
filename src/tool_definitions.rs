@@ -1,8 +1,8 @@
 //! Individual tool details, which conform to our interfaces.
 
-use std::fmt;
-use std::str::FromStr;
-use crate::install::{InstallError, Installer};
+use std::{fmt, str::FromStr};
+
+use crate::install::InstallError;
 
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

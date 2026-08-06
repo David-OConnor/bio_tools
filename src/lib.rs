@@ -9,7 +9,7 @@ pub mod install;
 mod output;
 pub mod run;
 pub mod status;
-mod tool_definitions;
+pub mod tool_definitions;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LaunchType {

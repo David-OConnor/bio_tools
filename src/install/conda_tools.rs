@@ -5,11 +5,12 @@
 //! those two still bootstrap a full Miniconda via [`Installer::ensure_conda`].
 
 use std::{env, fs, path::Path, process::Command};
-use crate::tool_definitions::Tool;
+
 use super::{
-    common::{ScratchDir, CONDA_FORGE}, InstallError,
-    Installer,
+    InstallError, Installer,
+    common::{CONDA_FORGE, ScratchDir},
 };
+use crate::tool_definitions::Tool;
 
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
     match tool {
@@ -234,7 +235,13 @@ fn install_germinal(installer: &mut Installer) -> Result<(), InstallError> {
     if upstream.is_file() {
         let conda = installer.ensure_conda()?;
         let mut remove = Command::new(&conda);
-        remove.args(["env", "remove", "--name", conda_environment(Tool::Germinal), "-y"]);
+        remove.args([
+            "env",
+            "remove",
+            "--name",
+            conda_environment(Tool::Germinal),
+            "-y",
+        ]);
         let _ = installer.succeeds(&mut remove);
         return run_bash_with_conda(installer, &upstream, &[], &target);
     }
