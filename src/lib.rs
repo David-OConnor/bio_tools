@@ -291,22 +291,25 @@ impl Process {
 
     /// Install this process to the caller's managed tools directory.
     pub fn install(&self, tools_path: &Path) -> io::Result<()> {
-        let tool = self
-            .spec
-            .slug
-            .parse::<install::Tool>()
-            .or_else(|_| self.name.parse::<install::Tool>())
-            .map_err(io::Error::other)?;
         install::Installer::from_environment(tools_path)
             .map_err(io::Error::other)?
-            .install(tool)
+            .install(self.tool()?)
             .map_err(io::Error::other)
     }
 
-    pub fn uninstall(&self, _tools_path: &Path) -> io::Result<()> {
-        if let Status::NotFound = self.status()? {
-            return Err(io::Error::other("Process not found"));
-        }
-        Ok(())
+    /// Remove this process's environment and assets from the managed tools directory.
+    pub fn uninstall(&self, tools_path: &Path) -> io::Result<install::UninstallReport> {
+        install::Installer::from_environment(tools_path)
+            .map_err(io::Error::other)?
+            .uninstall(self.tool()?)
+            .map_err(io::Error::other)
+    }
+
+    fn tool(&self) -> io::Result<install::Tool> {
+        self.spec
+            .slug
+            .parse::<install::Tool>()
+            .or_else(|_| self.name.parse::<install::Tool>())
+            .map_err(io::Error::other)
     }
 }

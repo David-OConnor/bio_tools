@@ -29,6 +29,30 @@ pub(crate) fn record_install(installer: &Installer, tool: Tool) -> Result<(), In
     })
 }
 
+pub(crate) fn forget_install(installer: &Installer, tool: Tool) -> Result<(), InstallError> {
+    let marker = marker_path(installer, tool);
+    match fs::remove_file(&marker) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(InstallError::io(
+            format!(
+                "unable to remove the installation marker {}",
+                marker.display()
+            ),
+            error,
+        )),
+    }
+}
+
+fn marker_path(installer: &Installer, tool: Tool) -> PathBuf {
+    installer
+        .config
+        .layout
+        .environments_root
+        .join(STATUS_DIRECTORY)
+        .join(format!("{}.installed", tool.slug()))
+}
+
 pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
     if !tool.is_supported() {
         return error(format!(
@@ -37,13 +61,7 @@ pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
         ));
     }
 
-    let marker = installer
-        .config
-        .layout
-        .environments_root
-        .join(STATUS_DIRECTORY)
-        .join(format!("{}.installed", tool.slug()));
-    let was_installed = marker.is_file();
+    let was_installed = marker_path(installer, tool).is_file();
 
     if tool == Tool::AlphaFold3 {
         return check_alphafold3(installer, was_installed);

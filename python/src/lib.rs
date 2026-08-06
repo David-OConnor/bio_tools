@@ -4,7 +4,7 @@ mod run;
 use std::{env, path::PathBuf};
 
 use bio_tools_rs::{
-    install::{Installer as RustInstaller, Tool},
+    install::{Installer as RustInstaller, Tool, UninstallReport},
     run::{CaptureLimits, CommandSpec, ExitPolicy},
     status::{ToolStatus, StatusKind}
 };
@@ -42,6 +42,38 @@ impl PyStatus {
         format!(
             "Status(result={:?}, detail={:?}, device={:?})",
             self.result, self.detail, self.device
+        )
+    }
+}
+
+#[pyclass(name = "UninstallReport", frozen, skip_from_py_object)]
+#[derive(Clone)]
+struct PyUninstallReport {
+    #[pyo3(get)]
+    removed: Vec<String>,
+    #[pyo3(get)]
+    kept: Vec<String>,
+}
+
+impl From<UninstallReport> for PyUninstallReport {
+    fn from(report: UninstallReport) -> Self {
+        Self {
+            removed: report
+                .removed
+                .into_iter()
+                .map(|path| path.display().to_string())
+                .collect(),
+            kept: report.kept,
+        }
+    }
+}
+
+#[pymethods]
+impl PyUninstallReport {
+    fn __repr__(&self) -> String {
+        format!(
+            "UninstallReport(removed={:?}, kept={:?})",
+            self.removed, self.kept
         )
     }
 }
@@ -97,19 +129,34 @@ impl PyTool {
             .unwrap_or_else(|| self.slug.clone())
     }
 
+    /// Whether this slug has an automatic recipe on this operating system.
+    #[getter]
+    fn installable(&self) -> bool {
+        self.inner.is_some_and(Tool::is_supported)
+    }
+
+    #[pyo3(signature = (process_executables, support_root=None))]
     fn install(
         &self,
         py: Python<'_>,
         process_executables: PathBuf,
         support_root: Option<PathBuf>,
     ) -> PyResult<()> {
-        let tool = self.inner.ok_or_else(|| {
-            PyRuntimeError::new_err(format!(
-                "{} is externally managed and has no automatic install recipe",
-                self.slug
-            ))
-        })?;
+        let tool = self.recipe()?;
         py.detach(move || configured_installer(process_executables, support_root)?.install(tool))
+            .map_err(install_error)
+    }
+
+    #[pyo3(signature = (process_executables, support_root=None))]
+    fn uninstall(
+        &self,
+        py: Python<'_>,
+        process_executables: PathBuf,
+        support_root: Option<PathBuf>,
+    ) -> PyResult<PyUninstallReport> {
+        let tool = self.recipe()?;
+        py.detach(move || configured_installer(process_executables, support_root)?.uninstall(tool))
+            .map(PyUninstallReport::from)
             .map_err(install_error)
     }
 
@@ -142,6 +189,18 @@ impl PyTool {
     }
 }
 
+impl PyTool {
+    /// The recipe behind this slug, or the error for the slugs that have none.
+    fn recipe(&self) -> PyResult<Tool> {
+        self.inner.ok_or_else(|| {
+            PyRuntimeError::new_err(format!(
+                "{} is externally managed and has no automatic install recipe",
+                self.slug
+            ))
+        })
+    }
+}
+
 #[pyclass(name = "Installer", unsendable)]
 struct PyInstaller {
     inner: RustInstaller,
@@ -159,13 +218,15 @@ impl PyInstaller {
     }
 
     fn install(&mut self, py: Python<'_>, tool: &PyTool) -> PyResult<()> {
-        let tool = tool.inner.ok_or_else(|| {
-            PyRuntimeError::new_err(format!(
-                "{} is externally managed and has no automatic install recipe",
-                tool.slug
-            ))
-        })?;
+        let tool = tool.recipe()?;
         py.detach(|| self.inner.install(tool))
+            .map_err(install_error)
+    }
+
+    fn uninstall(&mut self, py: Python<'_>, tool: &PyTool) -> PyResult<PyUninstallReport> {
+        let tool = tool.recipe()?;
+        py.detach(|| self.inner.uninstall(tool))
+            .map(PyUninstallReport::from)
             .map_err(install_error)
     }
 
@@ -305,5 +366,6 @@ fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyTool>()?;
     m.add_class::<PyStatus>()?;
     m.add_class::<PyInstaller>()?;
+    m.add_class::<PyUninstallReport>()?;
     Ok(())
 }

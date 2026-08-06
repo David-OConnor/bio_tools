@@ -28,6 +28,9 @@ mod igblast;
 mod opendde;
 mod protein_mpnn;
 mod python_tools;
+mod uninstall;
+
+pub use uninstall::UninstallReport;
 
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -188,6 +191,75 @@ impl Tool {
             Self::Placer => "PLACER",
             Self::Gromacs => "GROMACS",
             Self::BoltzAdme => "Boltz ADME",
+        }
+    }
+
+    /// Directories this tool's recipe creates under the tools root, relative to it.
+    ///
+    /// The isolated Python or micromamba environment is not listed: every recipe has one, and it
+    /// is derived from the slug. This is only the checkouts, binary distributions, and model
+    /// assets, which is what [`Installer::uninstall`] needs and no probe can rediscover.
+    pub const fn asset_directories(self) -> &'static [&'static str] {
+        match self {
+            Self::HighFold => &["HighFold"],
+            Self::BindCraft => &["BindCraft"],
+            Self::IgBlast => &["igblast"],
+            Self::AntiFold => &["AntiFold"],
+            Self::ProteinMpnn => &["ProteinMPNN"],
+            Self::LigandMpnn => &["LigandMPNN"],
+            Self::RfDiffusion => &["RFdiffusion"],
+            Self::RfAntibody => &["RFantibody"],
+            Self::Germinal => &["germinal"],
+            Self::Mber => &["mber-open"],
+            Self::IgDesign => &["igdesign"],
+            Self::ThermoMpnn => &["ThermoMPNN"],
+            Self::Genie3 => &["genie3"],
+            Self::DeepSp => &["DeepSP"],
+            Self::DeepImmuno => &["DeepImmuno"],
+            Self::TlImmuno2 => &["TLimmuno2"],
+            Self::NetSolP => &["NetSolP-1.0"],
+            Self::DeepStabP => &["deepStabP"],
+            Self::DlkCat => &["DLKcat"],
+            Self::CatPred => &["CatPred"],
+            Self::Placer => &["PLACER"],
+            Self::Gromacs => &["gromacs"],
+            _ => &[],
+        }
+    }
+
+    /// The named Conda environment an upstream installer creates, where one does.
+    ///
+    /// Everything else gets a prefix environment under the layout's environments root, which is
+    /// an ordinary directory. These three are in Conda's own envs directory and only Conda knows
+    /// where that is.
+    pub const fn conda_environment(self) -> Option<&'static str> {
+        match self {
+            Self::BindCraft => Some("BindCraft"),
+            Self::Genie3 => Some("genie3"),
+            // The micromamba branch of the recipe builds a prefix environment instead; removing a
+            // name that was never created is harmless and covers the install.sh branch.
+            Self::Germinal => Some("germinal"),
+            _ => None,
+        }
+    }
+
+    /// Assets an uninstall leaves in place, and why, for tools that have any.
+    pub const fn retained_assets(self) -> &'static [&'static str] {
+        match self {
+            Self::HighFold => &[
+                "The AlphaFold 2 parameters under alphafold_params were kept: they are several \
+                 gigabytes, are not specific to this tool, and are reused by any recipe that \
+                 needs them.",
+            ],
+            Self::OpenDde => &[
+                "The OpenDDE model checkpoint under ~/.cache/opendde was kept: it lives outside \
+                 the managed tree and is reused by a later reinstall.",
+            ],
+            Self::AlphaFold3 => &[
+                "The AlphaFold 3 model parameters and genetic databases were kept: they are \
+                 licensed assets configured by hand, not installed by this recipe.",
+            ],
+            _ => &[],
         }
     }
 
@@ -651,6 +723,22 @@ impl Installer {
     /// Probe an installed tool using the same layout used to install it.
     pub fn status(&self, tool: Tool) -> ToolStatus {
         status::check(self, tool)
+    }
+
+    /// Remove one tool's environment, assets, and installation marker.
+    ///
+    /// Rerunnable in the same sense the recipes are: a tool that is already absent uninstalls
+    /// successfully with an empty report, which is what makes this safe to offer as a button
+    /// beside a status that may be a few minutes stale.
+    pub fn uninstall(&mut self, tool: Tool) -> Result<UninstallReport, InstallError> {
+        self.current_tool = Some(tool);
+        self.emit(InstallEvent::ToolStarted(tool));
+        let result = uninstall::uninstall(self, tool);
+        if result.is_ok() {
+            self.emit(InstallEvent::ToolFinished(tool));
+        }
+        self.current_tool = None;
+        result
     }
 
     /// Install several tools without letting one broken upstream release suppress the rest.
