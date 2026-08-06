@@ -9,6 +9,29 @@ Provides an interface for input and output. This abstracts over the differences 
 can add many of them without repeating code
 
 
+## Running tools
+
+`run::CommandSpec` describes a shell-free invocation independently of any one
+tool. `CommandRunner` builds a `std::process::Command`, overlays environment
+variables, writes optional stdin, drains bounded stdout and stderr concurrently,
+enforces a timeout, and either returns or rejects non-zero exits according to
+`ExitPolicy`:
+
+```rust,no_run
+use std::time::Duration;
+use bio_tools::run::{run, CommandSpec};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let command = CommandSpec::new("opendde")
+        .args(["predict", "input.yaml"])
+        .current_dir("work")
+        .timeout(Duration::from_secs(600));
+    let output = run(&command)?;
+    println!("{}", output.stdout_lossy());
+    Ok(())
+}
+```
+
 ## Installation
 Handles installing applications. Details depend on the tool; some work by placing application executables in the
 appropriate places. Since many of these use Python, it uses [uv](https://docs.astral.sh/uv/) to set up isolated environments 
@@ -46,7 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ## Python bindings
 
 The `python/` package builds an ABI3 wheel with PyO3 and maturin. It exposes
-`Tool`, `Installer`, and `Status` using the same Rust recipes and probes:
+the same process metadata, command runner, installer, and status probes:
 
 ```python
 from pathlib import Path
@@ -56,4 +79,11 @@ root = Path("process_executables")
 installer = bio_tools.Installer(root)
 installer.install(bio_tools.Tool("opendde"))
 print(bio_tools.Tool("opendde").status(root).result)
+
+result = bio_tools.Command(
+    ["opendde", "predict", "input.yaml"],
+    cwd=Path("work"),
+    timeout=600,
+).run()
+print(result.stdout)
 ```

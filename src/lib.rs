@@ -7,9 +7,9 @@ use crate::input::InputField;
 mod input;
 pub mod install;
 mod output;
-mod run;
+pub mod run;
+pub mod status;
 mod tool_definitions;
-mod status;
 // pub const EXECUTABLES_PATH: &str = "./tool_executables"; // todo: A/R
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -182,24 +182,17 @@ impl fmt::Display for LicenseCategory {
     }
 }
 
-/// This is the top-level definition of an individual tool. It is broad, and applies
-/// to all tools this library manages.
-/// todo: Consider renaming as `Tool`.
-#[derive(Clone, Debug)]
-pub struct Process {
-    pub name: String,
-    pub id: u32,
-    pub categories: Vec<ToolCategory>,
-    pub launch_type: LaunchType,
-    pub license: LicenseData,
-    pub operating_systems: Vec<OperatingSystem>,
-    pub gpu_desired: bool,
-    pub expense: ProcessExpense,
-    pub top_choice: bool,
-    pub input_fields: Vec<InputField>,
-    /// E.g. the executable name, or python process exposed on the PATH; usd to launch
-    /// with via CLI.
-    pub executable_name: String,
+/// Alias used by application registries.
+pub type ProcessCategory = ToolCategory;
+
+/// Alias used by application registries.
+pub type LicenseType = LicenseCategory;
+
+/// Tool-specific descriptive data which does not depend on a UI framework or
+/// execution environment.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Spec {
+    pub slug: String,
     pub summary: String,
     pub description: String,
     pub availability: String,
@@ -207,25 +200,100 @@ pub struct Process {
     pub repo_url: Option<String>,
     pub home_url: Option<String>,
     pub docs_url: Option<String>,
-    // pub refresh_fields: Option<fn() -> Vec<Field>>,
-    // pub tasks: Vec<TaskOption>,
+}
+
+impl Spec {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        slug: impl Into<String>,
+        summary: impl Into<String>,
+        description: impl Into<String>,
+        availability: impl Into<String>,
+        license_details: impl Into<String>,
+        repo_url: Option<String>,
+        home_url: Option<String>,
+        docs_url: Option<String>,
+    ) -> Self {
+        Self {
+            slug: slug.into(),
+            summary: summary.into(),
+            description: description.into(),
+            availability: availability.into(),
+            license_details: license_details.into(),
+            repo_url,
+            home_url,
+            docs_url,
+        }
+    }
+
+    /// Official links in display order.
+    pub fn links(&self) -> Vec<(&'static str, &str)> {
+        [
+            ("Documentation", self.docs_url.as_deref()),
+            ("Home page", self.home_url.as_deref()),
+            ("Source code", self.repo_url.as_deref()),
+        ]
+        .into_iter()
+        .filter_map(|(label, url)| url.map(|url| (label, url)))
+        .collect()
+    }
+}
+
+/// Registry data shared by Rust and Python applications.
+///
+/// UI field descriptors and an adapter implementation are deliberately owned
+/// by the consuming application; this type contains the stable, reusable
+/// identity and classification of a tool.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Process {
+    pub name: String,
+    pub id: u32,
+    pub categories: Vec<ProcessCategory>,
+    pub launch_type: LaunchType,
+    pub license_type: LicenseType,
+    pub expense: ProcessExpense,
+    pub top_choice: bool,
+    pub spec: Spec,
 }
 
 impl Process {
-    /// Status probing is tool-specific and is not yet described by [`Process`].
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        name: impl Into<String>,
+        id: u32,
+        categories: Vec<ProcessCategory>,
+        launch_type: LaunchType,
+        license_type: LicenseType,
+        expense: ProcessExpense,
+        top_choice: bool,
+        spec: Spec,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            id,
+            categories,
+            launch_type,
+            license_type,
+            expense,
+            top_choice,
+            spec,
+        }
+    }
+
+    /// Status probing requires installation layout and is exposed by
+    /// install::Installer.
     pub fn status(&self) -> io::Result<Status> {
         Err(io::Error::new(
             io::ErrorKind::Unsupported,
-            "this process does not define a status probe",
+            "use Installer::status with a configured installation layout",
         ))
     }
 
-    /// Install this process to the managed applications/tools directory.
-    /// The caller sets the application path; this
-    /// is the outer path, e.g. likely the same for all that caller's tools.
+    /// Install this process to the caller's managed tools directory.
     pub fn install(&self, tools_path: &Path) -> io::Result<()> {
         let tool = self
-            .executable_name
+            .spec
+            .slug
             .parse::<install::Tool>()
             .or_else(|_| self.name.parse::<install::Tool>())
             .map_err(io::Error::other)?;
@@ -235,13 +303,10 @@ impl Process {
             .map_err(io::Error::other)
     }
 
-    /// Uninstall this process from the managed applications/tools directory. The caller sets the application path; this
-    /// is the outer path, e.g. likely the same for all that caller's tools.
     pub fn uninstall(&self, _tools_path: &Path) -> io::Result<()> {
         if let Status::NotFound = self.status()? {
             return Err(io::Error::other("Process not found"));
         }
-
         Ok(())
     }
 }

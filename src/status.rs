@@ -1,10 +1,10 @@
-use std::{
-    env, fs,
-    path::PathBuf,
-    process::{Command, Output},
-};
+use std::{env, fs, path::PathBuf, time::Duration};
 
-use crate::install::{InstallError, Installer, StatusKind, Tool, ToolStatus};
+pub use crate::install::{StatusKind, ToolStatus};
+use crate::{
+    install::{InstallError, Installer, Tool},
+    run::{CaptureLimits, CommandOutput, CommandSpec, ExitPolicy, RunError},
+};
 
 const STATUS_DIRECTORY: &str = ".bio_tools";
 
@@ -58,7 +58,7 @@ pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
         }
     }
 
-    let mut command = match probe_command(installer, tool) {
+    let command = match probe_command(installer, tool) {
         Some(command) => command,
         None if was_installed => {
             return pass(
@@ -74,9 +74,9 @@ pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
         }
     };
 
-    let output = match command.output() {
+    let output = match run_probe(command) {
         Ok(output) => output,
-        Err(cause) if cause.kind() == std::io::ErrorKind::NotFound => {
+        Err(cause) if cause.io_error_kind() == Some(std::io::ErrorKind::NotFound) => {
             return missing_or_broken(was_installed, cause.to_string());
         }
         Err(cause) => return error(format!("Could not probe {}: {cause}", tool.name())),
@@ -140,9 +140,10 @@ fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
             format!("ALPHAFOLD3_RUNNER does not exist at {}.", runner.display()),
         );
     }
-    let mut command = Command::new(installer.venv_python("alphafold3"));
-    command.arg(&runner).arg("--help");
-    match command.output() {
+    let command = CommandSpec::new(installer.venv_python("alphafold3"))
+        .arg(&runner)
+        .arg("--help");
+    match run_probe(command) {
         Ok(output) if output.status.success() || !output_detail(&output).is_empty() => pass(
             output_detail(&output)
                 .lines()
@@ -158,7 +159,7 @@ fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
     }
 }
 
-fn probe_command(installer: &Installer, tool: Tool) -> Option<Command> {
+fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     let (script, arguments): (&str, &[&str]) = match tool {
         Tool::OpenDde => ("opendde", &["--version"]),
         Tool::Boltz2 => ("boltz", &["--help"]),
@@ -174,9 +175,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<Command> {
         Tool::Mber => ("mber-vhh", &["--help"]),
         Tool::IgBlast => {
             let executable = installer.tools_root().join("igblast/bin/igblastn");
-            let mut command = Command::new(executable);
-            command.arg("-version");
-            return Some(command);
+            return Some(CommandSpec::new(executable).arg("-version"));
         }
         Tool::Gromacs => {
             let prefix = installer
@@ -184,25 +183,19 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<Command> {
                 .gromacs_prefix
                 .clone()
                 .unwrap_or_else(|| installer.tools_root().join("gromacs"));
-            let mut command = Command::new(prefix.join("bin/gmx"));
-            command.arg("--version");
-            return Some(command);
+            return Some(CommandSpec::new(prefix.join("bin/gmx")).arg("--version"));
         }
         Tool::BindCraft | Tool::Germinal | Tool::Genie3 => {
             return named_conda_probe(installer, tool);
         }
         _ => {
-            let mut command = Command::new(installer.venv_python(tool.slug()));
-            command.arg("--version");
-            return Some(command);
+            return Some(CommandSpec::new(installer.venv_python(tool.slug())).arg("--version"));
         }
     };
-    let mut command = Command::new(installer.venv_script(tool.slug(), script));
-    command.args(arguments);
-    Some(command)
+    Some(CommandSpec::new(installer.venv_script(tool.slug(), script)).args(arguments))
 }
 
-fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<Command> {
+fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     let executable = installer
         .config
         .conda_executable
@@ -220,9 +213,15 @@ fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<Command> {
         Tool::Genie3 => "genie3",
         _ => return None,
     };
-    let mut command = Command::new(executable);
-    command.args(["run", "--name", environment, "python", "--version"]);
-    Some(command)
+    Some(CommandSpec::new(executable).args(["run", "--name", environment, "python", "--version"]))
+}
+
+fn run_probe(command: CommandSpec) -> Result<CommandOutput, RunError> {
+    crate::run::run(
+        &command
+            .exit_policy(ExitPolicy::AllowFailure)
+            .capture_limits(CaptureLimits::new(4_000, 4_000)),
+    )
 }
 
 fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static str)> {
@@ -325,17 +324,21 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
     } else {
         "import torch; print('GPU' if torch.cuda.is_available() else 'CPU')"
     };
-    let output = Command::new(python).args(["-c", snippet]).output().ok()?;
+    let command = CommandSpec::new(python)
+        .args(["-c", snippet])
+        .timeout(Duration::from_secs(300))
+        .capture_limits(CaptureLimits::new(4_000, 4_000));
+    let output = crate::run::run(&command).ok()?;
     if !output.status.success() {
         return None;
     }
-    let value = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+    let value = output.stdout_lossy().trim().to_owned();
     matches!(value.as_str(), "GPU" | "CPU").then_some(value)
 }
 
-fn output_detail(output: &Output) -> String {
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let stderr = String::from_utf8_lossy(&output.stderr);
+fn output_detail(output: &CommandOutput) -> String {
+    let stdout = output.stdout_lossy();
+    let stderr = output.stderr_lossy();
     format!("{stdout}{stderr}")
         .trim()
         .chars()

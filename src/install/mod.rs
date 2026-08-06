@@ -16,6 +16,7 @@ use std::{
     str::FromStr,
     sync::Arc,
 };
+
 use crate::status;
 
 mod alphafold3;

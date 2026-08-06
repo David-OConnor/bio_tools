@@ -1,7 +1,11 @@
-use std::{env, path::PathBuf, process::Command};
+mod metadata;
+mod run;
+
+use std::{env, path::PathBuf};
 
 use bio_tools_rs::{
     install::{Installer as RustInstaller, Tool},
+    run::{CaptureLimits, CommandSpec, ExitPolicy},
     status::{ToolStatus, StatusKind}
 };
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
@@ -195,10 +199,10 @@ fn external_status(
     python_executable: &std::path::Path,
 ) -> PyStatus {
     match slug {
-        "rdkit" => command_status(
-            Command::new(python_executable)
-                .args(["-c", "import rdkit; print('RDKit', rdkit.__version__)"]),
-        ),
+        "rdkit" => command_status(CommandSpec::new(python_executable).args([
+            "-c",
+            "import rdkit; print('RDKit', rdkit.__version__)",
+        ])),
         "orca" => {
             let configured = env::var_os("ORCA_EXECUTABLE").map(PathBuf::from);
             let executable = configured.filter(|path| path.is_file()).or_else(|| {
@@ -214,7 +218,7 @@ fn external_status(
                     "ORCA is not configured under process_executables or ORCA_EXECUTABLE.",
                 );
             };
-            command_status(Command::new(executable).arg("--help"))
+            command_status(CommandSpec::new(executable).arg("--help"))
         }
         "pdbbind" => {
             let root = env::var_os("PDBBIND_ROOT")
@@ -233,20 +237,19 @@ fn external_status(
             let Some(runner) = env::var_os("TAP_RUNNER").map(PathBuf::from) else {
                 return missing("TAP_RUNNER is not configured.");
             };
-            command_status(Command::new(python).arg(runner).arg("--help"))
+            command_status(CommandSpec::new(python).arg(runner).arg("--help"))
         }
         _ => missing(format!("No status probe is defined for {slug}.")),
     }
 }
 
-fn command_status(command: &mut Command) -> PyStatus {
-    match command.output() {
+fn command_status(command: CommandSpec) -> PyStatus {
+    let command = command
+        .exit_policy(ExitPolicy::AllowFailure)
+        .capture_limits(CaptureLimits::new(4_000, 4_000));
+    match bio_tools_rs::run::run(&command) {
         Ok(output) => {
-            let detail = format!(
-                "{}{}",
-                String::from_utf8_lossy(&output.stdout),
-                String::from_utf8_lossy(&output.stderr)
-            );
+            let detail = format!("{}{}", output.stdout_lossy(), output.stderr_lossy());
             let detail = detail.trim();
             if output.status.success() || (!detail.is_empty() && !detail.starts_with("Traceback")) {
                 passing(
@@ -264,7 +267,9 @@ fn command_status(command: &mut Command) -> PyStatus {
                 })
             }
         }
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => missing(error.to_string()),
+        Err(error) if error.io_error_kind() == Some(std::io::ErrorKind::NotFound) => {
+            missing(error.to_string())
+        }
         Err(error) => failing(error.to_string()),
     }
 }
@@ -295,6 +300,8 @@ fn failing(detail: impl Into<String>) -> PyStatus {
 
 #[pymodule]
 fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    metadata::register(m)?;
+    run::register(m)?;
     m.add_class::<PyTool>()?;
     m.add_class::<PyStatus>()?;
     m.add_class::<PyInstaller>()?;
