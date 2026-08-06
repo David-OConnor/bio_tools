@@ -1,12 +1,15 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// Sequence analysis first: it numbers and annotates what was submitted
 /// rather than predicting anything about it, and the liability flags
 /// follow from the regions the numbering establishes.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "antibody_annotator",
-    name: "Antibody Annotator",
+    identity: Identity::Alias {
+        tool: Tool::Anarcii,
+        slug: "antibody_annotator",
+        name: Some("Antibody Annotator"),
+    },
     categories: &[
         ProcessCategory::SequenceAnalysis,
         ProcessCategory::AntibodyDesign,

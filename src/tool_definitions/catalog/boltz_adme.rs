@@ -1,11 +1,14 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// A hosted model: the wait is a network round trip and a queue, not local
 /// compute -- but it is billed against Boltz credits.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "boltz_adme",
-    name: "Boltz ADME",
+    identity: Identity::Alias {
+        tool: Tool::BoltzAdme,
+        slug: "boltz_adme",
+        name: None,
+    },
     categories: &[
         ProcessCategory::PropertyPrediction,
         ProcessCategory::Cheminformatics,

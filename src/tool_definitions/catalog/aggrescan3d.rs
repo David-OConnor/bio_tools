@@ -1,11 +1,10 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// A single static structure is seconds; the CABS-flex ensemble and the
 /// mutation search the form also offer are not.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "aggrescan3d",
-    name: "AggreScan3D",
+    identity: Identity::Installed(Tool::AggreScan3d),
     categories: &[ProcessCategory::PropertyPrediction],
     launch_type: LaunchType::CondaBasedApp,
     license_type: LicenseType::NonCommercial,

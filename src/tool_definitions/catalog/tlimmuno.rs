@@ -1,9 +1,12 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "tlimmuno",
-    name: "TLimmuno2",
+    identity: Identity::Alias {
+        tool: Tool::TlImmuno2,
+        slug: "tlimmuno",
+        name: None,
+    },
     categories: &[
         ProcessCategory::PropertyPrediction,
         ProcessCategory::SequenceAnalysis,

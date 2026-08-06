@@ -1,10 +1,12 @@
-use super::CatalogEntry;
+use super::{CatalogEntry, Identity};
 use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
 
 /// A directory lookup against a dataset already on disk; nothing is computed.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "pdbbind",
-    name: "PDBBind",
+    identity: Identity::Uninstalled {
+        slug: "pdbbind",
+        name: "PDBBind",
+    },
     categories: &[ProcessCategory::BindingData],
     launch_type: LaunchType::PythonLib,
     license_type: LicenseType::NonCommercial,

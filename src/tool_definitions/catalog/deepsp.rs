@@ -1,11 +1,10 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// The point of the model: it replaces a molecular dynamics run with one
 /// forward pass over the sequence.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "deepsp",
-    name: "DeepSP",
+    identity: Identity::Installed(Tool::DeepSp),
     categories: &[
         ProcessCategory::PropertyPrediction,
         ProcessCategory::AntibodyDesign,

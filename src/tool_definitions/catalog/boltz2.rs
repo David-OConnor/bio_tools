@@ -1,12 +1,11 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// Property prediction is the third category rather than one of the two it
 /// shares with the co-folding models above: the adapter asks for ligand
 /// affinity by default, which none of the others predict.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "boltz2",
-    name: "Boltz-2",
+    identity: Identity::Installed(Tool::Boltz2),
     categories: &[
         ProcessCategory::StructurePrediction,
         ProcessCategory::ProteinDesign,

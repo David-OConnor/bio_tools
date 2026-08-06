@@ -1,9 +1,8 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "esmfold2",
-    name: "ESMFold 2",
+    identity: Identity::Installed(Tool::EsmFold2),
     categories: &[
         ProcessCategory::StructurePrediction,
         ProcessCategory::ProteinDesign,

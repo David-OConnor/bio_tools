@@ -1,9 +1,8 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "alphafold3",
-    name: "AlphaFold 3",
+    identity: Identity::Installed(Tool::AlphaFold3),
     categories: &[
         ProcessCategory::StructurePrediction,
         ProcessCategory::ProteinDesign,

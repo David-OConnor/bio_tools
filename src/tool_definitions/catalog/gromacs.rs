@@ -1,12 +1,11 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// The adapter runs pdb2gmx/editconf/solvate only. Preparing a system
 /// takes seconds; it is the simulation this stops short of that would be
 /// expensive.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "gromacs",
-    name: "GROMACS",
+    identity: Identity::Installed(Tool::Gromacs),
     categories: &[ProcessCategory::MoleculeDynamics],
     launch_type: LaunchType::Executable,
     license_type: LicenseType::Copyleft,

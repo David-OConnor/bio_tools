@@ -1,11 +1,13 @@
-use super::CatalogEntry;
+use super::{CatalogEntry, Identity};
 use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
 
 /// A structural model is built before the five metrics are measured on
 /// it, so this is not the sequence-only calculation it looks like.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "tap",
-    name: "TAP",
+    identity: Identity::Uninstalled {
+        slug: "tap",
+        name: "TAP",
+    },
     categories: &[
         ProcessCategory::PropertyPrediction,
         ProcessCategory::AntibodyDesign,

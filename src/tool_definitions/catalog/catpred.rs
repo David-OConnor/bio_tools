@@ -1,11 +1,10 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// A protein language model embedding per query, unlike DLKcat's much
 /// smaller sequence CNN.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "catpred",
-    name: "CatPred",
+    identity: Identity::Installed(Tool::CatPred),
     categories: &[
         ProcessCategory::PropertyPrediction,
         ProcessCategory::Cheminformatics,

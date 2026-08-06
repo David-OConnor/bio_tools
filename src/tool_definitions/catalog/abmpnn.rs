@@ -1,9 +1,12 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "abmpnn",
-    name: "AbMPNN",
+    identity: Identity::Alias {
+        tool: Tool::ProteinMpnn,
+        slug: "abmpnn",
+        name: Some("AbMPNN"),
+    },
     categories: &[
         ProcessCategory::AntibodyDesign,
         ProcessCategory::SequencePrediction,

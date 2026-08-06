@@ -1,12 +1,11 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// Seconds, not minutes: three small single-sequence networks with no MSA
 /// or template search, and the OpenMM refinement that follows each one is
 /// what dominates the wait.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "immunebuilder",
-    name: "ImmuneBuilder",
+    identity: Identity::Installed(Tool::ImmuneBuilder),
     categories: &[
         ProcessCategory::StructurePrediction,
         ProcessCategory::AntibodyDesign,

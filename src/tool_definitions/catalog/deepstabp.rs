@@ -1,9 +1,8 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "deepstabp",
-    name: "DeepSTABp",
+    identity: Identity::Installed(Tool::DeepStabP),
     categories: &[ProcessCategory::PropertyPrediction],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseType::Permissive,

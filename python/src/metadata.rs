@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use bio_tools_rs::{
     LaunchType as RustLaunchType, LicenseType as RustLicenseType, Process as RustProcess,
@@ -412,6 +412,100 @@ impl PyProcess {
     }
 }
 
+/// Materialize catalog-owned form descriptors using a consumer's Field and
+/// Option classes. Dynamic select options are supplied by the consumer because
+/// they reflect resources installed on that particular host.
+#[pyfunction]
+#[pyo3(signature = (slug, *, field_type, option_type, dynamic_options=None))]
+fn catalog_fields(
+    py: Python<'_>,
+    slug: &str,
+    field_type: Py<PyAny>,
+    option_type: Py<PyAny>,
+    dynamic_options: Option<HashMap<String, Vec<(String, String)>>>,
+) -> PyResult<Py<PyAny>> {
+    let json = py.import("json")?;
+    let catalog: Bound<'_, PyDict> = json
+        .call_method1("loads", (include_str!("../../src/tool_definitions/catalog/fields.json"),))?
+        .extract()?;
+    let entry: Bound<'_, PyDict> = catalog
+        .get_item(slug)?
+        .ok_or_else(|| PyValueError::new_err(format!("no bio_tools field catalog for slug {slug:?}")))?
+        .extract()?;
+    let definitions: Bound<'_, PyList> = entry
+        .get_item("fields")?
+        .ok_or_else(|| PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}")))?
+        .extract()?;
+    let values = PyList::empty(py);
+    for descriptor in definitions.iter() {
+        let descriptor = descriptor.cast::<PyDict>()?;
+        let get = |key| {
+            descriptor.get_item(key)?.ok_or_else(|| {
+                PyValueError::new_err(format!("invalid field descriptor for {slug:?}: missing {key}"))
+            })
+        };
+        let name: String = get("name")?.extract()?;
+        let label: String = get("label")?.extract()?;
+        let kind: String = get("kind")?.extract()?;
+        let kwargs = PyDict::new(py);
+        for key in [
+            "default", "required", "help", "rows", "minimum", "maximum", "step", "maxlength", "accept", "task",
+        ] {
+            kwargs.set_item(key, get(key)?)?;
+        }
+        let options = PyList::empty(py);
+        if let Some(items) = dynamic_options.as_ref().and_then(|items| items.get(&name)) {
+            for (value, label) in items {
+                options.append(option_type.call1(py, (value, label))?)?;
+            }
+            if matches!(name.as_str(), "germline_db_v" | "germline_db_j") {
+                if let Some((value, _)) = items.first() {
+                    kwargs.set_item("default", value)?;
+                }
+            }
+        } else {
+            let original: Bound<'_, PyList> = get("options")?.extract()?;
+            for option in original.iter() {
+                let option = option.cast::<PyDict>()?;
+                let value = option.get_item("value")?.expect("serialized option value");
+                let label = option.get_item("label")?.expect("serialized option label");
+                options.append(option_type.call1(py, (value, label))?)?;
+            }
+        }
+        kwargs.set_item("options", options)?;
+        values.append(field_type.call(py, (name, label, kind), Some(&kwargs))?)?;
+    }
+    Ok(values.into_any().unbind())
+}
+/// Materialize catalog-owned task selectors using a consumer's Option class.
+#[pyfunction]
+#[pyo3(signature = (slug, *, option_type))]
+fn catalog_tasks(
+    py: Python<'_>,
+    slug: &str,
+    option_type: Py<PyAny>,
+) -> PyResult<Py<PyAny>> {
+    let json = py.import("json")?;
+    let catalog: Bound<'_, PyDict> = json
+        .call_method1("loads", (include_str!("../../src/tool_definitions/catalog/fields.json"),))?
+        .extract()?;
+    let entry: Bound<'_, PyDict> = catalog
+        .get_item(slug)?
+        .ok_or_else(|| PyValueError::new_err(format!("no bio_tools field catalog for slug {slug:?}")))?
+        .extract()?;
+    let tasks: Bound<'_, PyList> = entry
+        .get_item("tasks")?
+        .ok_or_else(|| PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}")))?
+        .extract()?;
+    let values = PyList::empty(py);
+    for task in tasks.iter() {
+        let task = task.cast::<PyDict>()?;
+        let value = task.get_item("value")?.expect("serialized task value");
+        let label = task.get_item("label")?.expect("serialized task label");
+        values.append(option_type.call1(py, (value, label))?)?;
+    }
+    Ok(values.into_any().unbind())
+}
 /// Build a [`PySpec`] from bio_tools' central catalog by slug, so a caller
 /// supplies only what is genuinely its own: UI field descriptors.
 #[pyfunction]
@@ -457,7 +551,7 @@ fn catalog_process(py: Python<'_>, id: u32, module: Py<PyAny>) -> PyResult<PyPro
 
     Ok(PyProcess::new(
         py,
-        entry.name.to_owned(),
+        entry.name().to_owned(),
         id,
         categories,
         launch_type,
@@ -493,6 +587,8 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<PyLicenseType>()?;
     module.add_class::<PySpec>()?;
     module.add_class::<PyProcess>()?;
+    module.add_function(wrap_pyfunction!(catalog_fields, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_tasks, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_spec, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_process, module)?)?;
     Ok(())

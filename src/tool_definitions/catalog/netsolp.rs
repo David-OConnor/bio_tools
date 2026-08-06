@@ -1,11 +1,10 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// A protein language model embedding per sequence, and ESM-1b is the
 /// large one of the three offered.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "netsolp",
-    name: "NetSolP",
+    identity: Identity::Installed(Tool::NetSolP),
     categories: &[
         ProcessCategory::PropertyPrediction,
         ProcessCategory::SequencePrediction,

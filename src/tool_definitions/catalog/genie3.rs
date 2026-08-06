@@ -1,12 +1,11 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// Confirmed: Genie 3's headline capability is target-conditioned binder
 /// backbone generation, and the adapter requires a target structure,
 /// selection, and hotspots.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "genie3",
-    name: "Genie 3",
+    identity: Identity::Installed(Tool::Genie3),
     categories: &[
         ProcessCategory::PeptideBinderDesign,
         ProcessCategory::ProteinDesign,

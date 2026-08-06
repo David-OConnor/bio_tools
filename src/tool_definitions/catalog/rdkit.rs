@@ -1,9 +1,11 @@
-use super::CatalogEntry;
+use super::{CatalogEntry, Identity};
 use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "rdkit",
-    name: "RDKit",
+    identity: Identity::Uninstalled {
+        slug: "rdkit",
+        name: "RDKit",
+    },
     categories: &[ProcessCategory::Cheminformatics],
     launch_type: LaunchType::PythonLib,
     license_type: LicenseType::Permissive,

@@ -1,9 +1,8 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "germinal",
-    name: "Germinal",
+    identity: Identity::Installed(Tool::Germinal),
     categories: &[
         ProcessCategory::AntibodyDesign,
         ProcessCategory::ProteinDesign,

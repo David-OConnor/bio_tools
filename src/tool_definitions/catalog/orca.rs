@@ -1,12 +1,14 @@
-use super::CatalogEntry;
+use super::{CatalogEntry, Identity};
 use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
 
 /// Input-dependent over a wide range: a single point on a small molecule
 /// is seconds, but the form also offers optimization and frequency jobs
 /// across up to 32 cores.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "orca",
-    name: "ORCA",
+    identity: Identity::Uninstalled {
+        slug: "orca",
+        name: "ORCA",
+    },
     categories: &[ProcessCategory::QuantumChemistry],
     launch_type: LaunchType::Executable,
     license_type: LicenseType::Proprietary,

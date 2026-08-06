@@ -1,11 +1,14 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// A whole saturation-mutagenesis scan in one forward pass, which is the
 /// point of the method.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "proteinmpnn_ddg",
-    name: "ProteinMPNN-ddG",
+    identity: Identity::Alias {
+        tool: Tool::ProteinMpnnDdg,
+        slug: "proteinmpnn_ddg",
+        name: None,
+    },
     categories: &[ProcessCategory::PropertyPrediction],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseType::Permissive,

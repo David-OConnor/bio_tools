@@ -1,11 +1,10 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// One query against the germline databases: the process start and
 /// database load dominate.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "igblast",
-    name: "IgBLAST",
+    identity: Identity::Installed(Tool::IgBlast),
     categories: &[ProcessCategory::SequenceAnalysis],
     launch_type: LaunchType::Executable,
     license_type: LicenseType::Permissive,

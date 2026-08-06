@@ -1,12 +1,11 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// Both: the binders are mini-proteins of 65-120 residues rather than
 /// peptides, but PeptideBinderDesign is the registry's general "binder
 /// design" category, which is what a campaign against a named target is.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "bindcraft",
-    name: "BindCraft",
+    identity: Identity::Installed(Tool::BindCraft),
     categories: &[
         ProcessCategory::PeptideBinderDesign,
         ProcessCategory::ProteinDesign,

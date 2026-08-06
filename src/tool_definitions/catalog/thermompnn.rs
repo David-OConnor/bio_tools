@@ -1,12 +1,11 @@
-use super::CatalogEntry;
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use super::{CatalogEntry, Identity};
+use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
 
 /// Property prediction first: it scores mutations rather than producing
 /// sequences, and is used to triage a design campaign's output rather than
 /// to generate it.
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    slug: "thermompnn",
-    name: "ThermoMPNN",
+    identity: Identity::Installed(Tool::ThermoMpnn),
     categories: &[
         ProcessCategory::PropertyPrediction,
         ProcessCategory::ProteinDesign,
