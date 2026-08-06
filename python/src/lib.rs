@@ -4,7 +4,8 @@ mod run;
 use std::{env, path::PathBuf};
 
 use bio_tools_rs::{
-    install::{Installer as RustInstaller, Tool, UninstallReport},
+    install::{Installer as RustInstaller, UninstallReport},
+    tool_definitions::Tool,
     run::{CaptureLimits, CommandSpec, ExitPolicy},
     status::{ToolStatus, StatusKind}
 };

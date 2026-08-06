@@ -4,12 +4,13 @@ use super::{
     InstallError, Installer,
     common::{PipOptions, TorchBackend},
 };
+use crate::tool_definitions::Tool;
 
 const LIGAND_WEIGHTS_ROOT: &str = "https://files.ipd.uw.edu/pub/ligandmpnn";
 const ABMPNN_WEIGHTS: &str = "https://zenodo.org/records/8164693/files/abmpnn.pt?download=1";
 
 pub(super) fn install_ligand(installer: &mut Installer) -> Result<(), InstallError> {
-    const SLUG: &str = "ligandmpnn";
+    const SLUG: &str = Tool::LigandMpnn.slug();
     install_runtime(installer, SLUG)?;
     let target = installer.tools_root().join("LigandMPNN");
     installer.clone_or_update("https://github.com/dauparas/LigandMPNN", &target)?;
@@ -33,7 +34,7 @@ pub(super) fn install_ligand(installer: &mut Installer) -> Result<(), InstallErr
 }
 
 pub(super) fn install_protein(installer: &mut Installer) -> Result<(), InstallError> {
-    const SLUG: &str = "proteinmpnn";
+    const SLUG: &str = Tool::ProteinMpnn.slug();
     install_runtime(installer, SLUG)?;
     let target = installer.tools_root().join("ProteinMPNN");
     installer.clone_or_update("https://github.com/dauparas/ProteinMPNN", &target)?;
@@ -74,7 +75,7 @@ fn convert_weights(installer: &Installer, target: &Path) {
     };
 
     installer.step("Converting ProteinMPNN weights for the native ddG scanner");
-    let mut command = Command::new(installer.venv_python("proteinmpnn"));
+    let mut command = Command::new(installer.venv_python(Tool::ProteinMpnn.slug()));
     command
         .arg(converter)
         .arg("--checkpoint")

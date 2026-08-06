@@ -1,10 +1,15 @@
+//! Get the status of each tool by running it with a simple command like `--version`, and confirming
+//! the application and exists and is healthy, or if there's a problem. On a tool-by-tool basis,
+//! provies additional data like computation devices configured for.
+
 use std::{env, fs, path::PathBuf, time::Duration};
 
 pub use crate::install::{StatusKind, ToolStatus};
 use crate::{
-    install::{InstallError, Installer, Tool},
+    install::{InstallError, Installer},
     run::{CaptureLimits, CommandOutput, CommandSpec, ExitPolicy, RunError},
 };
+use crate::tool_definitions::Tool;
 
 const STATUS_DIRECTORY: &str = ".bio_tools";
 
@@ -14,12 +19,14 @@ pub(crate) fn record_install(installer: &Installer, tool: Tool) -> Result<(), In
         .layout
         .environments_root
         .join(STATUS_DIRECTORY);
+
     fs::create_dir_all(&directory).map_err(|error| {
         InstallError::io(
             format!("unable to create status directory {}", directory.display()),
             error,
         )
     })?;
+
     let marker = directory.join(format!("{}.installed", tool.slug()));
     fs::write(&marker, format!("{}\n", tool.slug())).map_err(|error| {
         InstallError::io(
@@ -158,7 +165,7 @@ fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
             format!("ALPHAFOLD3_RUNNER does not exist at {}.", runner.display()),
         );
     }
-    let command = CommandSpec::new(installer.venv_python("alphafold3"))
+    let command = CommandSpec::new(installer.venv_python(Tool::AlphaFold3.slug()))
         .arg(&runner)
         .arg("--help");
     match run_probe(command) {
@@ -177,20 +184,24 @@ fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
     }
 }
 
+/// For commands directly runnable from CLI, launch them with a "help" or "version" command as
+/// a coarse status check.
 fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
-    let (script, arguments): (&str, &[&str]) = match tool {
-        Tool::OpenDde => ("opendde", &["--version"]),
-        Tool::Boltz2 => ("boltz", &["--help"]),
-        Tool::Chai1 => ("chai-lab", &["--help"]),
-        Tool::Protenix => ("protenix", &["--help"]),
-        Tool::EsmFold2 => ("esm-fold", &["--help"]),
-        Tool::ImmuneBuilder => ("ABodyBuilder2", &["--help"]),
-        Tool::BoltzGen => ("boltzgen", &["--help"]),
-        Tool::BioPhi => ("biophi", &["--help"]),
-        Tool::ProteinMpnnDdg => ("proteinmpnn-ddg", &["--help"]),
-        Tool::Anarcii => ("anarcii", &["--help"]),
-        Tool::AggreScan3d => ("aggrescan", &["--help"]),
-        Tool::Mber => ("mber-vhh", &["--help"]),
+    // The executable's name comes from `Tool::console_script`, which is not always the slug; only
+    // the probe argument is decided here.
+    let arguments: &[&str] = match tool {
+        Tool::OpenDde => &["--version"],
+        Tool::Boltz2
+        | Tool::Chai1
+        | Tool::Protenix
+        | Tool::EsmFold2
+        | Tool::ImmuneBuilder
+        | Tool::BoltzGen
+        | Tool::BioPhi
+        | Tool::ProteinMpnnDdg
+        | Tool::Anarcii
+        | Tool::AggreScan3d
+        | Tool::Mber => &["--help"],
         Tool::IgBlast => {
             let executable = installer.tools_root().join("igblast/bin/igblastn");
             return Some(CommandSpec::new(executable).arg("-version"));
@@ -209,7 +220,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         Tool::Germinal => {
             // The micromamba branch of the recipe builds a prefix environment; only the legacy
             // install.sh branch leaves a named Conda environment behind.
-            let python = installer.venv_python("germinal");
+            let python = installer.venv_python(tool.slug());
             if python.is_file() {
                 return Some(CommandSpec::new(python).arg("--version"));
             }
@@ -219,7 +230,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
             return Some(CommandSpec::new(installer.venv_python(tool.slug())).arg("--version"));
         }
     };
-    Some(CommandSpec::new(installer.venv_script(tool.slug(), script)).args(arguments))
+    Some(CommandSpec::new(installer.venv_script(tool.slug(), tool.console_script())).args(arguments))
 }
 
 fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
@@ -234,12 +245,7 @@ fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
                 .environments_root
                 .join("conda/bin/conda")
         });
-    let environment = match tool {
-        Tool::BindCraft => "BindCraft",
-        Tool::Germinal => "germinal",
-        Tool::Genie3 => "genie3",
-        _ => return None,
-    };
+    let environment = tool.conda_environment()?;
     Some(CommandSpec::new(executable).args(["run", "--name", environment, "python", "--version"]))
 }
 

@@ -4,8 +4,9 @@ use super::{
     InstallError, Installer,
     common::{PipOptions, ScratchDir, TorchBackend, scrub_python_environment},
 };
+use crate::tool_definitions::Tool;
 
-const SLUG: &str = "opendde";
+const SLUG: &str = Tool::OpenDde.slug();
 
 pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
     let mut backend = installer.select_torch_backend()?;
@@ -38,7 +39,7 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
         install_backend(installer, backend)?;
     }
 
-    let executable = installer.venv_script(SLUG, "opendde");
+    let executable = installer.venv_script(SLUG, Tool::OpenDde.console_script());
     let mut version = Command::new(&executable);
     version.arg("--version");
     installer.checked(&mut version)?;

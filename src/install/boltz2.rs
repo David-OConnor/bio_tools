@@ -4,9 +4,10 @@ use super::{
     InstallError, Installer,
     common::{PipOptions, TorchBackend},
 };
+use crate::tool_definitions::Tool;
 
 pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
-    const SLUG: &str = "boltz2";
+    const SLUG: &str = Tool::Boltz2.slug();
     let backend = installer.select_torch_backend()?;
     installer.create_venv(SLUG, "3.12")?;
     installer.install_torch(SLUG, &["torch==2.7.1"], backend)?;
@@ -26,7 +27,7 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
         installer.pip_install(SLUG, &["boltz~=2.2.1"], PipOptions::default())?;
     }
 
-    let executable = installer.venv_script(SLUG, "boltz");
+    let executable = installer.venv_script(SLUG, Tool::Boltz2.console_script());
     let mut verify = Command::new(&executable);
     verify.arg("--help");
     installer.checked(&mut verify)?;

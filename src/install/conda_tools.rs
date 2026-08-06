@@ -5,10 +5,10 @@
 //! those two still bootstrap a full Miniconda via [`Installer::ensure_conda`].
 
 use std::{env, fs, path::Path, process::Command};
-
+use crate::tool_definitions::Tool;
 use super::{
-    InstallError, Installer, Tool,
-    common::{CONDA_FORGE, ScratchDir},
+    common::{ScratchDir, CONDA_FORGE}, InstallError,
+    Installer,
 };
 
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
@@ -31,7 +31,7 @@ fn install_highfold(installer: &mut Installer) -> Result<(), InstallError> {
     install_alphafold2_parameters(installer)?;
     let target = installer.tools_root().join("HighFold");
     installer.clone_or_update("https://github.com/hongliangduan/HighFold", &target)?;
-    let prefix = installer.reset_mamba_environment("highfold", "3.10")?;
+    let prefix = installer.reset_mamba_environment(Tool::HighFold.slug(), "3.10")?;
     mamba_install(
         installer,
         &prefix,
@@ -48,7 +48,7 @@ fn install_highfold(installer: &mut Installer) -> Result<(), InstallError> {
 fn install_antifold(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("AntiFold");
     installer.clone_or_update("https://github.com/oxpig/AntiFold", &target)?;
-    let prefix = installer.reset_mamba_environment("antifold", "3.10")?;
+    let prefix = installer.reset_mamba_environment(Tool::AntiFold.slug(), "3.10")?;
     // conda-forge skipped the 2.2 series entirely; under Conda this pin only resolved through the
     // implicit `defaults` channel. Upstream's own environment.yml sources Torch from `pytorch`.
     mamba_install(
@@ -61,7 +61,7 @@ fn install_antifold(installer: &mut Installer) -> Result<(), InstallError> {
 }
 
 fn install_aggrescan3d(installer: &mut Installer) -> Result<(), InstallError> {
-    let prefix = installer.reset_mamba_environment("aggrescan3d", "2.7")?;
+    let prefix = installer.reset_mamba_environment(Tool::AggreScan3d.slug(), "2.7")?;
     installer.mamba_run(
         &prefix,
         &[
@@ -77,7 +77,7 @@ fn install_aggrescan3d(installer: &mut Installer) -> Result<(), InstallError> {
 fn install_mber(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("mber-open");
     installer.clone_or_update("https://github.com/manifoldbio/mber-open", &target)?;
-    let prefix = installer.venv_dir("mber");
+    let prefix = installer.venv_dir(Tool::Mber.slug());
     let mut remove = installer.micromamba_command()?;
     remove
         .args(["env", "remove", "--yes", "--prefix"])
@@ -127,6 +127,12 @@ fn install_mber(installer: &mut Installer) -> Result<(), InstallError> {
     mamba_pip_install_path(installer, &prefix, &target.join("protocols"), &["-e"])?;
     let download = target.join("download_weights.sh");
     installer.run_upstream_script(&download, &[], &target)
+}
+
+/// The named Conda environment a recipe creates, which [`Tool::conda_environment`] owns.
+fn conda_environment(tool: Tool) -> &'static str {
+    tool.conda_environment()
+        .expect("this recipe creates a named Conda environment")
 }
 
 fn mamba_install(
@@ -188,18 +194,19 @@ fn install_alphafold2_parameters(installer: &Installer) -> Result<(), InstallErr
 /// Stays on full Conda: `install_bindcraft.sh` resolves `conda info --base` and then sources
 /// `$CONDA_BASE/bin/activate`, neither of which exists in a micromamba root.
 fn install_bindcraft(installer: &mut Installer) -> Result<(), InstallError> {
+    let environment = conda_environment(Tool::BindCraft);
     let target = installer.tools_root().join("BindCraft");
     let marker = target.join("params/params_model_5_ptm.npz");
     let conda = installer.ensure_conda()?;
     let mut probe = Command::new(&conda);
-    probe.args(["run", "--name", "BindCraft", "python", "--version"]);
+    probe.args(["run", "--name", environment, "python", "--version"]);
     if marker.is_file() && installer.succeeds(&mut probe) {
         installer.note("BindCraft is already installed");
         return Ok(());
     }
     installer.clone_or_update("https://github.com/martinpacesa/BindCraft", &target)?;
     let mut remove = Command::new(&conda);
-    remove.args(["env", "remove", "--name", "BindCraft", "-y"]);
+    remove.args(["env", "remove", "--name", environment, "-y"]);
     let _ = installer.succeeds(&mut remove);
 
     let cuda = env::var("BINDCRAFT_CUDA").unwrap_or_else(|_| "12.4".to_owned());
@@ -227,24 +234,25 @@ fn install_germinal(installer: &mut Installer) -> Result<(), InstallError> {
     if upstream.is_file() {
         let conda = installer.ensure_conda()?;
         let mut remove = Command::new(&conda);
-        remove.args(["env", "remove", "--name", "germinal", "-y"]);
+        remove.args(["env", "remove", "--name", conda_environment(Tool::Germinal), "-y"]);
         let _ = installer.succeeds(&mut remove);
         return run_bash_with_conda(installer, &upstream, &[], &target);
     }
-    let prefix = installer.reset_mamba_environment("germinal", "3.11")?;
+    let prefix = installer.reset_mamba_environment(Tool::Germinal.slug(), "3.11")?;
     mamba_pip_install_path(installer, &prefix, &target, &[])
 }
 
 /// Stays on full Conda: `scripts/setup/setup.sh` runs `eval "$(conda shell.bash hook)"` followed by
 /// `conda activate`, and micromamba's hook takes a different form.
 fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
+    let environment = conda_environment(Tool::Genie3);
     let target = installer.tools_root().join("genie3");
     let conda = installer.ensure_conda()?;
     let mut existing = Command::new(&conda);
     existing.args([
         "run",
         "--name",
-        "genie3",
+        environment,
         "python",
         "-c",
         "import torch; assert torch.cuda.is_available()",
@@ -255,10 +263,10 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
     }
     installer.clone_or_update("https://github.com/aqlaboratory/genie3", &target)?;
     let mut remove = Command::new(&conda);
-    remove.args(["env", "remove", "--name", "genie3", "-y"]);
+    remove.args(["env", "remove", "--name", environment, "-y"]);
     let _ = installer.succeeds(&mut remove);
     let mut create = Command::new(&conda);
-    create.args(["create", "--name", "genie3", "python=3.10", "-y"]);
+    create.args(["create", "--name", environment, "python=3.10", "-y"]);
     installer.checked(&mut create)?;
 
     let cuda = env::var("GENIE3_NVCC_CUDA").unwrap_or_else(|_| "12.4.1".to_owned());
@@ -266,7 +274,7 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
     nvcc.args([
         "install",
         "--name",
-        "genie3",
+        environment,
         "-y",
         "-c",
         &format!("nvidia/label/cuda-{cuda}"),
@@ -289,7 +297,7 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
     verify.args([
         "run",
         "--name",
-        "genie3",
+        environment,
         "python",
         "-c",
         "import torch; assert torch.cuda.is_available(), 'Genie 3 requires CUDA'",

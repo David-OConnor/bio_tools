@@ -12,8 +12,9 @@ use std::{
     process::Command,
 };
 
-use super::{InstallError, Installer, Tool};
+use super::{InstallError, Installer};
 use crate::status;
+use crate::tool_definitions::Tool;
 
 /// What [`Installer::uninstall`] removed, and what it deliberately left behind.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]

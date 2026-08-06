@@ -10,7 +10,6 @@ mod output;
 pub mod run;
 pub mod status;
 mod tool_definitions;
-// pub const EXECUTABLES_PATH: &str = "./tool_executables"; // todo: A/R
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LaunchType {
@@ -305,11 +304,11 @@ impl Process {
             .map_err(io::Error::other)
     }
 
-    fn tool(&self) -> io::Result<install::Tool> {
+    fn tool(&self) -> io::Result<tool_definitions::Tool> {
         self.spec
             .slug
-            .parse::<install::Tool>()
-            .or_else(|_| self.name.parse::<install::Tool>())
+            .parse::<tool_definitions::Tool>()
+            .or_else(|_| self.name.parse::<tool_definitions::Tool>())
             .map_err(io::Error::other)
     }
 }

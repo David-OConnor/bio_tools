@@ -1,10 +1,10 @@
 //! Reusable execution of third-party command-line tools.
 //!
-//! CommandSpec describes an invocation without tying it to a particular
-//! biology tool. CommandRunner turns that description into a
-//! std::process::Command, captures bounded output, enforces an optional
+//! [`CommandSpec`] describes an invocation without tying it to a particular
+//! biology tool. [`CommandRunner`] turns that description into a
+//! [`std::process::Command`], captures bounded output, enforces an optional
 //! timeout, and applies the selected ExitPolicy. Rust applications can
-//! construct a CommandSpec directly or implement ToolInvocation for
+//! construct a [`CommandSpec`] directly or implement [`ToolInvocation`] for
 //! their own tool-specific configuration type.
 
 use std::{
@@ -349,13 +349,17 @@ impl CommandRunner {
             .args(&spec.arguments)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
+
         if let Some(current_dir) = &spec.current_dir {
             command.current_dir(current_dir);
         }
+
         if spec.environment_policy == EnvironmentPolicy::Clear {
             command.env_clear();
         }
+
         command.envs(&spec.environment);
+
         if spec.stdin.is_some() {
             command.stdin(Stdio::piped());
         }
@@ -372,6 +376,7 @@ impl CommandRunner {
         let stderr_limit = spec.capture_limits.stderr;
         let stdout_reader = thread::spawn(move || read_tail(stdout, stdout_limit));
         let stderr_reader = thread::spawn(move || read_tail(stderr, stderr_limit));
+
         let input_writer = spec.stdin.as_ref().map(|input| {
             let mut stdin = child.stdin.take().expect("stdin was configured as piped");
             let input = input.clone();
@@ -384,6 +389,7 @@ impl CommandRunner {
         let deadline = spec
             .timeout
             .and_then(|timeout| started.checked_add(timeout));
+
         let (status, timed_out) = loop {
             match child.try_wait() {
                 Ok(Some(status)) => break (status, false),
@@ -411,6 +417,7 @@ impl CommandRunner {
         join_input(input_writer)?;
         let stdout = join_output(stdout_reader, "standard output")?;
         let stderr = join_output(stderr_reader, "standard error")?;
+
         let output = CommandOutput {
             status,
             stdout,

@@ -1,8 +1,8 @@
 use std::{fs, path::Path, process::Command};
-
+use crate::tool_definitions::Tool;
 use super::{
-    InstallError, Installer, Tool,
-    common::{PipOptions, ScratchDir},
+    common::{PipOptions, ScratchDir}, InstallError,
+    Installer,
 };
 
 struct FetchedScript {
@@ -59,7 +59,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                     "import torch; assert torch.cuda.is_available() and \
                      torch.cuda.is_bf16_supported(), 'Chai-1 requires a CUDA GPU with bfloat16'",
                 ),
-                ..UvRecipe::simple("chai1", "3.11", &["chai_lab==0.6.1"], &["chai-lab"])
+                ..UvRecipe::simple(Tool::Chai1.slug(), "3.11", &["chai_lab==0.6.1"], &["chai-lab"])
             },
         ),
         Tool::Protenix => install_recipe(
@@ -68,14 +68,14 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                 gpu_probe: Some(
                     "import torch; assert torch.cuda.is_available(), 'Protenix requires CUDA'",
                 ),
-                ..UvRecipe::simple("protenix", "3.11", &["protenix"], &["protenix"])
+                ..UvRecipe::simple(Tool::Protenix.slug(), "3.11", &["protenix"], &["protenix"])
             },
         ),
         Tool::EsmFold2 => install_esmfold(installer),
         Tool::ImmuneBuilder => install_recipe(
             installer,
             UvRecipe::simple(
-                "immunebuilder",
+                Tool::ImmuneBuilder.slug(),
                 "3.11",
                 &["ImmuneBuilder", "openmm", "pdbfixer", "anarci"],
                 &["ABodyBuilder2", "NanoBodyBuilder2", "TCRBuilder2"],
@@ -84,7 +84,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::BioPhi => install_recipe(
             installer,
             UvRecipe::simple(
-                "biophi",
+                Tool::BioPhi.slug(),
                 "3.11",
                 &[
                     "biophi @ git+https://github.com/Merck/BioPhi@main",
@@ -102,7 +102,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             UvRecipe {
                 torch: &["torch==2.7.1"],
                 ..UvRecipe::simple(
-                    "thermompnn",
+                    Tool::ThermoMpnn.slug(),
                     "3.12",
                     &[
                         "numpy<2",
@@ -122,7 +122,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::DeepImmuno => install_checkout_recipe(
             installer,
             UvRecipe::simple(
-                "deepimmuno",
+                Tool::DeepImmuno.slug(),
                 "3.10",
                 &["tensorflow<2.16", "pandas", "numpy<2", "scikit-learn"],
                 &[],
@@ -133,7 +133,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::TlImmuno2 => install_checkout_recipe(
             installer,
             UvRecipe::simple(
-                "tlimmuno2",
+                Tool::TlImmuno2.slug(),
                 "3.10",
                 &[
                     "tensorflow<2.16",
@@ -153,7 +153,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             installer,
             UvRecipe {
                 torch: &["torch==2.7.1"],
-                ..UvRecipe::simple("dlkcat", "3.10", &["numpy<2", "rdkit", "scikit-learn"], &[])
+                ..UvRecipe::simple(Tool::DlkCat.slug(), "3.10", &["numpy<2", "rdkit", "scikit-learn"], &[])
             },
             "https://github.com/SysBioChalmers/DLKcat",
             "DLKcat",
@@ -170,14 +170,14 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                         "import anarcii; print('anarcii', anarcii.__version__)",
                     ],
                 )),
-                ..UvRecipe::simple("anarcii", "3.12", &["anarcii"], &["anarcii"])
+                ..UvRecipe::simple(Tool::Anarcii.slug(), "3.12", &["anarcii"], &["anarcii"])
             },
         ),
         Tool::Placer => install_placer(installer),
         Tool::Gromacs => install_gromacs(installer),
         Tool::BoltzAdme => install_recipe(
             installer,
-            UvRecipe::simple("boltz-adme", "3.13", &["boltz-api~=0.45.0"], &[]),
+            UvRecipe::simple(Tool::BoltzAdme.slug(), "3.13", &["boltz-api~=0.45.0"], &[]),
         ),
         _ => Err(InstallError::InvalidConfiguration(format!(
             "{} has no uv/executable recipe",
@@ -258,7 +258,7 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
                 url: "https://raw.githubusercontent.com/facebookresearch/esm/v2.0.0/scripts/esmfold_inference.py",
             }],
             ..UvRecipe::simple(
-                "esmfold2",
+                Tool::EsmFold2.slug(),
                 "3.11",
                 &[
                     "fair-esm[esmfold]~=2.0.0",
@@ -283,7 +283,7 @@ fn install_proteinmpnn_ddg(installer: &mut Installer) -> Result<(), InstallError
                  'ProteinMPNN-ddG requires a JAX CUDA device'",
             ),
             ..UvRecipe::simple(
-                "proteinmpnn-ddg",
+                Tool::ProteinMpnnDdg.slug(),
                 "3.10",
                 &[
                     "ProteinMPNN-ddG[cuda12] @ git+https://github.com/PeptoneLtd/proteinmpnn_ddg.git@main",
@@ -305,7 +305,7 @@ fn install_rfdiffusion(installer: &mut Installer) -> Result<(), InstallError> {
                 "import torch; assert torch.cuda.is_available(), 'RFdiffusion requires CUDA'",
             ),
             ..UvRecipe::simple(
-                "rfdiffusion",
+                Tool::RfDiffusion.slug(),
                 "3.10",
                 &[
                     "dgl @ https://data.dgl.ai/wheels/torch-2.3/cu118/dgl-2.4.0%2Bcu118-cp310-cp310-manylinux1_x86_64.whl",
@@ -362,7 +362,7 @@ fn install_rfantibody(installer: &mut Installer) -> Result<(), InstallError> {
                 "import torch; assert torch.cuda.is_available(), 'RFantibody requires CUDA'",
             ),
             ..UvRecipe::simple(
-                "rfantibody",
+                Tool::RfAntibody.slug(),
                 "3.10",
                 &[
                     "dgl @ https://data.dgl.ai/wheels/torch-2.3/cu118/dgl-2.4.0%2Bcu118-cp310-cp310-manylinux1_x86_64.whl",
@@ -408,7 +408,7 @@ fn install_igdesign(installer: &mut Installer) -> Result<(), InstallError> {
                 "import torch; assert torch.cuda.is_available(), 'IgDesign requires CUDA'",
             ),
             ..UvRecipe::simple(
-                "igdesign",
+                Tool::IgDesign.slug(),
                 "3.11",
                 &[
                     "torch==2.7.1+cu118",
@@ -435,7 +435,7 @@ fn install_igdesign(installer: &mut Installer) -> Result<(), InstallError> {
     installer.clone_or_update("https://github.com/AbSciBio/igdesign", &target)?;
     // Normal VCS installation exposes no modules; upstream documents an editable checkout.
     let target_argument = target.to_string_lossy().into_owned();
-    installer.pip_install("igdesign", &["-e", &target_argument], PipOptions::default())?;
+    installer.pip_install(Tool::IgDesign.slug(), &["-e", &target_argument], PipOptions::default())?;
     let download = target.join("download_ckpts.sh");
     if download.is_file() {
         installer.run_upstream_script(&download, &[], &target)?;
@@ -454,7 +454,7 @@ fn install_deepsp(installer: &mut Installer) -> Result<(), InstallError> {
         UvRecipe {
             torch: &["torch==2.7.1"],
             ..UvRecipe::simple(
-                "deepsp",
+                Tool::DeepSp.slug(),
                 "3.11",
                 &["tensorflow", "pandas", "numpy", "biopython", "anarcii"],
                 &[],
@@ -476,7 +476,7 @@ fn install_deepstabp(installer: &mut Installer) -> Result<(), InstallError> {
         UvRecipe {
             torch: &["torch==2.7.1"],
             ..UvRecipe::simple(
-                "deepstabp",
+                Tool::DeepStabP.slug(),
                 "3.11",
                 &[
                     "transformers<5",
@@ -505,7 +505,7 @@ fn install_netsolp(installer: &mut Installer) -> Result<(), InstallError> {
         UvRecipe {
             torch: &["torch==2.7.1"],
             ..UvRecipe::simple(
-                "netsolp",
+                Tool::NetSolP.slug(),
                 "3.11",
                 &["fair-esm~=2.0.0", "pandas", "numpy<2"],
                 &[],
@@ -567,7 +567,7 @@ fn install_catpred(installer: &mut Installer) -> Result<(), InstallError> {
         UvRecipe {
             extra_indexes: &["https://download.pytorch.org/whl/cu124"],
             ..UvRecipe::simple(
-                "catpred",
+                Tool::CatPred.slug(),
                 "3.10",
                 &[
                     "catpred @ git+https://github.com/maranasgroup/CatPred.git@main",
@@ -673,7 +673,7 @@ fn install_placer(installer: &mut Installer) -> Result<(), InstallError> {
                 "import torch; assert torch.cuda.is_available(), 'PLACER requires CUDA'",
             ),
             ..UvRecipe::simple(
-                "placer",
+                Tool::Placer.slug(),
                 "3.10",
                 &[
                     "dgl @ https://data.dgl.ai/wheels/torch-2.3/cu118/dgl-2.4.0%2Bcu118-cp310-cp310-manylinux1_x86_64.whl",
