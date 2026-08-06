@@ -185,7 +185,16 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
                 .unwrap_or_else(|| installer.tools_root().join("gromacs"));
             return Some(CommandSpec::new(prefix.join("bin/gmx")).arg("--version"));
         }
-        Tool::BindCraft | Tool::Germinal | Tool::Genie3 => {
+        Tool::BindCraft | Tool::Genie3 => {
+            return named_conda_probe(installer, tool);
+        }
+        Tool::Germinal => {
+            // The micromamba branch of the recipe builds a prefix environment; only the legacy
+            // install.sh branch leaves a named Conda environment behind.
+            let python = installer.venv_python("germinal");
+            if python.is_file() {
+                return Some(CommandSpec::new(python).arg("--version"));
+            }
             return named_conda_probe(installer, tool);
         }
         _ => {

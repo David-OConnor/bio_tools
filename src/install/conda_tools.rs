@@ -1,9 +1,17 @@
+//! Tools whose dependencies come from the Conda package ecosystem rather than PyPI.
+//!
+//! Recipes we drive ourselves use micromamba. BindCraft and Genie 3 hand control to an upstream
+//! `install.sh` that calls `conda info --base`, `conda shell.bash hook`, and `conda activate`, so
+//! those two still bootstrap a full Miniconda via [`Installer::ensure_conda`].
+
 use std::{env, fs, path::Path, process::Command};
 
-use super::{InstallError, Installer, Tool, common::ScratchDir};
+use super::{
+    InstallError, Installer, Tool,
+    common::{CONDA_FORGE, ScratchDir},
+};
 
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
-    prepare_conda(installer)?;
     match tool {
         Tool::HighFold => install_highfold(installer),
         Tool::BindCraft => install_bindcraft(installer),
@@ -19,55 +27,42 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
     }
 }
 
-fn prepare_conda(installer: &mut Installer) -> Result<(), InstallError> {
-    let conda = installer.ensure_conda()?;
-    // Conda 24.9+ requires explicit acceptance for defaults in non-interactive installs. Older
-    // versions do not expose `conda tos`, so absence of that subcommand is harmless.
-    for channel in [
-        "https://repo.anaconda.com/pkgs/main",
-        "https://repo.anaconda.com/pkgs/r",
-    ] {
-        let mut command = Command::new(&conda);
-        command.args(["tos", "accept", "--override-channels", "--channel", channel]);
-        let _ = installer.succeeds(&mut command);
-    }
-    Ok(())
-}
-
 fn install_highfold(installer: &mut Installer) -> Result<(), InstallError> {
     install_alphafold2_parameters(installer)?;
     let target = installer.tools_root().join("HighFold");
     installer.clone_or_update("https://github.com/hongliangduan/HighFold", &target)?;
-    let prefix = installer.reset_conda_environment("highfold", "3.10")?;
-    conda_install(
+    let prefix = installer.reset_mamba_environment("highfold", "3.10")?;
+    mamba_install(
         installer,
         &prefix,
-        &["-c", "conda-forge", "-c", "bioconda"],
+        &["-c", CONDA_FORGE, "-c", "bioconda"],
         &["openmm", "pdbfixer", "kalign2", "hhsuite"],
     )?;
-    installer.conda_run(
+    installer.mamba_run(
         &prefix,
         &["python", "-m", "pip", "install", "--upgrade", "jax[cuda12]"],
     )?;
-    conda_pip_install_path(installer, &prefix, &target, &[])
+    mamba_pip_install_path(installer, &prefix, &target, &[])
 }
 
 fn install_antifold(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("AntiFold");
     installer.clone_or_update("https://github.com/oxpig/AntiFold", &target)?;
-    let prefix = installer.reset_conda_environment("antifold", "3.10")?;
-    conda_install(
+    let prefix = installer.reset_mamba_environment("antifold", "3.10")?;
+    // conda-forge skipped the 2.2 series entirely; under Conda this pin only resolved through the
+    // implicit `defaults` channel. Upstream's own environment.yml sources Torch from `pytorch`.
+    mamba_install(
         installer,
         &prefix,
-        &["-c", "conda-forge"],
+        &["-c", "pytorch", "-c", CONDA_FORGE],
         &["pytorch==2.2.0"],
     )?;
-    conda_pip_install_path(installer, &prefix, &target, &[])
+    mamba_pip_install_path(installer, &prefix, &target, &[])
 }
 
 fn install_aggrescan3d(installer: &mut Installer) -> Result<(), InstallError> {
-    let prefix = installer.reset_conda_environment("aggrescan3d", "2.7")?;
-    installer.conda_run(
+    let prefix = installer.reset_mamba_environment("aggrescan3d", "2.7")?;
+    installer.mamba_run(
         &prefix,
         &[
             "python",
@@ -82,14 +77,20 @@ fn install_aggrescan3d(installer: &mut Installer) -> Result<(), InstallError> {
 fn install_mber(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("mber-open");
     installer.clone_or_update("https://github.com/manifoldbio/mber-open", &target)?;
-    let conda = installer.ensure_conda()?;
     let prefix = installer.venv_dir("mber");
-    let mut remove = Command::new(&conda);
+    let mut remove = installer.micromamba_command()?;
     remove
-        .args(["env", "remove", "--prefix"])
-        .arg(&prefix)
-        .arg("-y");
+        .args(["env", "remove", "--yes", "--prefix"])
+        .arg(&prefix);
     let _ = installer.succeeds(&mut remove);
+    if prefix.exists() {
+        fs::remove_dir_all(&prefix).map_err(|error| {
+            InstallError::io(
+                format!("unable to clear the environment at {}", prefix.display()),
+                error,
+            )
+        })?;
+    }
 
     let source = fs::read_to_string(target.join("environment.yml"))
         .map_err(|error| InstallError::io("unable to read the mBER Conda environment", error))?;
@@ -106,14 +107,14 @@ fn install_mber(installer: &mut Installer) -> Result<(), InstallError> {
     fs::write(&environment, format!("{conda_only}\n")).map_err(|error| {
         InstallError::io("unable to write the mBER Conda-only environment", error)
     })?;
-    let mut create = Command::new(conda);
+    let mut create = installer.micromamba_command()?;
     create
-        .args(["env", "create", "--prefix"])
+        .args(["create", "--yes", "--prefix"])
         .arg(&prefix)
         .arg("-f")
         .arg(environment);
     installer.checked(&mut create)?;
-    conda_pip_install_path(
+    mamba_pip_install_path(
         installer,
         &prefix,
         &target,
@@ -123,37 +124,35 @@ fn install_mber(installer: &mut Installer) -> Result<(), InstallError> {
             "https://download.pytorch.org/whl/cu128",
         ],
     )?;
-    conda_pip_install_path(installer, &prefix, &target.join("protocols"), &["-e"])?;
+    mamba_pip_install_path(installer, &prefix, &target.join("protocols"), &["-e"])?;
     let download = target.join("download_weights.sh");
     installer.run_upstream_script(&download, &[], &target)
 }
 
-fn conda_install(
+fn mamba_install(
     installer: &mut Installer,
     prefix: &Path,
     options: &[&str],
     packages: &[&str],
 ) -> Result<(), InstallError> {
-    let conda = installer.ensure_conda()?;
-    let mut command = Command::new(conda);
+    let mut command = installer.micromamba_command()?;
     command
         .arg("install")
         .arg("--prefix")
         .arg(prefix)
-        .arg("-y")
+        .arg("--yes")
         .args(options)
         .args(packages);
     installer.checked(&mut command)
 }
 
-fn conda_pip_install_path(
+fn mamba_pip_install_path(
     installer: &mut Installer,
     prefix: &Path,
     package: &Path,
     extra_arguments: &[&str],
 ) -> Result<(), InstallError> {
-    let conda = installer.ensure_conda()?;
-    let mut command = Command::new(conda);
+    let mut command = installer.micromamba_command()?;
     command
         .args(["run", "--prefix"])
         .arg(prefix)
@@ -186,6 +185,8 @@ fn install_alphafold2_parameters(installer: &Installer) -> Result<(), InstallErr
     Ok(())
 }
 
+/// Stays on full Conda: `install_bindcraft.sh` resolves `conda info --base` and then sources
+/// `$CONDA_BASE/bin/activate`, neither of which exists in a micromamba root.
 fn install_bindcraft(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("BindCraft");
     let marker = target.join("params/params_model_5_ptm.npz");
@@ -220,19 +221,22 @@ fn install_bindcraft(installer: &mut Installer) -> Result<(), InstallError> {
 fn install_germinal(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("germinal");
     installer.clone_or_update("https://github.com/SantiagoMille/germinal", &target)?;
-    let conda = installer.ensure_conda()?;
-    let mut remove = Command::new(&conda);
-    remove.args(["env", "remove", "--name", "germinal", "-y"]);
-    let _ = installer.succeeds(&mut remove);
+    // Upstream currently ships only an environment.yml, so the prefix branch below is what runs.
+    // The script branch is kept because earlier releases did carry an install.sh.
     let upstream = target.join("install.sh");
     if upstream.is_file() {
-        run_bash_with_conda(installer, &upstream, &[], &target)
-    } else {
-        let prefix = installer.reset_conda_environment("germinal", "3.11")?;
-        conda_pip_install_path(installer, &prefix, &target, &[])
+        let conda = installer.ensure_conda()?;
+        let mut remove = Command::new(&conda);
+        remove.args(["env", "remove", "--name", "germinal", "-y"]);
+        let _ = installer.succeeds(&mut remove);
+        return run_bash_with_conda(installer, &upstream, &[], &target);
     }
+    let prefix = installer.reset_mamba_environment("germinal", "3.11")?;
+    mamba_pip_install_path(installer, &prefix, &target, &[])
 }
 
+/// Stays on full Conda: `scripts/setup/setup.sh` runs `eval "$(conda shell.bash hook)"` followed by
+/// `conda activate`, and micromamba's hook takes a different form.
 fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("genie3");
     let conda = installer.ensure_conda()?;

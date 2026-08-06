@@ -13,6 +13,11 @@ use super::{InstallError, Installer, TorchBackendPreference};
 
 const CUDA_126_INDEX: &str = "https://download.pytorch.org/whl/cu126";
 const CPU_TORCH_INDEX: &str = "https://download.pytorch.org/whl/cpu";
+const MICROMAMBA_RELEASES: &str =
+    "https://github.com/mamba-org/micromamba-releases/releases/latest/download";
+/// micromamba ships no default channels, so every explicit spec has to name one. Staying on
+/// conda-forge also keeps us clear of the Anaconda `defaults` licence terms.
+pub(crate) const CONDA_FORGE: &str = "conda-forge";
 const PYTHON_ENVIRONMENT_VARIABLES: [&str; 7] = [
     "VIRTUAL_ENV",
     "UV_PROJECT_ENVIRONMENT",
@@ -168,15 +173,7 @@ impl Installer {
             })?;
         }
 
-        let mut command = Command::new(uv);
-        command.args([
-            "venv",
-            "--managed-python",
-            "--python",
-            python_version,
-            "--clear",
-        ]);
-        command.arg(&target);
+        let mut command = uv_venv_command(&uv, python_version, &target);
         scrub_python_environment(&mut command);
         self.checked(&mut command)?;
 
@@ -409,6 +406,131 @@ impl Installer {
         Ok(managed)
     }
 
+    /// Shared package cache for every managed environment. Environments hardlink out of it, so all
+    /// micromamba invocations must agree on the location or each one redownloads its packages.
+    /// Without it micromamba falls back to `~/micromamba`, outside the layout we manage.
+    pub(crate) fn micromamba_root(&self) -> PathBuf {
+        self.config.layout.environments_root.join("micromamba")
+    }
+
+    pub(crate) fn ensure_micromamba(&mut self) -> Result<PathBuf, InstallError> {
+        if let Some(path) = &self.micromamba {
+            return Ok(path.clone());
+        }
+        let managed = self
+            .config
+            .layout
+            .environments_root
+            .join("micromamba-bin")
+            .join(executable_name("micromamba"));
+        let candidates = self
+            .config
+            .micromamba_executable
+            .clone()
+            .into_iter()
+            .chain([
+                managed.clone(),
+                PathBuf::from(executable_name("micromamba")),
+            ]);
+        for candidate in candidates {
+            let mut probe = Command::new(&candidate);
+            probe.arg("--version");
+            if self.succeeds(&mut probe) {
+                self.micromamba = Some(candidate.clone());
+                return Ok(candidate);
+            }
+        }
+
+        let url = micromamba_download_url()?;
+        self.step(format!("Installing micromamba into {}", managed.display()));
+        // A managed binary that exists but failed the probe above is broken; `download` would
+        // otherwise keep it on the strength of its size alone.
+        if managed.exists() {
+            fs::remove_file(&managed).map_err(|error| {
+                InstallError::io(
+                    format!(
+                        "unable to replace the broken micromamba at {}",
+                        managed.display()
+                    ),
+                    error,
+                )
+            })?;
+        }
+        self.download(&url, &managed)?;
+        make_executable(&managed)?;
+
+        let mut probe = Command::new(&managed);
+        probe.arg("--version");
+        if !self.succeeds(&mut probe) {
+            return Err(InstallError::InvalidConfiguration(format!(
+                "the micromamba binary downloaded to {} is not runnable",
+                managed.display()
+            )));
+        }
+        self.micromamba = Some(managed.clone());
+        Ok(managed)
+    }
+
+    /// A micromamba invocation pinned to our own root prefix.
+    pub(crate) fn micromamba_command(&mut self) -> Result<Command, InstallError> {
+        let micromamba = self.ensure_micromamba()?;
+        let root = self.micromamba_root();
+        fs::create_dir_all(&root).map_err(|error| {
+            InstallError::io(format!("unable to create {}", root.display()), error)
+        })?;
+        let mut command = Command::new(micromamba);
+        command.env("MAMBA_ROOT_PREFIX", &root);
+        Ok(command)
+    }
+
+    pub(crate) fn reset_mamba_environment(
+        &mut self,
+        slug: &str,
+        python_version: &str,
+    ) -> Result<PathBuf, InstallError> {
+        let prefix = self.venv_dir(slug);
+        let mut remove = self.micromamba_command()?;
+        remove
+            .args(["env", "remove", "--yes", "--prefix"])
+            .arg(&prefix);
+        let _ = self.succeeds(&mut remove);
+        // `env remove` declines prefixes it did not create, which would leave `create` layering a
+        // new environment over the old one instead of resetting it.
+        if prefix.exists() {
+            fs::remove_dir_all(&prefix).map_err(|error| {
+                InstallError::io(
+                    format!("unable to clear the environment at {}", prefix.display()),
+                    error,
+                )
+            })?;
+        }
+
+        let mut create = self.micromamba_command()?;
+        create
+            .args(["create", "--yes", "--prefix"])
+            .arg(&prefix)
+            .args(["-c", CONDA_FORGE])
+            .arg(format!("python={python_version}"));
+        self.checked(&mut create)?;
+        Ok(prefix)
+    }
+
+    pub(crate) fn mamba_run(
+        &mut self,
+        prefix: &Path,
+        arguments: &[&str],
+    ) -> Result<(), InstallError> {
+        let mut command = self.micromamba_command()?;
+        command
+            .args(["run", "--prefix"])
+            .arg(prefix)
+            .args(arguments);
+        self.checked(&mut command)
+    }
+
+    /// Full Conda, needed only by the recipes that delegate to an upstream `install.sh`: those
+    /// scripts call `conda info --base`, `conda shell.bash hook`, and `conda activate`, none of
+    /// which micromamba provides. Everything we drive ourselves uses [`Self::micromamba_command`].
     pub(crate) fn ensure_conda(&mut self) -> Result<PathBuf, InstallError> {
         if let Some(path) = &self.conda {
             return Ok(path.clone());
@@ -432,6 +554,7 @@ impl Installer {
             probe.arg("--version");
             if self.succeeds(&mut probe) {
                 self.conda = Some(candidate.clone());
+                self.accept_conda_terms(&candidate);
                 return Ok(candidate);
             }
         }
@@ -451,11 +574,14 @@ impl Installer {
             "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh",
             &installer,
         )?;
-        let mut command = Command::new("bash");
-        command
-            .arg(&installer)
-            .args(["-b", "-p"])
-            .arg(&managed_root);
+        let repair_existing = managed_root.exists();
+        if repair_existing {
+            self.note(format!(
+                "The managed Conda prefix at {} is unusable; repairing it with Miniconda update mode",
+                managed_root.display()
+            ));
+        }
+        let mut command = miniconda_install_command(&installer, &managed_root, repair_existing);
         self.checked(&mut command)?;
 
         let mut probe = Command::new(&managed);
@@ -467,45 +593,26 @@ impl Installer {
             )));
         }
         self.conda = Some(managed.clone());
+        self.accept_conda_terms(&managed);
         Ok(managed)
     }
 
-    pub(crate) fn reset_conda_environment(
-        &mut self,
-        slug: &str,
-        python_version: &str,
-    ) -> Result<PathBuf, InstallError> {
-        let conda = self.ensure_conda()?;
-        let prefix = self.venv_dir(slug);
-        let mut remove = Command::new(&conda);
-        remove
-            .args(["env", "remove", "--prefix"])
-            .arg(&prefix)
-            .arg("-y");
-        let _ = self.succeeds(&mut remove);
-
-        let mut create = Command::new(conda);
-        create
-            .args(["create", "--prefix"])
-            .arg(&prefix)
-            .arg(format!("python={python_version}"))
-            .arg("-y");
-        self.checked(&mut create)?;
-        Ok(prefix)
-    }
-
-    pub(crate) fn conda_run(
-        &mut self,
-        prefix: &Path,
-        arguments: &[&str],
-    ) -> Result<(), InstallError> {
-        let conda = self.ensure_conda()?;
-        let mut command = Command::new(conda);
-        command
-            .args(["run", "--prefix"])
-            .arg(prefix)
-            .args(arguments);
-        self.checked(&mut command)
+    /// Conda 24.9+ refuses to touch the Anaconda `defaults` channels non-interactively until their
+    /// terms are accepted, and the upstream installers we shell out to still resolve against them.
+    /// Older versions do not expose `conda tos`, so absence of that subcommand is harmless.
+    fn accept_conda_terms(&mut self, conda: &Path) {
+        if self.conda_terms_accepted {
+            return;
+        }
+        self.conda_terms_accepted = true;
+        for channel in [
+            "https://repo.anaconda.com/pkgs/main",
+            "https://repo.anaconda.com/pkgs/r",
+        ] {
+            let mut command = Command::new(conda);
+            command.args(["tos", "accept", "--override-channels", "--channel", channel]);
+            let _ = self.succeeds(&mut command);
+        }
     }
 
     pub(crate) fn download(&self, url: &str, destination: &Path) -> Result<(), InstallError> {
@@ -759,6 +866,50 @@ fn executable_name(name: &str) -> OsString {
     }
 }
 
+fn uv_venv_command(uv: &Path, python_version: &str, target: &Path) -> Command {
+    let mut command = Command::new(uv);
+    command.args([
+        "venv",
+        "--no-project",
+        "--managed-python",
+        "--python",
+        python_version,
+        "--clear",
+    ]);
+    command.arg(target);
+    command
+}
+
+/// micromamba publishes a bare statically linked binary per platform, so bootstrapping is a
+/// download and a chmod rather than Miniconda's ~500 MB self-extracting base environment.
+fn micromamba_download_url() -> Result<String, InstallError> {
+    let asset = match (env::consts::OS, env::consts::ARCH) {
+        ("linux", "x86_64") => "micromamba-linux-64",
+        ("linux", "aarch64") => "micromamba-linux-aarch64",
+        ("linux", "powerpc64") => "micromamba-linux-ppc64le",
+        ("macos", "x86_64") => "micromamba-osx-64",
+        ("macos", "aarch64") => "micromamba-osx-arm64",
+        ("windows", "x86_64") => "micromamba-win-64.exe",
+        ("windows", "aarch64") => "micromamba-win-arm64.exe",
+        (os, arch) => {
+            return Err(InstallError::InvalidConfiguration(format!(
+                "micromamba does not publish a binary for {os}-{arch}"
+            )));
+        }
+    };
+    Ok(format!("{MICROMAMBA_RELEASES}/{asset}"))
+}
+
+fn miniconda_install_command(installer: &Path, target: &Path, update: bool) -> Command {
+    let mut command = Command::new("bash");
+    command.arg(installer).arg("-b");
+    if update {
+        command.arg("-u");
+    }
+    command.arg("-p").arg(target);
+    command
+}
+
 fn home_dir() -> Option<PathBuf> {
     env::var_os(if cfg!(target_os = "windows") {
         "USERPROFILE"
@@ -907,6 +1058,73 @@ mod tests {
         assert_eq!(
             append_to_path(Path::new("weights/model.pt"), ".partial"),
             Path::new("weights/model.pt.partial")
+        );
+    }
+
+    #[test]
+    fn tool_venv_does_not_inherit_the_calling_project() {
+        let command = uv_venv_command(
+            Path::new("uv"),
+            "3.10",
+            Path::new("environments/rfantibody"),
+        );
+        assert_eq!(
+            command.get_args().collect::<Vec<_>>(),
+            [
+                "venv",
+                "--no-project",
+                "--managed-python",
+                "--python",
+                "3.10",
+                "--clear",
+                "environments/rfantibody",
+            ]
+        );
+    }
+
+    #[test]
+    fn micromamba_asset_matches_the_build_platform() {
+        let url = micromamba_download_url().expect("this platform has a micromamba binary");
+        assert!(url.starts_with(MICROMAMBA_RELEASES), "{url}");
+        let asset = url.rsplit('/').next().unwrap_or_default();
+        assert_eq!(
+            asset.ends_with(".exe"),
+            cfg!(target_os = "windows"),
+            "only the Windows assets carry an extension: {asset}"
+        );
+        let platform = if cfg!(target_os = "macos") {
+            "osx"
+        } else if cfg!(target_os = "windows") {
+            "win"
+        } else {
+            "linux"
+        };
+        assert!(
+            asset.starts_with(&format!("micromamba-{platform}-")),
+            "{asset}"
+        );
+    }
+
+    #[test]
+    fn existing_miniconda_prefix_uses_update_mode() {
+        let fresh = miniconda_install_command(
+            Path::new("miniconda.sh"),
+            Path::new("environments/conda"),
+            false,
+        );
+        assert_eq!(
+            fresh.get_args().collect::<Vec<_>>(),
+            ["miniconda.sh", "-b", "-p", "environments/conda"]
+        );
+
+        let repair = miniconda_install_command(
+            Path::new("miniconda.sh"),
+            Path::new("environments/conda"),
+            true,
+        );
+        assert_eq!(
+            repair.get_args().collect::<Vec<_>>(),
+            ["miniconda.sh", "-b", "-u", "-p", "environments/conda"]
         );
     }
 }

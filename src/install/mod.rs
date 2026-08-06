@@ -293,7 +293,7 @@ impl FromStr for Tool {
 pub struct InstallLayout {
     /// Root containing source checkouts, binary distributions, and model data.
     pub tools_root: PathBuf,
-    /// Root containing each isolated Python/Conda environment.
+    /// Root containing each isolated Python/micromamba environment.
     pub environments_root: PathBuf,
     /// Appended to a tool slug when naming its environment.
     pub environment_suffix: String,
@@ -320,7 +320,7 @@ impl InstallLayout {
     }
 
     /// Shared application layout: assets live directly under process_executables, while
-    /// isolated Python and Conda environments live under process_executables/python_envs.
+    /// isolated Python and micromamba environments live under process_executables/python_envs.
     pub fn process_executables(root: impl Into<PathBuf>) -> Self {
         let root = root.into();
         Self::split(root.clone(), root.join("python_envs"))
@@ -362,7 +362,10 @@ pub struct InstallConfig {
     pub layout: InstallLayout,
     pub torch_backend: TorchBackendPreference,
     pub uv_executable: Option<PathBuf>,
+    /// Only consulted by the recipes that hand control to an upstream `install.sh`; everything
+    /// else resolves [`InstallConfig::micromamba_executable`] instead.
     pub conda_executable: Option<PathBuf>,
+    pub micromamba_executable: Option<PathBuf>,
     /// Project/release root containing optional adapter helper scripts.
     pub support_root: Option<PathBuf>,
     pub opendde_root: Option<PathBuf>,
@@ -380,6 +383,7 @@ impl InstallConfig {
             torch_backend: TorchBackendPreference::Auto,
             uv_executable: None,
             conda_executable: None,
+            micromamba_executable: None,
             support_root: None,
             opendde_root: None,
             prewarm_opendde: true,
@@ -397,6 +401,9 @@ impl InstallConfig {
         }
         if self.conda_executable.is_none() {
             self.conda_executable = first_env_path(&["BIO_TOOLS_CONDA"]);
+        }
+        if self.micromamba_executable.is_none() {
+            self.micromamba_executable = first_env_path(&["BIO_TOOLS_MICROMAMBA"]);
         }
         if let Some(value) = first_env(&[
             "BIO_TOOLS_TORCH_BACKEND",
@@ -540,14 +547,17 @@ impl InstallReport {
 
 type Reporter = Arc<dyn Fn(InstallEvent) + Send + Sync>;
 
-/// Stateful installation context. The located uv/Conda executables and selected Torch backend are
-/// cached across recipes in one run.
+/// Stateful installation context. The located uv/micromamba/Conda executables and selected Torch
+/// backend are cached across recipes in one run.
 pub struct Installer {
     pub config: InstallConfig,
     reporter: Option<Reporter>,
     current_tool: Option<Tool>,
     uv: Option<PathBuf>,
+    micromamba: Option<PathBuf>,
     conda: Option<PathBuf>,
+    /// Anaconda's terms only need accepting once per run, and only on the Conda path.
+    conda_terms_accepted: bool,
     torch_backend: Option<common::TorchBackend>,
 }
 
@@ -577,7 +587,9 @@ impl Installer {
             reporter: None,
             current_tool: None,
             uv: None,
+            micromamba: None,
             conda: None,
+            conda_terms_accepted: false,
             torch_backend: None,
         }
     }
