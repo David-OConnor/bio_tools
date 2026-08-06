@@ -4,6 +4,8 @@ use std::{fmt, str::FromStr};
 
 use crate::install::InstallError;
 
+pub mod catalog;
+
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Tool {

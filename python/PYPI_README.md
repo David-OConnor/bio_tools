@@ -12,6 +12,7 @@ installer.install(bio_tools.Tool("opendde"))
 
 status = bio_tools.Tool("opendde").status(root)
 print(status.result, status.detail, status.device)
+print(installer.list())
 
 result = bio_tools.Command(
     ["opendde", "predict", "input.yaml"],

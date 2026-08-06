@@ -92,12 +92,16 @@ impl Installer {
         }
     }
 
-    pub(crate) fn venv_script(&self, slug: &str, script: &str) -> PathBuf {
-        let directory = self.venv_dir(slug).join(if cfg!(target_os = "windows") {
+    pub(crate) fn venv_scripts_dir(&self, slug: &str) -> PathBuf {
+        self.venv_dir(slug).join(if cfg!(target_os = "windows") {
             "Scripts"
         } else {
             "bin"
-        });
+        })
+    }
+
+    pub(crate) fn venv_script(&self, slug: &str, script: &str) -> PathBuf {
+        let directory = self.venv_scripts_dir(slug);
         if !cfg!(target_os = "windows") {
             return directory.join(script);
         }

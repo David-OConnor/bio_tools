@@ -3,11 +3,13 @@ use std::collections::BTreeMap;
 use bio_tools_rs::{
     LaunchType as RustLaunchType, LicenseType as RustLicenseType, Process as RustProcess,
     ProcessCategory as RustProcessCategory, ProcessExpense as RustProcessExpense, Spec as RustSpec,
+    tool_definitions::catalog,
 };
 use pyo3::{
+    PyClass,
+    exceptions::PyValueError,
     prelude::*,
     types::{PyDict, PyList},
-    PyClass,
 };
 
 macro_rules! python_enum {
@@ -57,6 +59,17 @@ macro_rules! python_enum {
 
             fn __hash__(&self) -> u8 {
                 self.value
+            }
+        }
+
+        impl $python {
+            /// The Python-facing variant for a Rust enum value, for building one
+            /// from data the caller did not construct by hand (e.g. a catalog
+            /// entry) rather than from a `#[classattr]`.
+            pub(crate) fn from_inner(inner: $rust) -> Self {
+                match inner {
+                    $(<$rust>::$variant => Self::$variant(),)+
+                }
             }
         }
     };
@@ -244,10 +257,7 @@ impl PySpec {
             .links()
             .into_iter()
             .map(|(label, url)| {
-                BTreeMap::from([
-                    ("label", label.to_owned()),
-                    ("url", url.to_owned()),
-                ])
+                BTreeMap::from([("label", label.to_owned()), ("url", url.to_owned())])
             })
             .collect()
     }
@@ -257,7 +267,10 @@ impl PySpec {
     }
 
     fn __repr__(&self) -> String {
-        format!("Spec(slug={:?}, summary={:?})", self.inner.slug, self.inner.summary)
+        format!(
+            "Spec(slug={:?}, summary={:?})",
+            self.inner.slug, self.inner.summary
+        )
     }
 }
 
@@ -399,6 +412,63 @@ impl PyProcess {
     }
 }
 
+/// Build a [`PySpec`] from bio_tools' central catalog by slug, so a caller
+/// supplies only what is genuinely its own: UI field descriptors.
+#[pyfunction]
+#[pyo3(signature = (slug, *, fields, refresh_fields=None, tasks=None))]
+fn catalog_spec(
+    py: Python<'_>,
+    slug: &str,
+    fields: Py<PyAny>,
+    refresh_fields: Option<Py<PyAny>>,
+    tasks: Option<Py<PyAny>>,
+) -> PyResult<PySpec> {
+    let entry = catalog::by_slug(slug).ok_or_else(|| {
+        PyValueError::new_err(format!("no bio_tools catalog entry for slug {slug:?}"))
+    })?;
+    Ok(PySpec {
+        inner: entry.to_spec(),
+        fields,
+        refresh_fields,
+        tasks: tasks.unwrap_or_else(|| PyList::empty(py).into_any().unbind()),
+    })
+}
+
+/// Build a [`PyProcess`] from bio_tools' central catalog, keyed by the slug
+/// already on `module.SPEC` (itself built by [`catalog_spec`]). A caller
+/// supplies only what is genuinely its own: a numeric id for its own storage
+/// and the adapter module.
+#[pyfunction]
+fn catalog_process(py: Python<'_>, id: u32, module: Py<PyAny>) -> PyResult<PyProcess> {
+    let spec: Py<PySpec> = module.bind(py).getattr("SPEC")?.extract()?;
+    let slug = spec.borrow(py).inner.slug.clone();
+    let entry = catalog::by_slug(&slug).ok_or_else(|| {
+        PyValueError::new_err(format!("no bio_tools catalog entry for slug {slug:?}"))
+    })?;
+
+    let categories = entry
+        .categories
+        .iter()
+        .map(|category| Py::new(py, PyProcessCategory::from_inner(*category)))
+        .collect::<PyResult<Vec<_>>>()?;
+    let launch_type = Py::new(py, PyLaunchType::from_inner(entry.launch_type))?;
+    let license_type = Py::new(py, PyLicenseType::from_inner(entry.license_type))?;
+    let expense = Py::new(py, PyProcessExpense::from_inner(entry.expense))?;
+
+    Ok(PyProcess::new(
+        py,
+        entry.name.to_owned(),
+        id,
+        categories,
+        launch_type,
+        license_type,
+        expense,
+        module,
+        entry.top_choice,
+        spec,
+    ))
+}
+
 fn serialize_dataclasses(py: Python<'_>, values: &Py<PyAny>) -> PyResult<Py<PyAny>> {
     let asdict = py.import("dataclasses")?.getattr("asdict")?;
     let serialized = PyList::empty(py);
@@ -423,5 +493,7 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<PyLicenseType>()?;
     module.add_class::<PySpec>()?;
     module.add_class::<PyProcess>()?;
+    module.add_function(wrap_pyfunction!(catalog_spec, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_process, module)?)?;
     Ok(())
 }

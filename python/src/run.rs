@@ -5,7 +5,12 @@ use pyo3::{create_exception, exceptions::PyRuntimeError, prelude::*};
 
 create_exception!(bio_tools, CommandError, PyRuntimeError);
 
-#[pyclass(name = "CommandOutput", module = "bio_tools", frozen, skip_from_py_object)]
+#[pyclass(
+    name = "CommandOutput",
+    module = "bio_tools",
+    frozen,
+    skip_from_py_object
+)]
 pub(crate) struct PyCommandOutput {
     #[pyo3(get)]
     command: Vec<String>,
@@ -17,6 +22,23 @@ pub(crate) struct PyCommandOutput {
     stderr: String,
     #[pyo3(get)]
     elapsed_seconds: f64,
+}
+
+/// Execute a prepared Rust command specification for any Python-facing API.
+pub(crate) fn execute(
+    py: Python<'_>,
+    spec: CommandSpec,
+    command: Vec<String>,
+) -> PyResult<PyCommandOutput> {
+    py.detach(move || bio_tools_rs::run::run(&spec))
+        .map(|output| PyCommandOutput {
+            command,
+            return_code: output.return_code(),
+            stdout: output.stdout_lossy(),
+            stderr: output.stderr_lossy(),
+            elapsed_seconds: output.elapsed.as_secs_f64(),
+        })
+        .map_err(|error| CommandError::new_err(error.to_string()))
 }
 
 #[pymethods]
@@ -102,16 +124,7 @@ impl PyCommand {
             spec = spec.stdin(stdin.as_bytes().to_vec());
         }
 
-        let command = self.command.clone();
-        py.detach(move || bio_tools_rs::run::run(&spec))
-            .map(|output| PyCommandOutput {
-                command,
-                return_code: output.return_code(),
-                stdout: output.stdout_lossy(),
-                stderr: output.stderr_lossy(),
-                elapsed_seconds: output.elapsed.as_secs_f64(),
-            })
-            .map_err(|error| CommandError::new_err(error.to_string()))
+        execute(py, spec, self.command.clone())
     }
 
     fn __repr__(&self) -> String {
@@ -123,10 +136,7 @@ impl PyCommand {
 }
 
 pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add(
-        "CommandError",
-        module.py().get_type::<CommandError>(),
-    )?;
+    module.add("CommandError", module.py().get_type::<CommandError>())?;
     module.add_class::<PyCommand>()?;
     module.add_class::<PyCommandOutput>()?;
     Ok(())

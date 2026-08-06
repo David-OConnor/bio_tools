@@ -17,7 +17,7 @@ use std::{
     sync::Arc,
 };
 
-use crate::status;
+use crate::{run::CommandSpec, status};
 
 mod alphafold3;
 mod boltz2;
@@ -356,6 +356,31 @@ impl Installer {
     pub fn executable_path(&self, tool: Tool) -> PathBuf {
         self.venv_script(tool.slug(), tool.console_script())
     }
+    /// Build a command for a tool's console entry point in its managed environment.
+    ///
+    /// The child receives `VIRTUAL_ENV` and a `PATH` whose first directory is the
+    /// tool environment's scripts directory. This is equivalent to activating the
+    /// environment before running its console script, and lets dependencies such
+    /// as PyTorch find helper executables installed beside the script.
+    pub fn tool_command(&self, tool: Tool) -> CommandSpec {
+        self.with_tool_environment(tool, CommandSpec::new(self.executable_path(tool)))
+    }
+
+    /// Build a command for the managed Python interpreter of a tool.
+    pub fn tool_python_command(&self, tool: Tool) -> CommandSpec {
+        self.with_tool_environment(tool, CommandSpec::new(self.venv_python(tool.slug())))
+    }
+
+    fn with_tool_environment(&self, tool: Tool, command: CommandSpec) -> CommandSpec {
+        let environment = self.venv_dir(tool.slug());
+        let scripts = self.venv_scripts_dir(tool.slug());
+        let inherited = std::env::var_os("PATH")
+            .map(|path| std::env::split_paths(&path).collect::<Vec<_>>())
+            .unwrap_or_default();
+        let path = std::env::join_paths(std::iter::once(scripts.clone()).chain(inherited))
+            .unwrap_or_else(|_| scripts.into_os_string());
+        command.env("VIRTUAL_ENV", environment).env("PATH", path)
+    }
 
     pub fn tools_root(&self) -> &Path {
         &self.config.layout.tools_root
@@ -404,6 +429,10 @@ impl Installer {
         status::check(self, tool)
     }
 
+    /// Probe every tool installed by this crate using this installer's layout.
+    pub fn list(&self) -> Vec<(Tool, ToolStatus)> {
+        status::list(self)
+    }
     /// Remove one tool's environment, assets, and installation marker.
     ///
     /// Rerunnable in the same sense the recipes are: a tool that is already absent uninstalls
@@ -469,6 +498,23 @@ impl Installer {
 mod tests {
     use super::*;
 
+    #[test]
+    fn tool_command_activates_its_managed_environment() {
+        let installer = Installer::new("managed-root");
+        let command = installer.tool_command(Tool::OpenDde);
+        assert_eq!(
+            command.environment.get(std::ffi::OsStr::new("VIRTUAL_ENV")),
+            Some(&installer.venv_dir(Tool::OpenDde.slug()).into_os_string())
+        );
+        let path = command
+            .environment
+            .get(std::ffi::OsStr::new("PATH"))
+            .unwrap();
+        assert_eq!(
+            std::env::split_paths(path).next(),
+            Some(installer.venv_scripts_dir(Tool::OpenDde.slug()))
+        );
+    }
     #[test]
     fn all_tools_contains_no_duplicates() {
         let unique: std::collections::HashSet<_> = Tool::ALL.into_iter().collect();

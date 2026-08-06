@@ -5,11 +5,13 @@ use std::{env, path::PathBuf};
 
 use bio_tools_rs::{
     install::{Installer as RustInstaller, UninstallReport},
-    tool_definitions::Tool,
     run::{CaptureLimits, CommandSpec, ExitPolicy},
-    status::{ToolStatus, StatusKind}
+    status::{StatusKind, ToolStatus},
+    tool_definitions::Tool,
 };
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
+
+use crate::run::{PyCommandOutput, execute};
 
 #[pyclass(name = "Status", frozen, skip_from_py_object)]
 #[derive(Clone)]
@@ -231,6 +233,53 @@ impl PyInstaller {
             .map_err(install_error)
     }
 
+    /// Run a tool's console entry point with its managed environment activated.
+    #[pyo3(signature = (tool, arguments=Vec::new(), *, cwd=None, timeout=None, check=true))]
+    fn run(
+        &self,
+        py: Python<'_>,
+        tool: &PyTool,
+        arguments: Vec<String>,
+        cwd: Option<PathBuf>,
+        timeout: Option<f64>,
+        check: bool,
+    ) -> PyResult<PyCommandOutput> {
+        let tool = tool.recipe()?;
+        if timeout.is_some_and(|seconds| !seconds.is_finite() || seconds < 0.0) {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "timeout must be a finite, non-negative number of seconds",
+            ));
+        }
+        let mut command = self.inner.tool_command(tool).args(arguments.clone());
+        if let Some(path) = cwd {
+            command = command.current_dir(path);
+        }
+        command = command.timeout(timeout.map(std::time::Duration::from_secs_f64));
+        command = command.exit_policy(if check {
+            ExitPolicy::RequireSuccess
+        } else {
+            ExitPolicy::AllowFailure
+        });
+        let display = std::iter::once(command.program.to_string_lossy().into_owned())
+            .chain(arguments)
+            .collect();
+        execute(py, command, display)
+    }
+    /// Return every tool installed by this crate and its current status.
+    fn list(&self, py: Python<'_>) -> Vec<(PyTool, PyStatus)> {
+        py.detach(|| self.inner.list())
+            .into_iter()
+            .map(|(tool, status)| {
+                (
+                    PyTool {
+                        slug: tool.slug().to_owned(),
+                        inner: Some(tool),
+                    },
+                    PyStatus::from(status),
+                )
+            })
+            .collect()
+    }
     fn status(&self, py: Python<'_>, tool: &PyTool) -> PyResult<PyStatus> {
         let tool = tool.inner.ok_or_else(|| {
             PyRuntimeError::new_err(format!(
@@ -261,10 +310,10 @@ fn external_status(
     python_executable: &std::path::Path,
 ) -> PyStatus {
     match slug {
-        "rdkit" => command_status(CommandSpec::new(python_executable).args([
-            "-c",
-            "import rdkit; print('RDKit', rdkit.__version__)",
-        ])),
+        "rdkit" => command_status(
+            CommandSpec::new(python_executable)
+                .args(["-c", "import rdkit; print('RDKit', rdkit.__version__)"]),
+        ),
         "orca" => {
             let configured = env::var_os("ORCA_EXECUTABLE").map(PathBuf::from);
             let executable = configured.filter(|path| path.is_file()).or_else(|| {

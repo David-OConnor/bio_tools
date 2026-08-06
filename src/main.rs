@@ -1,9 +1,11 @@
-//! Optional standalone wrapper around the `bio_tools` library API.
+//! Optional standalone CLI application; a thin wrapper around the library API which can be launched
+//! without using it in a rust or python program
+
 use std::{env, error::Error, ffi::OsString, path::PathBuf, process, str::FromStr};
 
 use bio_tools::{
     install::{InstallEvent, Installer, StatusKind},
-    run::{CommandSpec, run},
+    run::run,
     tool_definitions::Tool,
 };
 
@@ -33,8 +35,9 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         if !args.is_empty() {
             return Err("list does not accept arguments".into());
         }
-        for tool in Tool::ALL {
-            println!("{}\t{}", tool.slug(), tool.name());
+        let installer = Installer::from_environment(root)?;
+        for (tool, status) in installer.list() {
+            println!("{}\t{:?}\t{}", tool.slug(), status.result, status.detail);
         }
         return Ok(());
     }
@@ -105,7 +108,7 @@ fn run_tool(
     if !executable.is_file() {
         return Err(format!("{} has no installed console entry point at {}; install it first, or use the library API for a tool-specific invocation", tool.name(), executable.display()).into());
     }
-    let output = run(&CommandSpec::new(executable).args(args).timeout(None))?;
+    let output = run(&installer.tool_command(tool).args(args).timeout(None))?;
     print!("{}", output.stdout_lossy());
     eprint!("{}", output.stderr_lossy());
     Ok(())

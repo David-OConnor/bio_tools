@@ -60,6 +60,16 @@ fn marker_path(installer: &Installer, tool: Tool) -> PathBuf {
         .join(format!("{}.installed", tool.slug()))
 }
 
+/// Probe every tool installed by this crate using the supplied installation layout.
+///
+/// The returned order is the stable, user-facing [`Tool::ALL`] order.
+pub fn list(installer: &Installer) -> Vec<(Tool, ToolStatus)> {
+    Tool::ALL
+        .into_iter()
+        .filter(|tool| marker_path(installer, *tool).is_file())
+        .map(|tool| (tool, check(installer, tool)))
+        .collect()
+}
 pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
     if !tool.is_supported() {
         return error(format!(
@@ -165,7 +175,8 @@ fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
             format!("ALPHAFOLD3_RUNNER does not exist at {}.", runner.display()),
         );
     }
-    let command = CommandSpec::new(installer.venv_python(Tool::AlphaFold3.slug()))
+    let command = installer
+        .tool_python_command(Tool::AlphaFold3)
         .arg(&runner)
         .arg("--help");
     match run_probe(command) {
@@ -222,17 +233,15 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
             // install.sh branch leaves a named Conda environment behind.
             let python = installer.venv_python(tool.slug());
             if python.is_file() {
-                return Some(CommandSpec::new(python).arg("--version"));
+                return Some(installer.tool_python_command(tool).arg("--version"));
             }
             return named_conda_probe(installer, tool);
         }
         _ => {
-            return Some(CommandSpec::new(installer.venv_python(tool.slug())).arg("--version"));
+            return Some(installer.tool_python_command(tool).arg("--version"));
         }
     };
-    Some(
-        CommandSpec::new(installer.venv_script(tool.slug(), tool.console_script())).args(arguments),
-    )
+    Some(installer.tool_command(tool).args(arguments))
 }
 
 fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
@@ -359,7 +368,8 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
     } else {
         "import torch; print('GPU' if torch.cuda.is_available() else 'CPU')"
     };
-    let command = CommandSpec::new(python)
+    let command = installer
+        .tool_python_command(tool)
         .args(["-c", snippet])
         .timeout(Duration::from_secs(300))
         .capture_limits(CaptureLimits::new(4_000, 4_000));
