@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory};
 
 /// A structural model is built before the five metrics are measured on
 /// it, so this is not the sequence-only calculation it looks like.
@@ -9,11 +9,11 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         name: "TAP",
     },
     categories: &[
-        ProcessCategory::PropertyPrediction,
-        ProcessCategory::AntibodyDesign,
+        ToolCategory::PropertyPrediction,
+        ToolCategory::AntibodyDesign,
     ],
     launch_type: LaunchType::CondaBasedApp,
-    license_type: LicenseType::NonCommercial,
+    license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Flag developability risks in an antibody against clinical-stage therapeutics.",

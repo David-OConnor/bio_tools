@@ -1,14 +1,14 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::RfDiffusion),
     categories: &[
-        ProcessCategory::ProteinDesign,
-        ProcessCategory::PeptideBinderDesign,
+        ToolCategory::ProteinDesign,
+        ToolCategory::PeptideBinderDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Generate protein backbones unconditionally, around a motif, or against a target.",

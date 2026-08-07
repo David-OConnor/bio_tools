@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// Sequence analysis first: it numbers and annotates what was submitted
 /// rather than predicting anything about it, and the liability flags
@@ -10,12 +10,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         slug: "antibody_annotator",
         name: Some("Antibody Annotator"),
     },
-    categories: &[
-        ProcessCategory::SequenceAnalysis,
-        ProcessCategory::AntibodyDesign,
-    ],
+    categories: &[ToolCategory::SequenceAnalysis, ToolCategory::AntibodyDesign],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: false,
     summary: "Number an antibody or TCR sequence and report its regions and liabilities.",

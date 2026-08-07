@@ -1,13 +1,13 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// One query against the germline databases: the process start and
 /// database load dominate.
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::IgBlast),
-    categories: &[ProcessCategory::SequenceAnalysis],
+    categories: &[ToolCategory::SequenceAnalysis],
     launch_type: LaunchType::Executable,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: false,
     summary: "Identify germline V(D)J matches in an antibody sequence.",

@@ -1,15 +1,15 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::Germinal),
     categories: &[
-        ProcessCategory::AntibodyDesign,
-        ProcessCategory::ProteinDesign,
-        ProcessCategory::PeptideBinderDesign,
+        ToolCategory::AntibodyDesign,
+        ToolCategory::ProteinDesign,
+        ToolCategory::PeptideBinderDesign,
     ],
     launch_type: LaunchType::CondaBasedApp,
-    license_type: LicenseType::NonCommercial,
+    license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Design de novo antibodies against a chosen epitope on a target structure.",

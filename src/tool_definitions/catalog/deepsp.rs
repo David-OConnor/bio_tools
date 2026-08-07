@@ -1,16 +1,16 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// The point of the model: it replaces a molecular dynamics run with one
 /// forward pass over the sequence.
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::DeepSp),
     categories: &[
-        ProcessCategory::PropertyPrediction,
-        ProcessCategory::AntibodyDesign,
+        ToolCategory::PropertyPrediction,
+        ToolCategory::AntibodyDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: false,
     summary: "Predict 30 spatial developability descriptors for an antibody from sequence alone.",

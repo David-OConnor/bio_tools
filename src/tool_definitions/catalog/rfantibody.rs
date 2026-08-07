@@ -1,14 +1,11 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::RfAntibody),
-    categories: &[
-        ProcessCategory::AntibodyDesign,
-        ProcessCategory::ProteinDesign,
-    ],
+    categories: &[ToolCategory::AntibodyDesign, ToolCategory::ProteinDesign],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: false,
     summary: "Design antibody or nanobody backbones against a target structure.",

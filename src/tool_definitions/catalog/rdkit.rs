@@ -1,14 +1,14 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Uninstalled {
         slug: "rdkit",
         name: "RDKit",
     },
-    categories: &[ProcessCategory::Cheminformatics],
+    categories: &[ToolCategory::Cheminformatics],
     launch_type: LaunchType::PythonLib,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Cheap,
     top_choice: false,
     summary: "Calculate common molecular descriptors and normalize SMILES.",

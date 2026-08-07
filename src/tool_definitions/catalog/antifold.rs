@@ -1,14 +1,14 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::AntiFold),
     categories: &[
-        ProcessCategory::AntibodyDesign,
-        ProcessCategory::SequencePrediction,
+        ToolCategory::AntibodyDesign,
+        ToolCategory::SequencePrediction,
     ],
     launch_type: LaunchType::CondaBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: false,
     summary: "Score or sample antibody sequences from an IMGT-numbered structure.",

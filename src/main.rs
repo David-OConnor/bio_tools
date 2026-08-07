@@ -20,7 +20,7 @@ fn format_status(status: &bio_tools::install::ToolStatus) -> String {
     }
 }
 
-const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools list\n\nThe installation root defaults to $BIO_TOOLS_ROOT, or ./.bio_tools when unset.";
+const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status-quick <tool>\n  bio_tools [--root <directory>] status-full <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools [--root <directory>] list-quick\n  bio_tools [--root <directory>] list-full\n\n`status` and `list` remain aliases for their full variants. The installation root defaults to $BIO_TOOLS_ROOT, or ./.bio_tools when unset.";
 
 fn main() {
     if let Err(error) = real_main() {
@@ -42,13 +42,17 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         .ok_or("missing command")?
         .to_owned();
     args.remove(0);
-    if command == "list" {
+    if matches!(command.as_str(), "list" | "list-full" | "list-quick") {
         if !args.is_empty() {
-            return Err("list does not accept arguments".into());
+            return Err(format!("{command} does not accept arguments").into());
         }
         let installer = Installer::from_environment(root)?;
         for tool in Tool::ALL {
-            let status = installer.status(tool);
+            let status = if command == "list-quick" {
+                installer.status_quick(tool)
+            } else {
+                installer.status_full(tool)
+            };
             println!("{}: {}", tool.name(), format_status(&status));
         }
         return Ok(());
@@ -78,9 +82,13 @@ fn real_main() -> Result<(), Box<dyn Error>> {
                 println!("Kept: {note}");
             }
         }
-        "status" => {
-            require_empty(&args, "status")?;
-            let status = installer.status(tool);
+        "status" | "status-full" | "status_full" | "status-quick" | "status_quick" => {
+            require_empty(&args, &command)?;
+            let status = if matches!(command.as_str(), "status-quick" | "status_quick") {
+                installer.status_quick(tool)
+            } else {
+                installer.status_full(tool)
+            };
             println!("{}: {:?}\n{}", tool.name(), status.result, status.detail);
             if let Some(device) = status.device {
                 println!("Device: {device}");

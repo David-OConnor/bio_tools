@@ -1,7 +1,7 @@
 mod metadata;
 mod run;
 
-use std::{env, path::PathBuf};
+use std::{env, path::PathBuf, time::Duration};
 
 use bio_tools_rs::{
     install::{Installer as RustInstaller, UninstallReport},
@@ -187,6 +187,41 @@ impl PyTool {
         Ok(py.detach(move || external_status(&slug, &process_executables, &python_executable)))
     }
 
+    #[pyo3(signature = (process_executables, support_root=None))]
+    fn status_quick(
+        &self,
+        py: Python<'_>,
+        process_executables: PathBuf,
+        support_root: Option<PathBuf>,
+    ) -> PyResult<PyStatus> {
+        if let Some(tool) = self.inner {
+            return py
+                .detach(move || {
+                    let installer = configured_installer(process_executables, support_root)?;
+                    Ok::<_, bio_tools_rs::install::InstallError>(installer.status_quick(tool))
+                })
+                .map(PyStatus::from)
+                .map_err(install_error);
+        }
+        let slug = self.slug.clone();
+        let python_executable = py
+            .import("sys")?
+            .getattr("executable")?
+            .extract::<PathBuf>()?;
+        Ok(py
+            .detach(move || external_status_quick(&slug, &process_executables, &python_executable)))
+    }
+
+    #[pyo3(signature = (process_executables, support_root=None))]
+    fn status_full(
+        &self,
+        py: Python<'_>,
+        process_executables: PathBuf,
+        support_root: Option<PathBuf>,
+    ) -> PyResult<PyStatus> {
+        self.status(py, process_executables, support_root)
+    }
+
     fn __repr__(&self) -> String {
         format!("Tool({:?})", self.slug)
     }
@@ -280,6 +315,28 @@ impl PyInstaller {
             })
             .collect()
     }
+
+    /// Return a quick, non-launching status for every tool installed by this crate.
+    fn list_quick(&self, py: Python<'_>) -> Vec<(PyTool, PyStatus)> {
+        py.detach(|| self.inner.list_quick())
+            .into_iter()
+            .map(|(tool, status)| {
+                (
+                    PyTool {
+                        slug: tool.slug().to_owned(),
+                        inner: Some(tool),
+                    },
+                    PyStatus::from(status),
+                )
+            })
+            .collect()
+    }
+
+    /// Return a full status for every tool installed by this crate.
+    fn list_full(&self, py: Python<'_>) -> Vec<(PyTool, PyStatus)> {
+        self.list(py)
+    }
+
     fn status(&self, py: Python<'_>, tool: &PyTool) -> PyResult<PyStatus> {
         let tool = tool.inner.ok_or_else(|| {
             PyRuntimeError::new_err(format!(
@@ -288,6 +345,20 @@ impl PyInstaller {
             ))
         })?;
         Ok(PyStatus::from(py.detach(|| self.inner.status(tool))))
+    }
+
+    fn status_quick(&self, py: Python<'_>, tool: &PyTool) -> PyResult<PyStatus> {
+        let tool = tool.inner.ok_or_else(|| {
+            PyRuntimeError::new_err(format!(
+                "{} is externally managed; call Tool.status_quick() for its external probe",
+                tool.slug
+            ))
+        })?;
+        Ok(PyStatus::from(py.detach(|| self.inner.status_quick(tool))))
+    }
+
+    fn status_full(&self, py: Python<'_>, tool: &PyTool) -> PyResult<PyStatus> {
+        self.status(py, tool)
     }
 }
 
@@ -351,6 +422,96 @@ fn external_status(
             command_status(CommandSpec::new(python).arg(runner).arg("--help"))
         }
         _ => missing(format!("No status probe is defined for {slug}.")),
+    }
+}
+
+fn external_status_quick(
+    slug: &str,
+    process_executables: &std::path::Path,
+    python_executable: &std::path::Path,
+) -> PyStatus {
+    match slug {
+        "rdkit" => python_distribution_status(python_executable, "rdkit", "RDKit"),
+        "orca" => {
+            let configured = env::var_os("ORCA_EXECUTABLE").map(PathBuf::from);
+            let executable = configured.filter(|path| path.is_file()).or_else(|| {
+                [
+                    process_executables.join("orca/orca"),
+                    process_executables.join("ORCA/orca"),
+                ]
+                .into_iter()
+                .find(|path| path.is_file())
+            });
+            match executable {
+                Some(path) => passing(format!("Found ORCA at {}.", path.display()), None),
+                None => {
+                    missing("ORCA is not configured under process_executables or ORCA_EXECUTABLE.")
+                }
+            }
+        }
+        "pdbbind" => {
+            let root = env::var_os("PDBBIND_ROOT")
+                .map(PathBuf::from)
+                .unwrap_or_else(|| process_executables.join("pdbbind"));
+            if root.is_dir() {
+                passing(format!("Dataset found at {}", root.display()), None)
+            } else {
+                missing(format!("No PDBBind release found at {}.", root.display()))
+            }
+        }
+        "tap" => {
+            let Some(python) = env::var_os("TAP_PYTHON").map(PathBuf::from) else {
+                return missing("TAP_PYTHON is not configured.");
+            };
+            let Some(runner) = env::var_os("TAP_RUNNER").map(PathBuf::from) else {
+                return missing("TAP_RUNNER is not configured.");
+            };
+            if !python.is_file() {
+                return missing(format!(
+                    "TAP_PYTHON does not exist at {}.",
+                    python.display()
+                ));
+            }
+            if !runner.is_file() {
+                return missing(format!(
+                    "TAP_RUNNER does not exist at {}.",
+                    runner.display()
+                ));
+            }
+            passing("Found TAP's Python interpreter and runner.", None)
+        }
+        _ => missing(format!("No status probe is defined for {slug}.")),
+    }
+}
+
+fn python_distribution_status(
+    python: &std::path::Path,
+    distribution: &str,
+    display_name: &str,
+) -> PyStatus {
+    let code = "import importlib.metadata as m, sys\ntry:\n print(m.version(sys.argv[1]))\nexcept m.PackageNotFoundError:\n sys.exit(3)";
+    let command = CommandSpec::new(python)
+        .args(["-c", code, distribution])
+        .timeout(Duration::from_secs(10))
+        .exit_policy(ExitPolicy::AllowFailure)
+        .capture_limits(CaptureLimits::new(1_000, 1_000));
+    match bio_tools_rs::run::run(&command) {
+        Ok(output) if output.status.success() => {
+            let version = output.stdout_lossy().trim().to_owned();
+            passing(format!("{display_name} {version}"), None)
+        }
+        Ok(output) if output.status.code() == Some(3) => missing(format!(
+            "The {distribution} Python distribution is not installed."
+        )),
+        Ok(output) => {
+            let detail = format!("{}{}", output.stdout_lossy(), output.stderr_lossy());
+            failing(if detail.trim().is_empty() {
+                format!("Could not inspect the {distribution} Python distribution.")
+            } else {
+                detail.trim().chars().take(200).collect()
+            })
+        }
+        Err(error) => missing(format!("Could not inspect {display_name}: {error}")),
     }
 }
 

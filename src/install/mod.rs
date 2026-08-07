@@ -424,14 +424,34 @@ impl Installer {
         result
     }
 
-    /// Probe an installed tool using the same layout used to install it.
-    pub fn status(&self, tool: Tool) -> ToolStatus {
-        status::check(self, tool)
+    /// Inspect an installed tool without launching its application code.
+    pub fn status_quick(&self, tool: Tool) -> ToolStatus {
+        status::status_quick(self, tool)
     }
 
-    /// Probe every tool installed by this crate using this installer's layout.
+    /// Launch an installed tool's status probe and inspect its compute device.
+    pub fn status_full(&self, tool: Tool) -> ToolStatus {
+        status::status_full(self, tool)
+    }
+
+    /// Backwards-compatible alias for [`Installer::status_full`].
+    pub fn status(&self, tool: Tool) -> ToolStatus {
+        self.status_full(tool)
+    }
+
+    /// Quickly inspect every tool installed by this crate.
+    pub fn list_quick(&self) -> Vec<(Tool, ToolStatus)> {
+        status::list_quick(self)
+    }
+
+    /// Fully probe every tool installed by this crate.
+    pub fn list_full(&self) -> Vec<(Tool, ToolStatus)> {
+        status::list_full(self)
+    }
+
+    /// Backwards-compatible alias for [`Installer::list_full`].
     pub fn list(&self) -> Vec<(Tool, ToolStatus)> {
-        status::list(self)
+        self.list_full()
     }
     /// Remove one tool's environment, assets, and installation marker.
     ///

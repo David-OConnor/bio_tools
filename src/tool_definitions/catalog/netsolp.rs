@@ -1,16 +1,16 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// A protein language model embedding per sequence, and ESM-1b is the
 /// large one of the three offered.
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::NetSolP),
     categories: &[
-        ProcessCategory::PropertyPrediction,
-        ProcessCategory::SequencePrediction,
+        ToolCategory::PropertyPrediction,
+        ToolCategory::SequencePrediction,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::NonCommercial,
+    license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
     top_choice: false,
     summary: "Predict whether a protein will be soluble and usable when expressed in E. coli.",

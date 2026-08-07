@@ -1,16 +1,16 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// A protein language model embedding per query, unlike DLKcat's much
 /// smaller sequence CNN.
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::CatPred),
     categories: &[
-        ProcessCategory::PropertyPrediction,
-        ProcessCategory::Cheminformatics,
+        ToolCategory::PropertyPrediction,
+        ToolCategory::Cheminformatics,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: false,
     summary: "Predict kcat, Km, or Ki for an enzyme and substrate, with an uncertainty estimate.",

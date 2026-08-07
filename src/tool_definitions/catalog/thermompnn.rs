@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// Property prediction first: it scores mutations rather than producing
 /// sequences, and is used to triage a design campaign's output rather than
@@ -7,11 +7,11 @@ use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_defin
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::ThermoMpnn),
     categories: &[
-        ProcessCategory::PropertyPrediction,
-        ProcessCategory::ProteinDesign,
+        ToolCategory::PropertyPrediction,
+        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: true,
     summary: "Predict the stability change of point mutations in a protein structure.",

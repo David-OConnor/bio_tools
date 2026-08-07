@@ -181,12 +181,6 @@ impl fmt::Display for LicenseCategory {
     }
 }
 
-/// Alias used by application registries.
-pub type ProcessCategory = ToolCategory;
-
-/// Alias used by application registries.
-pub type LicenseType = LicenseCategory;
-
 /// Tool-specific descriptive data which does not depend on a UI framework or
 /// execution environment.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -247,9 +241,9 @@ impl Spec {
 pub struct Process {
     pub name: String,
     pub id: u32,
-    pub categories: Vec<ProcessCategory>,
+    pub categories: Vec<ToolCategory>,
     pub launch_type: LaunchType,
-    pub license_type: LicenseType,
+    pub license_type: LicenseCategory,
     pub expense: ProcessExpense,
     pub top_choice: bool,
     pub spec: Spec,
@@ -260,9 +254,9 @@ impl Process {
     pub fn new(
         name: impl Into<String>,
         id: u32,
-        categories: Vec<ProcessCategory>,
+        categories: Vec<ToolCategory>,
         launch_type: LaunchType,
-        license_type: LicenseType,
+        license_type: LicenseCategory,
         expense: ProcessExpense,
         top_choice: bool,
         spec: Spec,

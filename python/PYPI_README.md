@@ -10,9 +10,11 @@ root = Path("process_executables")
 installer = bio_tools.Installer(root)
 installer.install(bio_tools.Tool("opendde"))
 
-status = bio_tools.Tool("opendde").status(root)
-print(status.result, status.detail, status.device)
-print(installer.list())
+quick = bio_tools.Tool("opendde").status_quick(root)
+full = bio_tools.Tool("opendde").status_full(root)
+print(quick.result, quick.detail)
+print(full.result, full.detail, full.device)
+print(installer.list_quick())
 
 result = bio_tools.Command(
     ["opendde", "predict", "input.yaml"],

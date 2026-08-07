@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// A hosted model: the wait is a network round trip and a queue, not local
 /// compute -- but it is billed against Boltz credits.
@@ -10,11 +10,11 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         name: None,
     },
     categories: &[
-        ProcessCategory::PropertyPrediction,
-        ProcessCategory::Cheminformatics,
+        ToolCategory::PropertyPrediction,
+        ToolCategory::Cheminformatics,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Proprietary,
+    license_type: LicenseCategory::Proprietary,
     expense: ProcessExpense::Moderate,
     top_choice: false,
     summary: "Predict lipophilicity, permeability, and solubility for small molecules.",

@@ -1,15 +1,15 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::IgDesign),
     categories: &[
-        ProcessCategory::AntibodyDesign,
-        ProcessCategory::SequencePrediction,
-        ProcessCategory::ProteinDesign,
+        ToolCategory::AntibodyDesign,
+        ToolCategory::SequencePrediction,
+        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::NonCommercial,
+    license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
     top_choice: false,
     summary: "Design antibody CDRs against a target antigen by inverse folding.",

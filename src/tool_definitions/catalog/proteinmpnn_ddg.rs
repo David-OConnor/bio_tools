@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// A whole saturation-mutagenesis scan in one forward pass, which is the
 /// point of the method.
@@ -9,9 +9,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         slug: "proteinmpnn_ddg",
         name: None,
     },
-    categories: &[ProcessCategory::PropertyPrediction],
+    categories: &[ToolCategory::PropertyPrediction],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: true,
     summary: "Predict the stability effects of every point mutation in a protein chain.",

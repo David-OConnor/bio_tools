@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// Both: the binders are mini-proteins of 65-120 residues rather than
 /// peptides, but PeptideBinderDesign is the registry's general "binder
@@ -7,11 +7,11 @@ use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_defin
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::BindCraft),
     categories: &[
-        ProcessCategory::PeptideBinderDesign,
-        ProcessCategory::ProteinDesign,
+        ToolCategory::PeptideBinderDesign,
+        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::CondaBasedApp,
-    license_type: LicenseType::NonCommercial,
+    license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Design de novo protein or peptide binders against a target structure.",

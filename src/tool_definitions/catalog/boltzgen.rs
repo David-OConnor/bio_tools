@@ -1,15 +1,15 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::BoltzGen),
     categories: &[
-        ProcessCategory::PeptideBinderDesign,
-        ProcessCategory::ProteinDesign,
-        ProcessCategory::AntibodyDesign,
+        ToolCategory::PeptideBinderDesign,
+        ToolCategory::ProteinDesign,
+        ToolCategory::AntibodyDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Design a protein, peptide, nanobody, or antibody binder.",

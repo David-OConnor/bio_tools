@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory};
 
 /// A directory lookup against a dataset already on disk; nothing is computed.
 pub const ENTRY: CatalogEntry = CatalogEntry {
@@ -7,9 +7,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         slug: "pdbbind",
         name: "PDBBind",
     },
-    categories: &[ProcessCategory::BindingData],
+    categories: &[ToolCategory::BindingData],
     launch_type: LaunchType::PythonLib,
-    license_type: LicenseType::NonCommercial,
+    license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Cheap,
     top_choice: false,
     summary: "Locate a protein-ligand complex in a local PDBBind release.",

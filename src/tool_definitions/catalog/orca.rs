@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory};
 
 /// Input-dependent over a wide range: a single point on a small molecule
 /// is seconds, but the form also offers optimization and frequency jobs
@@ -9,9 +9,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         slug: "orca",
         name: "ORCA",
     },
-    categories: &[ProcessCategory::QuantumChemistry],
+    categories: &[ToolCategory::QuantumChemistry],
     launch_type: LaunchType::Executable,
-    license_type: LicenseType::Proprietary,
+    license_type: LicenseCategory::Proprietary,
     expense: ProcessExpense::Expensive,
     top_choice: false,
     summary: "Build a single-point, optimization, or frequency calculation.",

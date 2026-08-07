@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// Property prediction is the third category rather than one of the two it
 /// shares with the co-folding models above: the adapter asks for ligand
@@ -7,12 +7,12 @@ use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_defin
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::Boltz2),
     categories: &[
-        ProcessCategory::StructurePrediction,
-        ProcessCategory::ProteinDesign,
-        ProcessCategory::PropertyPrediction,
+        ToolCategory::StructurePrediction,
+        ToolCategory::ProteinDesign,
+        ToolCategory::PropertyPrediction,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Predict a biomolecular complex and optional ligand affinity.",

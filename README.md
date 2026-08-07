@@ -1,8 +1,14 @@
 # Bio tools
 
 An interface for running arbitrary CLI applications for biology and chemistry. Focuses on tools with permissive
-licencing, and ones which are most popular. Handles installing these tools by downloading them, following official
-installation procedures.
+licencing, and ones which are most popular. Available as a rust library, a python library, or a standalone
+CLI application. Handles the following tasks:
+
+- Install
+- Uninstall
+- Run (Including abstractions over what inputs are accepted per tool)
+- Check status
+
 
 ## Generic interfaces
 Provides an interface for input and output. This abstracts over the differences between tools, so applications
@@ -17,7 +23,7 @@ variables, writes optional stdin, drains bounded stdout and stderr concurrently,
 enforces a timeout, and either returns or rejects non-zero exits according to
 `ExitPolicy`:
 
-```rust,no_run
+```rust
 use std::time::Duration;
 use bio_tools::run::{run, CommandSpec};
 
@@ -40,7 +46,7 @@ The Rust installer replaces application-owned shell and PowerShell orchestration
 the outer directory; `bio_tools` owns the stable per-tool layout, downloads, environments, GPU
 selection, and verification:
 
-```rust,no_run
+```rust
 use bio_tools::install::{Installer, Tool};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -70,7 +76,8 @@ The optional `bio_tools` executable wraps the same installer, status, and comman
 cargo install bio_tools --features cli --bin bio_tools
 
 bio_tools install opendde
-bio_tools status opendde
+bio_tools status-quick opendde
+bio_tools status-full opendde
 bio_tools run opendde -- --help
 
 bio_tools uninstall opendde
@@ -78,7 +85,7 @@ bio_tools uninstall opendde
 
 It uses `$BIO_TOOLS_ROOT`, or `./.bio_tools` when unset.
 
-`list` shows every known tool, one per line, with its current status (`Pass`, `Not installed`, or `Error: ...`). Rust callers can instead fetch only the tools installed by `bio_tools` in the selected root via `bio_tools::status::list(&installer)` (or `installer.list()`). `run` resolves an installed console entry point inside that managed environment, so it does not require the tool on `PATH`. Tools that only expose a Python module or checkout script still need a tool-specific library invocation.
+`status-quick` inspects installation markers, executables, and required assets without launching the tool. `status-full` also runs the tool's help/version probe and imports Torch or JAX where applicable to report its compute device. The corresponding list commands are `list-quick` and `list-full`; the older `status` and `list` commands remain aliases for the full variants. Rust callers can use `Installer::status_quick`, `Installer::status_full`, `list_quick`, or `list_full`. `run` resolves an installed console entry point inside that managed environment, so it does not require the tool on `PATH`. Tools that only expose a Python module or checkout script still need a tool-specific library invocation.
 
 ## Example uses
 - Building a GUI (Web or native) to these tools
@@ -97,8 +104,9 @@ import bio_tools
 root = Path("process_executables")
 installer = bio_tools.Installer(root)
 installer.install(bio_tools.Tool("opendde"))
-print(bio_tools.Tool("opendde").status(root).result)
-print(installer.list())
+print(bio_tools.Tool("opendde").status_quick(root).result)
+print(bio_tools.Tool("opendde").status_full(root).device)
+print(installer.list_quick())
 
 result = bio_tools.Command(
     ["opendde", "predict", "input.yaml"],

@@ -60,37 +60,105 @@ fn marker_path(installer: &Installer, tool: Tool) -> PathBuf {
         .join(format!("{}.installed", tool.slug()))
 }
 
-/// Probe every tool installed by this crate using the supplied installation layout.
+/// Quickly inspect every tool installed by this crate without launching its application code.
 ///
 /// The returned order is the stable, user-facing [`Tool::ALL`] order.
-pub fn list(installer: &Installer) -> Vec<(Tool, ToolStatus)> {
+pub fn list_quick(installer: &Installer) -> Vec<(Tool, ToolStatus)> {
     Tool::ALL
         .into_iter()
         .filter(|tool| marker_path(installer, *tool).is_file())
-        .map(|tool| (tool, check(installer, tool)))
+        .map(|tool| (tool, status_quick(installer, tool)))
         .collect()
 }
-pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
-    if !tool.is_supported() {
-        return error(format!(
-            "{} is not supported on this operating system.",
+
+/// Fully probe every tool installed by this crate using the supplied installation layout.
+///
+/// Unlike [`list_quick`], this launches each application and, where applicable, imports its
+/// compute framework to determine whether its environment can use a GPU.
+pub fn list_full(installer: &Installer) -> Vec<(Tool, ToolStatus)> {
+    Tool::ALL
+        .into_iter()
+        .filter(|tool| marker_path(installer, *tool).is_file())
+        .map(|tool| (tool, status_full(installer, tool)))
+        .collect()
+}
+
+/// Backwards-compatible alias for [`list_full`].
+pub fn list(installer: &Installer) -> Vec<(Tool, ToolStatus)> {
+    list_full(installer)
+}
+
+/// Check installation markers, required assets, and the probe executable without launching the
+/// tool. This is intended for interactive status pages and other latency-sensitive callers.
+pub fn status_quick(installer: &Installer, tool: Tool) -> ToolStatus {
+    let was_installed = match preliminary_check(installer, tool) {
+        Ok(was_installed) => was_installed,
+        Err(status) => return status,
+    };
+
+    let command = if tool == Tool::AlphaFold3 {
+        match alphafold3_command(installer, was_installed) {
+            Ok(command) => Some(command),
+            Err(status) => return status,
+        }
+    } else {
+        probe_command(installer, tool)
+    };
+
+    let Some(command) = command else {
+        return if was_installed {
+            pass(
+                "The bio_tools installation recipe completed successfully.",
+                None,
+            )
+        } else {
+            not_found(format!(
+                "No bio_tools installation marker was found for {}.",
+                tool.name()
+            ))
+        };
+    };
+
+    let executable = PathBuf::from(command.program.as_os_str());
+    if !executable.is_file() {
+        return missing_or_broken(
+            was_installed,
+            format!("Missing status executable at {}.", executable.display()),
+        );
+    }
+
+    // A named Conda probe starts the shared Conda executable, not a file inside the tool's
+    // environment. Its install marker and required assets are the quick evidence that the
+    // environment recipe completed; without that marker, finding Conda says nothing about the
+    // particular tool.
+    if (matches!(tool, Tool::BindCraft | Tool::Genie3)
+        || (tool == Tool::Germinal && !installer.venv_python(tool.slug()).is_file()))
+        && !was_installed
+    {
+        return not_found(format!(
+            "No bio_tools installation marker was found for {}.",
             tool.name()
         ));
     }
 
-    let was_installed = marker_path(installer, tool).is_file();
+    pass(
+        format!(
+            "Found {}'s executable and required installation files.",
+            tool.name()
+        ),
+        None,
+    )
+}
+
+/// Launch a tool with its help/version probe and inspect its compute device where applicable.
+pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
+    let was_installed = match preliminary_check(installer, tool) {
+        Ok(was_installed) => was_installed,
+        Err(status) => return status,
+    };
 
     if tool == Tool::AlphaFold3 {
         return check_alphafold3(installer, was_installed);
-    }
-
-    for (path, description) in required_paths(installer, tool) {
-        if !path.exists() {
-            return missing_or_broken(
-                was_installed,
-                format!("Missing {description} at {}.", path.display()),
-            );
-        }
     }
 
     let command = match probe_command(installer, tool) {
@@ -144,41 +212,32 @@ pub(crate) fn check(installer: &Installer, tool: Tool) -> ToolStatus {
     pass(detail, probe_device(installer, tool))
 }
 
-fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
-    let Some(runner) = env::var_os("ALPHAFOLD3_RUNNER").map(PathBuf::from) else {
-        return missing_or_broken(
-            was_installed,
-            "The Python environment is prepared, but ALPHAFOLD3_RUNNER is not configured."
-                .to_owned(),
-        );
-    };
-    for (name, variable) in [
-        ("model directory", "ALPHAFOLD3_MODEL_DIR"),
-        ("database directory", "ALPHAFOLD3_DATABASE_DIR"),
-    ] {
-        let Some(path) = env::var_os(variable).map(PathBuf::from) else {
-            return missing_or_broken(was_installed, format!("{variable} is not configured."));
-        };
+fn preliminary_check(installer: &Installer, tool: Tool) -> Result<bool, ToolStatus> {
+    if !tool.is_supported() {
+        return Err(error(format!(
+            "{} is not supported on this operating system.",
+            tool.name()
+        )));
+    }
+
+    let was_installed = marker_path(installer, tool).is_file();
+
+    for (path, description) in required_paths(installer, tool) {
         if !path.exists() {
-            return missing_or_broken(
+            return Err(missing_or_broken(
                 was_installed,
-                format!(
-                    "The configured {name} does not exist at {}.",
-                    path.display()
-                ),
-            );
+                format!("Missing {description} at {}.", path.display()),
+            ));
         }
     }
-    if !runner.is_file() {
-        return missing_or_broken(
-            was_installed,
-            format!("ALPHAFOLD3_RUNNER does not exist at {}.", runner.display()),
-        );
-    }
-    let command = installer
-        .tool_python_command(Tool::AlphaFold3)
-        .arg(&runner)
-        .arg("--help");
+    Ok(was_installed)
+}
+
+fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
+    let command = match alphafold3_command(installer, was_installed) {
+        Ok(command) => command,
+        Err(status) => return status,
+    };
     match run_probe(command) {
         Ok(output) if output.status.success() || !output_detail(&output).is_empty() => pass(
             output_detail(&output)
@@ -193,6 +252,49 @@ fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
         )),
         Err(cause) => missing_or_broken(was_installed, cause.to_string()),
     }
+}
+
+fn alphafold3_command(
+    installer: &Installer,
+    was_installed: bool,
+) -> Result<CommandSpec, ToolStatus> {
+    let Some(runner) = env::var_os("ALPHAFOLD3_RUNNER").map(PathBuf::from) else {
+        return Err(missing_or_broken(
+            was_installed,
+            "The Python environment is prepared, but ALPHAFOLD3_RUNNER is not configured."
+                .to_owned(),
+        ));
+    };
+    for (name, variable) in [
+        ("model directory", "ALPHAFOLD3_MODEL_DIR"),
+        ("database directory", "ALPHAFOLD3_DATABASE_DIR"),
+    ] {
+        let Some(path) = env::var_os(variable).map(PathBuf::from) else {
+            return Err(missing_or_broken(
+                was_installed,
+                format!("{variable} is not configured."),
+            ));
+        };
+        if !path.exists() {
+            return Err(missing_or_broken(
+                was_installed,
+                format!(
+                    "The configured {name} does not exist at {}.",
+                    path.display()
+                ),
+            ));
+        }
+    }
+    if !runner.is_file() {
+        return Err(missing_or_broken(
+            was_installed,
+            format!("ALPHAFOLD3_RUNNER does not exist at {}.", runner.display()),
+        ));
+    }
+    Ok(installer
+        .tool_python_command(Tool::AlphaFold3)
+        .arg(&runner)
+        .arg("--help"))
 }
 
 /// For commands directly runnable from CLI, launch them with a "help" or "version" command as

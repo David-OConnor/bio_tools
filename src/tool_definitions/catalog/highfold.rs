@@ -1,14 +1,14 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::HighFold),
     categories: &[
-        ProcessCategory::StructurePrediction,
-        ProcessCategory::PeptideBinderDesign,
+        ToolCategory::StructurePrediction,
+        ToolCategory::PeptideBinderDesign,
     ],
     launch_type: LaunchType::CondaBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: false,
     summary: "Predict the structure of a cyclic peptide or a cyclic-peptide complex.",

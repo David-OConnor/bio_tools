@@ -1,14 +1,14 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// The adapter runs pdb2gmx/editconf/solvate only. Preparing a system
 /// takes seconds; it is the simulation this stops short of that would be
 /// expensive.
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::Gromacs),
-    categories: &[ProcessCategory::MoleculeDynamics],
+    categories: &[ToolCategory::MoleculeDynamics],
     launch_type: LaunchType::Executable,
-    license_type: LicenseType::Copyleft,
+    license_type: LicenseCategory::Copyleft,
     expense: ProcessExpense::Moderate,
     top_choice: false,
     summary: "Prepare a solvated molecular-dynamics system from a PDB structure.",

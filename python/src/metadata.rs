@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, HashMap};
 
 use bio_tools_rs::{
-    LaunchType as RustLaunchType, LicenseType as RustLicenseType, Process as RustProcess,
-    ProcessCategory as RustProcessCategory, ProcessExpense as RustProcessExpense, Spec as RustSpec,
+    LaunchType as RustLaunchType, LicenseCategory as RustLicenseCategory, Process as RustProcess,
+    ProcessExpense as RustProcessExpense, Spec as RustSpec, ToolCategory as RustToolCategory,
     tool_definitions::catalog,
 };
 use pyo3::{
@@ -88,9 +88,9 @@ python_enum!(
 );
 
 python_enum!(
-    PyProcessCategory,
-    "ProcessCategory",
-    RustProcessCategory,
+    PyToolCategory,
+    "ToolCategory",
+    RustToolCategory,
     {
         Cheminformatics = 1,
         StructurePrediction = 2,
@@ -119,9 +119,9 @@ python_enum!(
 );
 
 python_enum!(
-    PyLicenseType,
-    "LicenseType",
-    RustLicenseType,
+    PyLicenseCategory,
+    "LicenseCategory",
+    RustLicenseCategory,
     {
         Permissive = 1,
         Copyleft = 2,
@@ -298,9 +298,9 @@ impl PySpec {
 #[pyclass(name = "Process", module = "bio_tools", frozen, skip_from_py_object)]
 pub(crate) struct PyProcess {
     inner: RustProcess,
-    categories: Vec<Py<PyProcessCategory>>,
+    categories: Vec<Py<PyToolCategory>>,
     launch_type: Py<PyLaunchType>,
-    license_type: Py<PyLicenseType>,
+    license_type: Py<PyLicenseCategory>,
     expense: Py<PyProcessExpense>,
     module: Py<PyAny>,
     spec: Py<PySpec>,
@@ -314,9 +314,9 @@ impl PyProcess {
         py: Python<'_>,
         name: String,
         id: u32,
-        categories: Vec<Py<PyProcessCategory>>,
+        categories: Vec<Py<PyToolCategory>>,
         launch_type: Py<PyLaunchType>,
-        license_type: Py<PyLicenseType>,
+        license_type: Py<PyLicenseCategory>,
         expense: Py<PyProcessExpense>,
         module: Py<PyAny>,
         top_choice: bool,
@@ -367,7 +367,7 @@ impl PyProcess {
     }
 
     #[getter]
-    fn license_type(&self, py: Python<'_>) -> Py<PyLicenseType> {
+    fn license_type(&self, py: Python<'_>) -> Py<PyLicenseCategory> {
         self.license_type.clone_ref(py)
     }
 
@@ -431,19 +431,22 @@ fn catalog_fields(
     option_type: Py<PyAny>,
     dynamic_options: Option<HashMap<String, Vec<(String, String)>>>,
 ) -> PyResult<Py<PyAny>> {
-
     let entry = form_catalog_entry(py, slug)?;
 
     let definitions: Bound<'_, PyList> = entry
         .get_item("fields")?
-        .ok_or_else(|| PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}")))?
+        .ok_or_else(|| {
+            PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}"))
+        })?
         .extract()?;
     let values = PyList::empty(py);
     for descriptor in definitions.iter() {
         let descriptor = descriptor.cast::<PyDict>()?;
         let get = |key| {
             descriptor.get_item(key)?.ok_or_else(|| {
-                PyValueError::new_err(format!("invalid field descriptor for {slug:?}: missing {key}"))
+                PyValueError::new_err(format!(
+                    "invalid field descriptor for {slug:?}: missing {key}"
+                ))
             })
         };
         let name: String = get("name")?.extract()?;
@@ -451,7 +454,16 @@ fn catalog_fields(
         let kind: String = get("kind")?.extract()?;
         let kwargs = PyDict::new(py);
         for key in [
-            "default", "required", "help", "rows", "minimum", "maximum", "step", "maxlength", "accept", "task",
+            "default",
+            "required",
+            "help",
+            "rows",
+            "minimum",
+            "maximum",
+            "step",
+            "maxlength",
+            "accept",
+            "task",
         ] {
             kwargs.set_item(key, get(key)?)?;
         }
@@ -482,17 +494,14 @@ fn catalog_fields(
 /// Materialize catalog-owned task selectors using a consumer's Option class.
 #[pyfunction]
 #[pyo3(signature = (slug, *, option_type))]
-fn catalog_tasks(
-    py: Python<'_>,
-    slug: &str,
-    option_type: Py<PyAny>,
-) -> PyResult<Py<PyAny>> {
-
+fn catalog_tasks(py: Python<'_>, slug: &str, option_type: Py<PyAny>) -> PyResult<Py<PyAny>> {
     let entry = form_catalog_entry(py, slug)?;
 
     let tasks: Bound<'_, PyList> = entry
         .get_item("tasks")?
-        .ok_or_else(|| PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}")))?
+        .ok_or_else(|| {
+            PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}"))
+        })?
         .extract()?;
     let values = PyList::empty(py);
     for task in tasks.iter() {
@@ -540,10 +549,10 @@ fn catalog_process(py: Python<'_>, id: u32, module: Py<PyAny>) -> PyResult<PyPro
     let categories = entry
         .categories
         .iter()
-        .map(|category| Py::new(py, PyProcessCategory::from_inner(*category)))
+        .map(|category| Py::new(py, PyToolCategory::from_inner(*category)))
         .collect::<PyResult<Vec<_>>>()?;
     let launch_type = Py::new(py, PyLaunchType::from_inner(entry.launch_type))?;
-    let license_type = Py::new(py, PyLicenseType::from_inner(entry.license_type))?;
+    let license_type = Py::new(py, PyLicenseCategory::from_inner(entry.license_type))?;
     let expense = Py::new(py, PyProcessExpense::from_inner(entry.expense))?;
 
     Ok(PyProcess::new(
@@ -579,9 +588,9 @@ fn list_from_objects<T: PyClass>(py: Python<'_>, values: &[Py<T>]) -> PyResult<P
 
 pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<PyLaunchType>()?;
-    module.add_class::<PyProcessCategory>()?;
+    module.add_class::<PyToolCategory>()?;
     module.add_class::<PyProcessExpense>()?;
-    module.add_class::<PyLicenseType>()?;
+    module.add_class::<PyLicenseCategory>()?;
     module.add_class::<PySpec>()?;
     module.add_class::<PyProcess>()?;
     module.add_function(wrap_pyfunction!(catalog_fields, module)?)?;

@@ -1,14 +1,14 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::AlphaFold3),
     categories: &[
-        ProcessCategory::StructurePrediction,
-        ProcessCategory::ProteinDesign,
+        ToolCategory::StructurePrediction,
+        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::NonCommercial,
+    license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Prepare protein or protein-ligand AlphaFold 3 predictions.",

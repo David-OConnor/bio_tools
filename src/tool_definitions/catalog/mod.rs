@@ -6,7 +6,7 @@
 //! its adapter module, and UI field descriptors.
 
 use crate::{
-    LaunchType, LicenseType, ProcessCategory, ProcessExpense, Spec, tool_definitions::Tool,
+    LaunchType, LicenseCategory, ProcessExpense, Spec, ToolCategory, tool_definitions::Tool,
 };
 
 pub mod fields;
@@ -110,9 +110,9 @@ impl Identity {
 #[derive(Debug, Clone, Copy)]
 pub struct CatalogEntry {
     pub identity: Identity,
-    pub categories: &'static [ProcessCategory],
+    pub categories: &'static [ToolCategory],
     pub launch_type: LaunchType,
-    pub license_type: LicenseType,
+    pub license_type: LicenseCategory,
     pub expense: ProcessExpense,
     pub top_choice: bool,
     pub summary: &'static str,

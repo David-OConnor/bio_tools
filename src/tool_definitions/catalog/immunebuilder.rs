@@ -1,5 +1,5 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 /// Seconds, not minutes: three small single-sequence networks with no MSA
 /// or template search, and the OpenMM refinement that follows each one is
@@ -7,11 +7,11 @@ use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_defin
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::ImmuneBuilder),
     categories: &[
-        ProcessCategory::StructurePrediction,
-        ProcessCategory::AntibodyDesign,
+        ToolCategory::StructurePrediction,
+        ToolCategory::AntibodyDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: true,
     summary: "Predict an antibody, nanobody, or TCR structure in seconds.",

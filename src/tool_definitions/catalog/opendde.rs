@@ -1,14 +1,14 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseType, ProcessCategory, ProcessExpense, tool_definitions::Tool};
+use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::OpenDde),
     categories: &[
-        ProcessCategory::StructurePrediction,
-        ProcessCategory::ProteinDesign,
+        ToolCategory::StructurePrediction,
+        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
-    license_type: LicenseType::Permissive,
+    license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     summary: "Run a protein, DNA/RNA, or ligand co-folding prediction.",
