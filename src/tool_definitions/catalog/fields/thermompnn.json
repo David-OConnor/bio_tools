@@ -1,0 +1,94 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "thermompnn-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "pdb",
+      "label": "Protein PDB",
+      "kind": "file",
+      "default": "HEADER    PASTE A PROTEIN PDB HERE",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".pdb,.ent",
+      "task": ""
+    },
+    {
+      "name": "chain",
+      "label": "Chain",
+      "kind": "text",
+      "default": "A",
+      "required": true,
+      "help": "The chain the mutations are scored in; the rest of the structure is context.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 4,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "mutations",
+      "label": "Mutations",
+      "kind": "textarea",
+      "default": "T27A\nH31Q\nY100F",
+      "required": true,
+      "help": "One per line, as wild-type residue, position, and mutant residue, for example T27A. Prefix with a chain and a colon to override the chain above.",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "mutations"
+    },
+    {
+      "name": "top_k",
+      "label": "Top mutations to highlight",
+      "kind": "number",
+      "default": 20,
+      "required": false,
+      "help": "Return the K most stabilising substitutions alongside the full table. 0 returns the full table only.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "scan"
+    }
+  ],
+  "tasks": [
+    {
+      "value": "scan",
+      "label": "Saturation scan"
+    },
+    {
+      "value": "mutations",
+      "label": "Named mutations"
+    }
+  ]
+}

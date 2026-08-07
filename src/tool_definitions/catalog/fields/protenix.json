@@ -1,0 +1,380 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "protenix-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "sequence_molecules",
+      "label": "Molecules",
+      "kind": "molecule_builder",
+      "default": "[{\"type\": \"protein\", \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\", \"cyclic\": false, \"modifications\": []}]",
+      "required": true,
+      "help": "Add one box per chain: Protein, DNA, RNA, Ligand, or Ion. Ligands take a SMILES string or a CCD_ code (e.g. CCD_ATP); ions take a CCD ion code (e.g. NA, MG, ZN). A modification applies a CCD residue code at a given position; \"Cyclic\" bonds the chain's first and last residue.",
+      "options": [
+        {
+          "value": "protein",
+          "label": "Protein"
+        },
+        {
+          "value": "dna",
+          "label": "DNA"
+        },
+        {
+          "value": "rna",
+          "label": "RNA"
+        },
+        {
+          "value": "ligand",
+          "label": "Ligand"
+        },
+        {
+          "value": "ion",
+          "label": "Ion"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "sequence"
+    },
+    {
+      "name": "proteins",
+      "label": "Protein chains",
+      "kind": "textarea",
+      "default": "MSTNPKPQRKTKRNTNRRPQDVKFPGG",
+      "required": true,
+      "help": "One protein chain sequence per line.",
+      "options": [],
+      "rows": 6,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list"
+    },
+    {
+      "name": "dnas",
+      "label": "DNA chains (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "One DNA chain sequence per line.",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list"
+    },
+    {
+      "name": "rnas",
+      "label": "RNA chains (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "One RNA chain sequence per line.",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list"
+    },
+    {
+      "name": "molecules",
+      "label": "Molecules",
+      "kind": "textarea",
+      "default": "[{\"type\": \"protein\", \"chain\": \"A\", \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\"}]",
+      "required": true,
+      "help": "JSON list of {\"type\": \"protein\"|\"dna\"|\"rna\", \"chain\": \"A\", \"sequence\": \"...\"}.",
+      "options": [],
+      "rows": 6,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecules"
+    },
+    {
+      "name": "ligands",
+      "label": "Ligands (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "One ligand per line: a CCD code such as CCD_ATP, or a SMILES string.",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list,molecules"
+    },
+    {
+      "name": "model",
+      "label": "Model",
+      "kind": "select",
+      "default": "protenix-v2",
+      "required": false,
+      "help": "Use protenix_base_constraint_v0.5.0 for pocket/contact restraints to have any effect on the prediction.",
+      "options": [
+        {
+          "value": "protenix-v2",
+          "label": "protenix-v2"
+        },
+        {
+          "value": "protenix_base_20250630_v1.0.0",
+          "label": "protenix_base_20250630_v1.0.0"
+        },
+        {
+          "value": "protenix_base_constraint_v0.5.0",
+          "label": "protenix_base_constraint_v0.5.0"
+        },
+        {
+          "value": "protenix_base_default_v0.5.0",
+          "label": "protenix_base_default_v0.5.0"
+        },
+        {
+          "value": "protenix_base_default_v1.0.0",
+          "label": "protenix_base_default_v1.0.0"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "num_samples",
+      "label": "Samples",
+      "kind": "number",
+      "default": 5,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 25,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "num_seeds",
+      "label": "Consecutive seeds",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "Runs this many seeds (MSA computed once); total predictions = seeds x samples.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 10,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "seed",
+      "label": "Starting random seed",
+      "kind": "number",
+      "default": 101,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 2147483647,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "num_recycles",
+      "label": "Recycles",
+      "kind": "number",
+      "default": 10,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 30,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "diffusion_steps",
+      "label": "Diffusion steps",
+      "kind": "number",
+      "default": 200,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 10,
+      "maximum": 500,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "use_msa_server",
+      "label": "Use the public MSA server",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Opt in to a network call for better accuracy; off keeps the run local.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "use_template",
+      "label": "Search PDB for templates",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Network search; only supported by protenix-v2 and the v1.0.0 base models.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "use_rna_msa",
+      "label": "Use RNA MSA search",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Network search; only supported by protenix-v2 and the v1.0.0 base models.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "use_guidance",
+      "label": "Use physics-aware guidance",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Training-free guidance for improved ligand plausibility (chirality, planarity, stereochemistry); increases compute time.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "bonds",
+      "label": "Covalent bonds (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "JSON list, e.g. [{\"atom1Chain\":\"A\",\"atom1Idx\":32,\"atom1Atom\":\"C\",\"atom2Chain\":\"B\",\"atom2Idx\":1,\"atom2Atom\":\"N\"}].",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "pocket_restraints",
+      "label": "Pocket restraint (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "At most one, as a JSON list, e.g. [{\"binderChain\":\"A\",\"pocketChain\":\"B\",\"pocketContacts\":\"5 6 7\",\"maxDistance\":6}].",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "contact_restraints",
+      "label": "Contact restraints (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "JSON list, e.g. [{\"chainA\":\"A\",\"res_idxA\":1,\"chainB\":\"B\",\"res_idxB\":1,\"max_distance_angstrom\":6,\"min_distance_angstrom\":3}].",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": [
+    {
+      "value": "sequence",
+      "label": "Sequence"
+    },
+    {
+      "value": "list",
+      "label": "Chain list"
+    },
+    {
+      "value": "molecules",
+      "label": "Molecules (JSON)"
+    }
+  ]
+}

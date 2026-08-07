@@ -1,0 +1,211 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "highfold-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "peptide_sequence",
+      "label": "Peptide sequence",
+      "kind": "textarea",
+      "default": "GNLWATGHFMGGSGSGSG",
+      "required": true,
+      "help": "Join the chains of a complex with a colon; the first chain is the cyclic peptide.",
+      "options": [],
+      "rows": 4,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "cyclic_constraint",
+      "label": "Cyclic constraint",
+      "kind": "select",
+      "default": "head_to_tail",
+      "required": false,
+      "help": "Which constraints the cyclic offset matrix is built from.",
+      "options": [
+        {
+          "value": "head_to_tail",
+          "label": "Head-to-tail backbone cyclization"
+        },
+        {
+          "value": "disulfide",
+          "label": "Disulfide bridge"
+        },
+        {
+          "value": "both",
+          "label": "Head-to-tail and disulfide"
+        },
+        {
+          "value": "none",
+          "label": "None (linear, for comparison)"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "disulfide_pairs",
+      "label": "Disulfide pairs (optional)",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "Comma-separated 1-indexed cysteine pairs, for example 3-11,5-17. Inferred from the sequence when left empty.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "msa_mode",
+      "label": "MSA mode",
+      "kind": "select",
+      "default": "single_sequence",
+      "required": false,
+      "help": "Short macrocycles have no useful alignment, so single-sequence is the usual choice.",
+      "options": [
+        {
+          "value": "single_sequence",
+          "label": "Single sequence (no MSA)"
+        },
+        {
+          "value": "mmseqs2_uniref_env",
+          "label": "MMseqs2 (UniRef and environmental)"
+        },
+        {
+          "value": "mmseqs2_uniref",
+          "label": "MMseqs2 (UniRef only)"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "num_models",
+      "label": "Models",
+      "kind": "number",
+      "default": 5,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 5,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "num_recycles",
+      "label": "Recycles",
+      "kind": "number",
+      "default": 3,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 48,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "num_seeds",
+      "label": "Seeds per model",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 16,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "seed",
+      "label": "Random seed",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 2147483647,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "use_templates",
+      "label": "Use PDB templates",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "amber_relax",
+      "label": "Relax the top model with Amber",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Cleans up bond geometry at the cyclization point, at a few minutes of extra runtime.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

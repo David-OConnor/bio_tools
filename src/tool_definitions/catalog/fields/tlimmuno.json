@@ -1,0 +1,78 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "tlimmuno-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "peptide",
+      "label": "Peptide",
+      "kind": "text",
+      "default": "AGFKGEQGPKGEPGPK",
+      "required": true,
+      "help": "13 to 21 residues, the range the class II model was trained on.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 21,
+      "accept": "",
+      "task": "single"
+    },
+    {
+      "name": "mhc_allele",
+      "label": "MHC class II allele",
+      "kind": "text",
+      "default": "DRB1_0101",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 40,
+      "accept": "",
+      "task": "single"
+    },
+    {
+      "name": "pairs",
+      "label": "Peptide and allele pairs",
+      "kind": "textarea",
+      "default": "AGFKGEQGPKGEPGPK,DRB1_0101\nPKYVKQNTLKLATGMR,DRB1_0101\nGELIGTLNAAKVPADT,DRB1_0401",
+      "required": true,
+      "help": "One pair per line, as peptide,allele.",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "batch"
+    }
+  ],
+  "tasks": [
+    {
+      "value": "single",
+      "label": "One peptide"
+    },
+    {
+      "value": "batch",
+      "label": "Many peptides"
+    }
+  ]
+}

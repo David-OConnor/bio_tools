@@ -1,0 +1,70 @@
+{
+  "fields": [
+    {
+      "name": "pdb_id",
+      "label": "PDB ID",
+      "kind": "text",
+      "default": "1a30",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 4,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "subset",
+      "label": "Dataset subset",
+      "kind": "select",
+      "default": "refined",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "refined",
+          "label": "Refined set"
+        },
+        {
+          "value": "general",
+          "label": "General set"
+        },
+        {
+          "value": "core",
+          "label": "Core set"
+        },
+        {
+          "value": "any",
+          "label": "Any configured set"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "include_file_listing",
+      "label": "List entry files",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

@@ -1,0 +1,259 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "opendde-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "sequence_molecules",
+      "label": "Molecules",
+      "kind": "molecule_builder",
+      "default": "[{\"type\": \"protein\", \"sequence\": \"ACDEFGHIK\", \"cyclic\": false, \"modifications\": []}]",
+      "required": true,
+      "help": "Add one box per chain: Protein, Ligand, DNA, or RNA. Ligands take a SMILES string or a CCD_ code (e.g. CCD_ATP). A modification applies a CCD residue code at a given position; \"Cyclic\" bonds the chain's first and last residue.",
+      "options": [
+        {
+          "value": "protein",
+          "label": "Protein"
+        },
+        {
+          "value": "ligand",
+          "label": "Ligand"
+        },
+        {
+          "value": "dna",
+          "label": "DNA"
+        },
+        {
+          "value": "rna",
+          "label": "RNA"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "sequence"
+    },
+    {
+      "name": "proteins",
+      "label": "Protein chains",
+      "kind": "textarea",
+      "default": "ACDEFGHIK",
+      "required": true,
+      "help": "One protein chain sequence per line.",
+      "options": [],
+      "rows": 6,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list"
+    },
+    {
+      "name": "dnas",
+      "label": "DNA chains (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "One DNA chain sequence per line.",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list"
+    },
+    {
+      "name": "rnas",
+      "label": "RNA chains (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "One RNA chain sequence per line.",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list"
+    },
+    {
+      "name": "molecules",
+      "label": "Molecules",
+      "kind": "textarea",
+      "default": "[{\"type\": \"protein\", \"chain\": \"A\", \"sequence\": \"ACDEFGHIK\"}]",
+      "required": true,
+      "help": "JSON list of {\"type\": \"protein\"|\"dna\"|\"rna\", \"chain\": \"A\", \"sequence\": \"...\"}.",
+      "options": [],
+      "rows": 6,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecules"
+    },
+    {
+      "name": "ligands_list",
+      "label": "Ligands (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "One ligand SMILES per line.",
+      "options": [],
+      "rows": 3,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "list"
+    },
+    {
+      "name": "ligands_molecules",
+      "label": "Ligands (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "One ligand SMILES per line.",
+      "options": [],
+      "rows": 3,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecules"
+    },
+    {
+      "name": "bonds",
+      "label": "Covalent bonds (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "JSON list of covalent bonds between the chains above, e.g. [{\"atom1Chain\":\"A\",\"atom1Idx\":\"32\",\"atom1Atom\":\"C\",\"atom2Chain\":\"B\",\"atom2Idx\":\"1\",\"atom2Atom\":\"N\"}]. Chains are lettered A, B, C... in the order entered: protein chains first, then DNA, then RNA, then ligands.",
+      "options": [],
+      "rows": 3,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "seeds",
+      "label": "Model seeds",
+      "kind": "text",
+      "default": "101",
+      "required": false,
+      "help": "Comma-separated seeds, e.g. \"101,102\"; each produces an independent set of samples.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "samples",
+      "label": "Samples per seed",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 16,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "steps",
+      "label": "Diffusion steps",
+      "kind": "number",
+      "default": 200,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 1000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "cycles",
+      "label": "Recycling cycles",
+      "kind": "number",
+      "default": 10,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 30,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "use_guidance",
+      "label": "Use physics-aware guidance",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Training-free guidance for improved ligand plausibility; increases compute time.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": [
+    {
+      "value": "sequence",
+      "label": "Sequence"
+    },
+    {
+      "value": "list",
+      "label": "Chain list"
+    },
+    {
+      "value": "molecules",
+      "label": "Molecules (JSON)"
+    }
+  ]
+}

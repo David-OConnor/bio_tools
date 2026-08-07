@@ -1,0 +1,156 @@
+{
+  "fields": [
+    {
+      "name": "coordinates",
+      "label": "Cartesian coordinates",
+      "kind": "textarea",
+      "default": "O  0.000000  0.000000  0.000000\nH  0.758602  0.000000  0.504284\nH -0.758602  0.000000  0.504284",
+      "required": true,
+      "help": "One element and x/y/z coordinates per line, without an XYZ header.",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "method",
+      "label": "Method",
+      "kind": "select",
+      "default": "B3LYP",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "B3LYP",
+          "label": "B3LYP"
+        },
+        {
+          "value": "PBE0",
+          "label": "PBE0"
+        },
+        {
+          "value": "HF",
+          "label": "Hartree-Fock"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "basis",
+      "label": "Basis set",
+      "kind": "select",
+      "default": "def2-SVP",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "def2-SVP",
+          "label": "def2-SVP"
+        },
+        {
+          "value": "def2-TZVP",
+          "label": "def2-TZVP"
+        },
+        {
+          "value": "6-31G*",
+          "label": "6-31G*"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "job_type",
+      "label": "Job type",
+      "kind": "select",
+      "default": "SP",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "SP",
+          "label": "Single point"
+        },
+        {
+          "value": "OPT",
+          "label": "Geometry optimization"
+        },
+        {
+          "value": "FREQ",
+          "label": "Frequency"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "charge",
+      "label": "Charge",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": -20,
+      "maximum": 20,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "multiplicity",
+      "label": "Multiplicity",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 20,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "nprocs",
+      "label": "CPU processes",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 32,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

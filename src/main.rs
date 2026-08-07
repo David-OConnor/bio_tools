@@ -9,6 +9,17 @@ use bio_tools::{
     tool_definitions::Tool,
 };
 
+fn format_status(status: &bio_tools::install::ToolStatus) -> String {
+    match status.result {
+        StatusKind::Pass => match &status.device {
+            Some(device) => format!("Pass, {} {device}", status.detail),
+            None => format!("Pass, {}", status.detail),
+        },
+        StatusKind::NotFound => "Not installed".to_owned(),
+        StatusKind::Error => format!("Error: {}", status.detail),
+    }
+}
+
 const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools list\n\nThe installation root defaults to $BIO_TOOLS_ROOT, or ./.bio_tools when unset.";
 
 fn main() {
@@ -36,8 +47,9 @@ fn real_main() -> Result<(), Box<dyn Error>> {
             return Err("list does not accept arguments".into());
         }
         let installer = Installer::from_environment(root)?;
-        for (tool, status) in installer.list() {
-            println!("{}\t{:?}\t{}", tool.slug(), status.result, status.detail);
+        for tool in Tool::ALL {
+            let status = installer.status(tool);
+            println!("{}: {}", tool.name(), format_status(&status));
         }
         return Ok(());
     }

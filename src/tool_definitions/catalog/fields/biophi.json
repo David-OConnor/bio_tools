@@ -1,0 +1,82 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Antibody name",
+      "kind": "text",
+      "default": "demo-antibody",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "heavy_sequence",
+      "label": "Heavy-chain sequence",
+      "kind": "textarea",
+      "default": "EVQLVESGGGLVQPGGSLRLSCAASGFTFSSYAMSWVRQAPGKGLEWVSAISGSGGSTYYADSVKGRFTISRDNSKNTLYLQMNSLRAEDTAVYYCAR",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 7,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "light_sequence",
+      "label": "Light-chain sequence",
+      "kind": "textarea",
+      "default": "DIQMTQSPSSLSASVGDRVTITCRASQDISNYLNWYQQKPGKAPKLLIYYTSRLHSGVPSRFSGSGSGTDFTLTISSLQPEDFATYYCQQGNTLPYT",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 7,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "operation",
+      "label": "Operation",
+      "kind": "select",
+      "default": "humanize",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "humanize",
+          "label": "Sapiens humanization"
+        },
+        {
+          "value": "mean_score",
+          "label": "Mean Sapiens score"
+        },
+        {
+          "value": "oasis",
+          "label": "OASis humanness"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

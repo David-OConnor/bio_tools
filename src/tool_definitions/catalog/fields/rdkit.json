@@ -1,0 +1,62 @@
+{
+  "fields": [
+    {
+      "name": "operation",
+      "label": "Operation",
+      "kind": "select",
+      "default": "descriptors",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "descriptors",
+          "label": "Descriptors"
+        },
+        {
+          "value": "canonicalize",
+          "label": "Canonical SMILES"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "smiles",
+      "label": "SMILES",
+      "kind": "textarea",
+      "default": "CC(=O)OC1=CC=CC=C1C(=O)O",
+      "required": true,
+      "help": "One molecule in SMILES notation; the example is aspirin.",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "include_inchi",
+      "label": "Include InChI",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Include InChI and InChIKey when the RDKit build supports them.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

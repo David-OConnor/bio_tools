@@ -1,0 +1,21 @@
+{
+  "fields": [
+    {
+      "name": "smiles",
+      "label": "Molecules as SMILES",
+      "kind": "textarea",
+      "default": "CC(=O)OC1=CC=CC=C1C(=O)O\nCC(C)Cc1ccc(cc1)C(C)C(=O)O",
+      "required": true,
+      "help": "One SMILES string per line; 1 to 128 molecules.",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

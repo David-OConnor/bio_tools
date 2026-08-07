@@ -1,0 +1,78 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "deepimmuno-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "epitope",
+      "label": "Epitope",
+      "kind": "text",
+      "default": "AAGIGILTV",
+      "required": true,
+      "help": "A 9-mer or 10-mer peptide.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 10,
+      "accept": "",
+      "task": "single"
+    },
+    {
+      "name": "hla",
+      "label": "HLA allele",
+      "kind": "text",
+      "default": "HLA-A*0201",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 20,
+      "accept": "",
+      "task": "single"
+    },
+    {
+      "name": "pairs",
+      "label": "Epitope and allele pairs",
+      "kind": "textarea",
+      "default": "AAGIGILTV,HLA-A*0201\nSLYNTVATL,HLA-A*0201\nGILGFVFTL,HLA-A*0201",
+      "required": true,
+      "help": "One pair per line, as epitope,allele.",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "batch"
+    }
+  ],
+  "tasks": [
+    {
+      "value": "single",
+      "label": "One epitope"
+    },
+    {
+      "value": "batch",
+      "label": "Many epitopes"
+    }
+  ]
+}

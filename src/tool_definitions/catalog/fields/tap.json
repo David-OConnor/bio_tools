@@ -1,0 +1,139 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "tap-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "heavy_sequence",
+      "label": "Heavy-chain variable domain",
+      "kind": "textarea",
+      "default": "EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRWGGDGFYAMDYWGQGTLVTVSS",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "light_sequence",
+      "label": "Light-chain variable domain",
+      "kind": "textarea",
+      "default": "DIQMTQSPSSLSASVGDRVTITCRASQDVNTAVAWYQQKPGKAPKLLIYSASFLYSGVPSRFSGSRSGTDFTLTISSLQPEDFATYYCQQHYTTPPTFGQGTKVEIK",
+      "required": true,
+      "help": "Leave the heavy chain alone and this empty is not supported: TAP profiles a paired Fv.",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "numbering_scheme",
+      "label": "Numbering scheme",
+      "kind": "select",
+      "default": "imgt",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "imgt",
+          "label": "IMGT"
+        },
+        {
+          "value": "kabat",
+          "label": "KABAT"
+        },
+        {
+          "value": "chothia",
+          "label": "CHOTHIA"
+        },
+        {
+          "value": "martin",
+          "label": "MARTIN"
+        },
+        {
+          "value": "aho",
+          "label": "AHO"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "cdr_definition",
+      "label": "CDR definition",
+      "kind": "select",
+      "default": "north",
+      "required": false,
+      "help": "Which loop boundaries the CDR-length and patch metrics are measured over.",
+      "options": [
+        {
+          "value": "north",
+          "label": "North"
+        },
+        {
+          "value": "imgt",
+          "label": "IMGT"
+        },
+        {
+          "value": "kabat",
+          "label": "Kabat"
+        },
+        {
+          "value": "chothia",
+          "label": "Chothia"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "return_model",
+      "label": "Return the structural model",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Include the homology model TAP built, as PDB text, alongside the metrics.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

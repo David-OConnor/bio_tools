@@ -1,0 +1,126 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "germinal-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "target_pdb",
+      "label": "Target antigen PDB",
+      "kind": "file",
+      "default": "HEADER    PASTE A TARGET ANTIGEN PDB HERE",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".pdb,.ent,.cif",
+      "task": ""
+    },
+    {
+      "name": "target_chain",
+      "label": "Target chain",
+      "kind": "text",
+      "default": "A",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 4,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "target_hotspots",
+      "label": "Epitope hotspots",
+      "kind": "text",
+      "default": "A56,A57,A58",
+      "required": true,
+      "help": "Comma-separated target residues that define the epitope, for example A56,A57,A58.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "binder_format",
+      "label": "Binder format",
+      "kind": "select",
+      "default": "vhh",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "vhh",
+          "label": "VHH (nanobody)"
+        },
+        {
+          "value": "scfv",
+          "label": "scFv"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "max_trajectories",
+      "label": "Trajectories to run",
+      "kind": "number",
+      "default": 10,
+      "required": false,
+      "help": "Hallucination trajectories attempted; most are discarded by the filters.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 10000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "max_passing_designs",
+      "label": "Designs to keep",
+      "kind": "number",
+      "default": 2,
+      "required": false,
+      "help": "The run stops once this many designs have passed every filter.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 1000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

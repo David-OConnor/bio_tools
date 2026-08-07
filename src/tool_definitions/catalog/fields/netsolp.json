@@ -1,0 +1,95 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "netsolp-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "fasta",
+      "label": "Sequences (FASTA)",
+      "kind": "file",
+      "default": ">demo_protein\nMKTVRQERLKSIVRILERSKEPVSGAQLAEELSVSRQVIVQDIAYLRSLGYNIVATPRGYVLAGG",
+      "required": true,
+      "help": "One or more records. Each is scored independently.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".fasta,.fa,.faa,.txt",
+      "task": ""
+    },
+    {
+      "name": "model_type",
+      "label": "Model",
+      "kind": "select",
+      "default": "ESM12",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "ESM12",
+          "label": "ESM-1 12-layer (fast)"
+        },
+        {
+          "value": "ESM1b",
+          "label": "ESM-1b (most accurate)"
+        },
+        {
+          "value": "Distilled",
+          "label": "Distilled (smallest)"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "prediction_type",
+      "label": "Prediction",
+      "kind": "select",
+      "default": "SU",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "S",
+          "label": "Solubility"
+        },
+        {
+          "value": "U",
+          "label": "Usability"
+        },
+        {
+          "value": "SU",
+          "label": "Solubility and usability"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

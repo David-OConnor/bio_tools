@@ -412,6 +412,13 @@ impl PyProcess {
     }
 }
 
+fn form_catalog_entry<'py>(py: Python<'py>, slug: &str) -> PyResult<Bound<'py, PyDict>> {
+    let source = catalog::fields::by_slug(slug).ok_or_else(|| {
+        PyValueError::new_err(format!("no bio_tools field catalog for slug {slug:?}"))
+    })?;
+    let entry = py.import("json")?.call_method1("loads", (source,))?;
+    Ok(entry.cast::<PyDict>().map_err(PyErr::from)?.clone())
+}
 /// Materialize catalog-owned form descriptors using a consumer's Field and
 /// Option classes. Dynamic select options are supplied by the consumer because
 /// they reflect resources installed on that particular host.
@@ -424,14 +431,9 @@ fn catalog_fields(
     option_type: Py<PyAny>,
     dynamic_options: Option<HashMap<String, Vec<(String, String)>>>,
 ) -> PyResult<Py<PyAny>> {
-    let json = py.import("json")?;
-    let catalog: Bound<'_, PyDict> = json
-        .call_method1("loads", (include_str!("../../src/tool_definitions/catalog/fields.json"),))?
-        .extract()?;
-    let entry: Bound<'_, PyDict> = catalog
-        .get_item(slug)?
-        .ok_or_else(|| PyValueError::new_err(format!("no bio_tools field catalog for slug {slug:?}")))?
-        .extract()?;
+
+    let entry = form_catalog_entry(py, slug)?;
+
     let definitions: Bound<'_, PyList> = entry
         .get_item("fields")?
         .ok_or_else(|| PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}")))?
@@ -485,14 +487,9 @@ fn catalog_tasks(
     slug: &str,
     option_type: Py<PyAny>,
 ) -> PyResult<Py<PyAny>> {
-    let json = py.import("json")?;
-    let catalog: Bound<'_, PyDict> = json
-        .call_method1("loads", (include_str!("../../src/tool_definitions/catalog/fields.json"),))?
-        .extract()?;
-    let entry: Bound<'_, PyDict> = catalog
-        .get_item(slug)?
-        .ok_or_else(|| PyValueError::new_err(format!("no bio_tools field catalog for slug {slug:?}")))?
-        .extract()?;
+
+    let entry = form_catalog_entry(py, slug)?;
+
     let tasks: Bound<'_, PyList> = entry
         .get_item("tasks")?
         .ok_or_else(|| PyValueError::new_err(format!("invalid bio_tools field catalog for slug {slug:?}")))?

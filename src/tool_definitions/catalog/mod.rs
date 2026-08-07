@@ -9,6 +9,8 @@ use crate::{
     LaunchType, LicenseType, ProcessCategory, ProcessExpense, Spec, tool_definitions::Tool,
 };
 
+pub mod fields;
+
 mod abmpnn;
 mod aggrescan3d;
 mod alphafold3;

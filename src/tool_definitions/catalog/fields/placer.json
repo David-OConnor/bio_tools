@@ -1,0 +1,182 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "placer-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "structure_file",
+      "label": "Structure (PDB or mmCIF)",
+      "kind": "file",
+      "default": "HEADER    PASTE A PROTEIN-LIGAND STRUCTURE HERE",
+      "required": true,
+      "help": "Only mmCIF files from RCSB are correctly parsed; PDB is the safer choice otherwise.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".pdb,.ent,.cif",
+      "task": ""
+    },
+    {
+      "name": "num_samples",
+      "label": "Samples",
+      "kind": "number",
+      "default": 10,
+      "required": false,
+      "help": "50-100 is a good number for docking; fewer is fine for side-chain conformations alone.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 500,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "predict_ligand",
+      "label": "Ligands to predict (optional)",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "Comma-separated ligand IDs, as name3, name3-resno, or chain-name3-resno. Empty predicts every ligand present.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "fixed_ligand",
+      "label": "Ligands to hold fixed (optional)",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "Comma-separated ligand IDs kept at their input coordinates instead of being predicted.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "target_res",
+      "label": "Crop-center residue (optional)",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "A protein residue, as chain-resno. Required when the input has no ligand at all.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 40,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "exclude_common_ligands",
+      "label": "Exclude common crystallography additives",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Drops solvents and crystallography additives (AlphaFold 3's exclusion list) before predicting.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "predict_multi",
+      "label": "Predict every allowed ligand",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Scores every eligible ligand rather than only the ones named in predict_ligand.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "rerank",
+      "label": "Rank output by",
+      "kind": "select",
+      "default": "prmsd",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "prmsd",
+          "label": "Predicted RMSD (ascending)"
+        },
+        {
+          "value": "plddt",
+          "label": "Predicted lDDT (descending)"
+        },
+        {
+          "value": "plddt_pde",
+          "label": "Predicted lDDT, pair track (descending)"
+        },
+        {
+          "value": "none",
+          "label": "Input order"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "use_small_molecule",
+      "label": "Include the small molecule",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Off predicts side chains only (apo), ignoring any ligand in the input.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

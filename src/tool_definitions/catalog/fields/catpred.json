@@ -1,0 +1,130 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "catpred-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "parameter",
+      "label": "Parameter",
+      "kind": "select",
+      "default": "kcat",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "kcat",
+          "label": "kcat (turnover number)"
+        },
+        {
+          "value": "km",
+          "label": "Km (Michaelis constant)"
+        },
+        {
+          "value": "ki",
+          "label": "Ki (inhibition constant)"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "protein_sequence",
+      "label": "Enzyme sequence",
+      "kind": "textarea",
+      "default": "MSEPAQKKQKVSNGGGSSNKRAADSLADQLYGKSAAAAHTPPAKKAKTETIAAPTFTTSGLDKLDLSNIDSSAWKQLAEEDLASLYGDLDSHRLDQPFPSAAAPVAKKRVSFTDSAAAA",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 6,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "substrate_smiles",
+      "label": "Substrate SMILES",
+      "kind": "textarea",
+      "default": "OCC1OC(O)C(O)C(O)C1O",
+      "required": true,
+      "help": "For a Ki prediction this is the inhibitor rather than the substrate.",
+      "options": [],
+      "rows": 2,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "ec_number",
+      "label": "EC number (optional)",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "For example 2.7.1.1. Used as a feature where the model has one.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 20,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "organism",
+      "label": "Organism (optional)",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "For example Escherichia coli.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 200,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "include_uncertainty",
+      "label": "Return the predicted uncertainty",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Lower predicted variance goes with higher accuracy, so this is worth keeping on.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

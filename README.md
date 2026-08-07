@@ -78,7 +78,7 @@ bio_tools uninstall opendde
 
 It uses `$BIO_TOOLS_ROOT`, or `./.bio_tools` when unset.
 
-`list` shows only tools installed by `bio_tools` in the selected root, with their current status. Rust callers can use `bio_tools::status::list(&installer)` (or `installer.list()`). `run` resolves an installed console entry point inside that managed environment, so it does not require the tool on `PATH`. Tools that only expose a Python module or checkout script still need a tool-specific library invocation.
+`list` shows every known tool, one per line, with its current status (`Pass`, `Not installed`, or `Error: ...`). Rust callers can instead fetch only the tools installed by `bio_tools` in the selected root via `bio_tools::status::list(&installer)` (or `installer.list()`). `run` resolves an installed console entry point inside that managed environment, so it does not require the tool on `PATH`. Tools that only expose a Python module or checkout script still need a tool-specific library invocation.
 
 ## Example uses
 - Building a GUI (Web or native) to these tools

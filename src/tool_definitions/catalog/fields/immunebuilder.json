@@ -1,0 +1,207 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "immunebuilder-demo",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "heavy_sequence",
+      "label": "Heavy-chain sequence",
+      "kind": "textarea",
+      "default": "EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRWGGDGFYAMDYWGQGTLVTVSS",
+      "required": true,
+      "help": "Variable domain only; constant domains are not modelled.",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "antibody"
+    },
+    {
+      "name": "light_sequence",
+      "label": "Light-chain sequence",
+      "kind": "textarea",
+      "default": "DIQMTQSPSSLSASVGDRVTITCRASQDVNTAVAWYQQKPGKAPKLLIYSASFLYSGVPSRFSGSRSGTDFTLTISSLQPEDFATYYCQQHYTTPPTFGQGTKVEIK",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "antibody"
+    },
+    {
+      "name": "vhh_sequence",
+      "label": "VHH sequence",
+      "kind": "textarea",
+      "default": "EVQLVESGGGLVQPGGSLRLSCAASGRTFSYNPMGWFRQAPGKGRELVAAISRTGGSTYYPDSVEGRFTISRDNAKRMVYLQMNSLRAEDTAVYYCAAAGVRAEDGRVRTLPSEYTFWGQGTQVTVSS",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "nanobody"
+    },
+    {
+      "name": "alpha_sequence",
+      "label": "TCR alpha-chain sequence",
+      "kind": "textarea",
+      "default": "QSVTQPDARVTVSEGASLQLRCKYSYSATPYLFWYVQYPRQGLQLLLKYYSGDPVVQGVNGFEAEFSKSNSSFHLRKASVHWSDSAVYFCAVRPTSGGSYIPTFGRGTSLIVHPY",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "tcr"
+    },
+    {
+      "name": "beta_sequence",
+      "label": "TCR beta-chain sequence",
+      "kind": "textarea",
+      "default": "NAGVTQTPKFQVLKTGQSMTLQCAQDMNHEYMSWYRQDPGMGLRLIHYSVGAGITDQGEVPNGYNVSRSTTEDFPLRLLSAAPSQTSVYFCASSYVGNTGELFFGEGSRLTVL",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "tcr"
+    },
+    {
+      "name": "numbering_scheme",
+      "label": "Numbering scheme",
+      "kind": "select",
+      "default": "imgt",
+      "required": false,
+      "help": "How the residues of the returned structure are numbered.",
+      "options": [
+        {
+          "value": "imgt",
+          "label": "IMGT"
+        },
+        {
+          "value": "chothia",
+          "label": "CHOTHIA"
+        },
+        {
+          "value": "kabat",
+          "label": "KABAT"
+        },
+        {
+          "value": "aho",
+          "label": "AHO"
+        },
+        {
+          "value": "martin",
+          "label": "MARTIN"
+        },
+        {
+          "value": "wolfguy",
+          "label": "WOLFGUY"
+        },
+        {
+          "value": "raw",
+          "label": "RAW"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "n_threads",
+      "label": "CPU threads for refinement",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "0 refines on the GPU; any other value forces OpenMM onto that many CPU threads.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 64,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "no_sidechain_bond_check",
+      "label": "Skip the strained-bond check",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Slightly faster, at the risk of an occasional unphysical side chain.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "original_weights",
+      "label": "Use the original TCRBuilder2 weights",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Off by default, which uses the newer TCRBuilder2+ weights.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "tcr"
+    }
+  ],
+  "tasks": [
+    {
+      "value": "antibody",
+      "label": "Antibody (Fv)"
+    },
+    {
+      "value": "nanobody",
+      "label": "Nanobody (VHH)"
+    },
+    {
+      "value": "tcr",
+      "label": "T-cell receptor"
+    }
+  ]
+}

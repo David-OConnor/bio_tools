@@ -1,0 +1,307 @@
+{
+  "fields": [
+    {
+      "name": "query_name",
+      "label": "Query name",
+      "kind": "text",
+      "default": "antibody-query",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "sequence_type",
+      "label": "Sequence type",
+      "kind": "select",
+      "default": "nucleotide",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "nucleotide",
+          "label": "Nucleotide"
+        },
+        {
+          "value": "protein",
+          "label": "Protein"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "sequence",
+      "label": "Sequence",
+      "kind": "textarea",
+      "default": "CAGGTGCAGCTGGTGCAGTCTGGGGGAGGCTTGGTACAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCT",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "organism",
+      "label": "Organism",
+      "kind": "select",
+      "default": "human",
+      "required": false,
+      "help": "Selects the internal annotation data; match it to the databases below.",
+      "options": [
+        {
+          "value": "human",
+          "label": "Human"
+        },
+        {
+          "value": "mouse",
+          "label": "Mouse"
+        },
+        {
+          "value": "rat",
+          "label": "Rat"
+        },
+        {
+          "value": "rabbit",
+          "label": "Rabbit"
+        },
+        {
+          "value": "rhesus_monkey",
+          "label": "Rhesus monkey"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "germline_db_v",
+      "label": "Germline V database",
+      "kind": "select",
+      "default": "airr_c_129S1_SvImJ.V",
+      "required": false,
+      "help": "BLAST databases found under the configured germline root.",
+      "options": [
+        {
+          "value": "airr_c_129S1_SvImJ.V",
+          "label": "airr_c_129S1_SvImJ.V"
+        },
+        {
+          "value": "airr_c_AKR_J.V",
+          "label": "airr_c_AKR_J.V"
+        },
+        {
+          "value": "airr_c_A_J.V",
+          "label": "airr_c_A_J.V"
+        },
+        {
+          "value": "airr_c_BALB_c_ByJ.V",
+          "label": "airr_c_BALB_c_ByJ.V"
+        },
+        {
+          "value": "airr_c_C3H_HeJ.V",
+          "label": "airr_c_C3H_HeJ.V"
+        },
+        {
+          "value": "airr_c_C57BL_6.V",
+          "label": "airr_c_C57BL_6.V"
+        },
+        {
+          "value": "airr_c_C57BL_6J.V",
+          "label": "airr_c_C57BL_6J.V"
+        },
+        {
+          "value": "airr_c_CAST_EiJ.V",
+          "label": "airr_c_CAST_EiJ.V"
+        },
+        {
+          "value": "airr_c_CBA_J.V",
+          "label": "airr_c_CBA_J.V"
+        },
+        {
+          "value": "airr_c_DBA_1J.V",
+          "label": "airr_c_DBA_1J.V"
+        },
+        {
+          "value": "airr_c_DBA_2J.V",
+          "label": "airr_c_DBA_2J.V"
+        },
+        {
+          "value": "airr_c_LEWES_EiJ.V",
+          "label": "airr_c_LEWES_EiJ.V"
+        },
+        {
+          "value": "airr_c_MRL_MpJ.V",
+          "label": "airr_c_MRL_MpJ.V"
+        },
+        {
+          "value": "airr_c_MSM_MsJI.V",
+          "label": "airr_c_MSM_MsJI.V"
+        },
+        {
+          "value": "airr_c_NOD_ShiLtJ.V",
+          "label": "airr_c_NOD_ShiLtJ.V"
+        },
+        {
+          "value": "airr_c_NOR_LtJ.V",
+          "label": "airr_c_NOR_LtJ.V"
+        },
+        {
+          "value": "airr_c_NZB_BlNJ.V",
+          "label": "airr_c_NZB_BlNJ.V"
+        },
+        {
+          "value": "airr_c_PWD_PhJ.V",
+          "label": "airr_c_PWD_PhJ.V"
+        },
+        {
+          "value": "airr_c_SJL_J.V",
+          "label": "airr_c_SJL_J.V"
+        },
+        {
+          "value": "airr_c_balbc.V",
+          "label": "airr_c_balbc.V"
+        },
+        {
+          "value": "airr_c_human_ig.V",
+          "label": "airr_c_human_ig.V"
+        },
+        {
+          "value": "mouse_gl_V",
+          "label": "mouse_gl_V"
+        },
+        {
+          "value": "rhesus_monkey_V",
+          "label": "rhesus_monkey_V"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "germline_db_d",
+      "label": "Germline D database",
+      "kind": "select",
+      "default": "",
+      "required": false,
+      "help": "BLAST databases found under the configured germline root.",
+      "options": [
+        {
+          "value": "",
+          "label": "None"
+        },
+        {
+          "value": "airr_c_human_igh.D",
+          "label": "airr_c_human_igh.D"
+        },
+        {
+          "value": "mouse_gl_D",
+          "label": "mouse_gl_D"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "germline_db_j",
+      "label": "Germline J database",
+      "kind": "select",
+      "default": "airr_c_human_ig.J",
+      "required": false,
+      "help": "BLAST databases found under the configured germline root.",
+      "options": [
+        {
+          "value": "airr_c_human_ig.J",
+          "label": "airr_c_human_ig.J"
+        },
+        {
+          "value": "mouse_gl_J",
+          "label": "mouse_gl_J"
+        },
+        {
+          "value": "rhesus_monkey_J",
+          "label": "rhesus_monkey_J"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "domain_system",
+      "label": "Domain system",
+      "kind": "select",
+      "default": "imgt",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "imgt",
+          "label": "IMGT"
+        },
+        {
+          "value": "kabat",
+          "label": "Kabat"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "num_alignments",
+      "label": "Alignments to report",
+      "kind": "number",
+      "default": 5,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1.0,
+      "maximum": 100.0,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

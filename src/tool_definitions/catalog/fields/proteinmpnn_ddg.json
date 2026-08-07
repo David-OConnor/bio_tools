@@ -1,0 +1,150 @@
+{
+  "fields": [
+    {
+      "name": "pdb",
+      "label": "Protein PDB",
+      "kind": "file",
+      "default": "HEADER    PASTE A PROTEIN PDB HERE",
+      "required": true,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".pdb,.ent",
+      "task": ""
+    },
+    {
+      "name": "chains",
+      "label": "Context chains",
+      "kind": "text",
+      "default": "A",
+      "required": true,
+      "help": "Comma-separated chains; the first is predicted by default.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "chain_to_predict",
+      "label": "Chain to predict",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "Optional; defaults to the first context chain.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "model_name",
+      "label": "Model",
+      "kind": "select",
+      "default": "v_48_020",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "v_48_002",
+          "label": "v_48_002"
+        },
+        {
+          "value": "v_48_010",
+          "label": "v_48_010"
+        },
+        {
+          "value": "v_48_020",
+          "label": "v_48_020"
+        },
+        {
+          "value": "v_48_030",
+          "label": "v_48_030"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "seed",
+      "label": "Random seed",
+      "kind": "number",
+      "default": 42,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 2147483647,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "repeats",
+      "label": "Model repeats",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 100,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "without_ddg_correction",
+      "label": "Disable the published ddG correction",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Required when selecting a model other than v_48_020.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "top_k",
+      "label": "Top mutations to highlight (optional)",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "Return only the K most stability-improving mutations, ranked by predicted ddG. 0 returns the full table only.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}
