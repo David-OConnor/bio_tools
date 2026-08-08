@@ -15,8 +15,10 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Expensive,
     top_choice: false,
     spec: SpecData {
-        summary: "Build a single-point, optimization, or frequency calculation.",
-        description: "Generates a conventional ORCA input deck and can run a configured local ORCA executable.",
+        summary: "A powerful and versatile quantum chemistry software package",
+        description: "ORCA is a multi-purpose quantum chemistry software package. It features a wide variety of methods \
+        ranging from semi-empirical methods to density functional theory to correlated single- and multi-reference wave \
+        function-based methods. Environmental as well as relativistic effects can be taken into account.",
         availability: "Manual ORCA installation required for execution",
         license_details: "Closed source, under the FAccTs end-user licence. Free for academic use after registration; commercial use requires a paid licence. The binaries are not redistributable, which is why setup_system.sh cannot fetch them.",
         repo_url: None,

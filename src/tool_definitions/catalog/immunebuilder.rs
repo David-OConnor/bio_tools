@@ -18,8 +18,10 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Moderate,
     top_choice: true,
     spec: SpecData {
-        summary: "Predict an antibody, nanobody, or TCR structure in seconds.",
-        description: "Runs ABodyBuilder2, NanoBodyBuilder2, or TCRBuilder2 on the supplied variable-domain sequences. These are single-sequence models with no MSA or template search, so a structure comes back in seconds rather than the minutes a general folding model needs.",
+        summary: "Deep-Learning models for predicting the structures of immune proteins.",
+        description: "A set of deep learning models trained to accurately predict the structure of antibodies \
+        (ABodyBuilder2), nanobodies (NanoBodyBuilder2) and T-Cell receptors (TCRBuilder2). By predicting an ensemble \
+        of structures, ImmuneBuilder also gives an error estimate for every residue in its final prediction.",
         availability: "Installed by setup_system.sh into its own uv environment; weights download on first execution",
         license_details: "BSD 3-Clause (Oxford Protein Informatics Group), weights included. Commercial use is unrestricted. Refinement uses OpenMM, which is MIT/LGPL.",
         repo_url: Some("https://github.com/oxpig/ImmuneBuilder"),

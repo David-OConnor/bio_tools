@@ -13,8 +13,10 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Cheap,
     top_choice: false,
     spec: SpecData {
-        summary: "Locate a protein-ligand complex in a local PDBBind release.",
-        description: "Checks a configured PDBBind dataset for a PDB entry and lists its structure and ligand files.",
+        summary: "A collection of binding affinities for protein−ligand complexes",
+        description: "Offers a comprehensive collection of experimental binding affinity data for all biomolecular complexes \
+        recorded in the Protein Data Bank (PDB). This database has been widely employed in various molecular modeling and \
+        machine-learning studies related to molecular recognition, drug discovery, and many more. ",
         availability: "A separately licensed/downloaded dataset must be configured with PDBBIND_ROOT",
         license_details: "No licence is granted here: PDBbind+ is distributed by its maintainers under registration, free for academic use, with commercial use requiring a paid subscription. This adapter only reads a copy the operator has already obtained under their own agreement.",
         repo_url: None,

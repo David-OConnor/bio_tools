@@ -18,8 +18,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Moderate,
     top_choice: true,
     spec: SpecData {
-        summary: "Predict the stability effects of every point mutation in a protein chain.",
-        description: "Runs ProteinMPNN-ddG with full sequence context and writes its saturation-mutagenesis scores as CSV.",
+        summary: "Estimate changes in protein stability upon point mutation",
+        description: "A modification of ProteinMPNN to use full sequence context. It introduces a decoding scheme \
+        to improve computational efficiency and enable saturation mutagenesis studies at scale.",
         availability: "Installed by setup_system.sh with JAX CUDA 12 for Linux/WSL and an NVIDIA GPU",
         license_details: "MIT (Peptone), over MIT-licensed ProteinMPNN weights. Commercial use is unrestricted.",
         repo_url: Some("https://github.com/PeptoneLtd/proteinmpnn_ddg"),

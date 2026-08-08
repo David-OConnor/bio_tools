@@ -16,8 +16,11 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Expensive,
     top_choice: true,
     spec: SpecData {
-        summary: "Design de novo antibodies against a chosen epitope on a target structure.",
-        description: "Runs the Germinal pipeline, which hallucinates VHH or scFv binders through AlphaFold-Multimer under antibody language model guidance and then filters the trajectories on its structural and sequence criteria. Germinal's own configuration is a set of named Hydra profiles rather than a flat set of flags; this writes a target profile for the submitted structure and selects the matching run and filter profiles for the chosen binder format.",
+        summary: "Efficient generation of epitope-targeted de novo antibodies",
+        description: "Germinal is a pipeline for designing de novo antibodies against specified epitopes on target proteins. \
+        The pipeline follows a 3-step process: hallucination based on ColabDesign, selective sequence redesign with AbMPNN, and \
+        cofolding with a structure prediction model. Germinal is capable of designing both nanobodies and scFvs against \
+        user-specified residues on target proteins.",
         availability: "Conda environment, an NVIDIA GPU, PyRosetta, and the AlphaFold 2 parameters are required",
         license_details: "MIT code, but the pipeline as it runs is narrower than that: PyRosetta needs a separate licence for commercial use, and the IgLM weights that guide design are released for non-commercial research only.",
         repo_url: Some("https://github.com/SantiagoMille/germinal"),
