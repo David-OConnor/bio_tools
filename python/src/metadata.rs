@@ -1,7 +1,8 @@
 use std::collections::{BTreeMap, HashMap};
 
 use bio_tools_rs::{
-    LaunchType as RustLaunchType, LicenseCategory as RustLicenseCategory, Process as RustProcess,
+    LaunchType as RustLaunchType, License as RustLicense,
+    LicenseCategory as RustLicenseCategory, Process as RustProcess,
     ProcessExpense as RustProcessExpense, Spec as RustSpec, ToolCategory as RustToolCategory,
     tool_definitions::catalog,
 };
@@ -130,6 +131,20 @@ python_enum!(
     }
 );
 
+python_enum!(
+    PyLicense,
+    "License",
+    RustLicense,
+    {
+        Mit = 1,
+        ApacheV2 = 2,
+        Bsd3Clause = 3,
+        Lgpl21OrLater = 4,
+        PublicDomain = 5,
+        Other = 6,
+    }
+);
+
 /// Shared tool description plus application-owned field descriptors.
 #[pyclass(name = "Spec", module = "bio_tools", frozen, skip_from_py_object)]
 pub(crate) struct PySpec {
@@ -153,6 +168,9 @@ impl PySpec {
         repo_url=None,
         home_url=None,
         docs_url=None,
+        paper_url=None,
+        license=None,
+        license_url=None,
         refresh_fields=None,
         tasks=None
     ))]
@@ -168,9 +186,15 @@ impl PySpec {
         repo_url: Option<String>,
         home_url: Option<String>,
         docs_url: Option<String>,
+        paper_url: Option<String>,
+        license: Option<Py<PyLicense>>,
+        license_url: Option<String>,
         refresh_fields: Option<Py<PyAny>>,
         tasks: Option<Py<PyAny>>,
     ) -> Self {
+        let license = license
+            .map(|license| license.borrow(py).inner)
+            .unwrap_or(RustLicense::Other);
         Self {
             inner: RustSpec::new(
                 slug,
@@ -181,6 +205,9 @@ impl PySpec {
                 repo_url,
                 home_url,
                 docs_url,
+                paper_url,
+                license,
+                license_url,
             ),
             fields,
             refresh_fields,
@@ -195,37 +222,52 @@ impl PySpec {
 
     #[getter]
     fn summary(&self) -> &str {
-        &self.inner.summary
+        &self.inner.data.summary
     }
 
     #[getter]
     fn description(&self) -> &str {
-        &self.inner.description
+        &self.inner.data.description
     }
 
     #[getter]
     fn availability(&self) -> &str {
-        &self.inner.availability
+        &self.inner.data.availability
     }
 
     #[getter]
     fn license_details(&self) -> &str {
-        &self.inner.license_details
+        &self.inner.data.license_details
     }
 
     #[getter]
     fn repo_url(&self) -> Option<&str> {
-        self.inner.repo_url.as_deref()
+        self.inner.data.repo_url.as_deref()
     }
 
     #[getter]
     fn home_url(&self) -> Option<&str> {
-        self.inner.home_url.as_deref()
+        self.inner.data.home_url.as_deref()
     }
 
     #[getter]
     fn docs_url(&self) -> Option<&str> {
-        self.inner.docs_url.as_deref()
+        self.inner.data.docs_url.as_deref()
+    }
+
+    #[getter]
+    fn paper_url(&self) -> Option<&str> {
+        self.inner.data.paper_url.as_deref()
+    }
+
+    #[getter]
+    fn license(&self, py: Python<'_>) -> PyResult<Py<PyLicense>> {
+        Py::new(py, PyLicense::from_inner(self.inner.data.license))
+    }
+
+    #[getter]
+    fn license_url(&self) -> Option<&str> {
+        self.inner.data.license_url.as_deref()
     }
 
     #[getter]
@@ -269,7 +311,7 @@ impl PySpec {
     fn __repr__(&self) -> String {
         format!(
             "Spec(slug={:?}, summary={:?})",
-            self.inner.slug, self.inner.summary
+            self.inner.slug, self.inner.data.summary
         )
     }
 }
@@ -278,13 +320,16 @@ impl PySpec {
     fn serialize_dict(&self, py: Python<'_>) -> PyResult<Py<PyDict>> {
         let data = PyDict::new(py);
         data.set_item("slug", &self.inner.slug)?;
-        data.set_item("summary", &self.inner.summary)?;
-        data.set_item("description", &self.inner.description)?;
-        data.set_item("availability", &self.inner.availability)?;
-        data.set_item("license_details", &self.inner.license_details)?;
-        data.set_item("repo_url", &self.inner.repo_url)?;
-        data.set_item("home_url", &self.inner.home_url)?;
-        data.set_item("docs_url", &self.inner.docs_url)?;
+        data.set_item("summary", &self.inner.data.summary)?;
+        data.set_item("description", &self.inner.data.description)?;
+        data.set_item("availability", &self.inner.data.availability)?;
+        data.set_item("license_details", &self.inner.data.license_details)?;
+        data.set_item("repo_url", &self.inner.data.repo_url)?;
+        data.set_item("home_url", &self.inner.data.home_url)?;
+        data.set_item("docs_url", &self.inner.data.docs_url)?;
+        data.set_item("paper_url", &self.inner.data.paper_url)?;
+        data.set_item("license", self.inner.data.license.to_string())?;
+        data.set_item("license_url", &self.inner.data.license_url)?;
         let fields = self.active_fields(py)?;
         data.set_item("fields", serialize_dataclasses(py, &fields)?)?;
         data.set_item("tasks", serialize_dataclasses(py, &self.tasks)?)?;
@@ -591,6 +636,7 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<PyToolCategory>()?;
     module.add_class::<PyProcessExpense>()?;
     module.add_class::<PyLicenseCategory>()?;
+    module.add_class::<PyLicense>()?;
     module.add_class::<PySpec>()?;
     module.add_class::<PyProcess>()?;
     module.add_function(wrap_pyfunction!(catalog_fields, module)?)?;

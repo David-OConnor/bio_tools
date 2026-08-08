@@ -126,12 +126,20 @@ impl fmt::Display for ProcessExpense {
     }
 }
 
-/// todo: Stub: Augment as required.
-#[derive(Debug, Clone, PartialEq)]
+/// The specific license under which a tool (or its weights) is released.
+/// Coarser than this is [`LicenseCategory`]; this is what a link to the
+/// license's own official text is built from -- see [`License::official_url`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum License {
     Mit,
     ApacheV2,
-    Other, // todo: Inner string?
+    Bsd3Clause,
+    Lgpl21OrLater,
+    PublicDomain,
+    /// A non-standard, tool-specific, or otherwise unlisted license: no
+    /// fixed official page exists for it, so [`CatalogEntry::license_url`]
+    /// carries the link instead, if one is known.
+    Other,
 }
 
 impl fmt::Display for License {
@@ -139,6 +147,9 @@ impl fmt::Display for License {
         f.write_str(match self {
             Self::Mit => "MIT",
             Self::ApacheV2 => "Apache-2.0",
+            Self::Bsd3Clause => "BSD-3-Clause",
+            Self::Lgpl21OrLater => "LGPL-2.1-or-later",
+            Self::PublicDomain => "Public domain",
             Self::Other => "Other",
         })
     }
@@ -148,8 +159,23 @@ impl License {
     pub fn category(self) -> LicenseCategory {
         use License::*;
         match self {
-            Mit | ApacheV2 => LicenseCategory::Permissive,
+            Mit | ApacheV2 | Bsd3Clause | PublicDomain => LicenseCategory::Permissive,
+            Lgpl21OrLater => LicenseCategory::Copyleft,
             Other => LicenseCategory::Proprietary,
+        }
+    }
+
+    /// The license's own official page, where a single fixed one exists for
+    /// every license of this kind. `None` for [`License::Other`]: use
+    /// [`CatalogEntry::license_url`] for a tool-specific override instead.
+    pub const fn official_url(self) -> Option<&'static str> {
+        match self {
+            Self::Mit => Some("https://opensource.org/license/mit"),
+            Self::ApacheV2 => Some("https://www.apache.org/licenses/LICENSE-2.0"),
+            Self::Bsd3Clause => Some("https://opensource.org/license/bsd-3-clause"),
+            Self::Lgpl21OrLater => Some("https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"),
+            Self::PublicDomain => None,
+            Self::Other => None,
         }
     }
 }
@@ -182,17 +208,49 @@ impl fmt::Display for LicenseCategory {
 }
 
 /// Tool-specific descriptive data which does not depend on a UI framework or
-/// execution environment.
+/// execution environment or on the tool's identity (slug/name), so that the
+/// same field list can also back the catalog's `&'static str`-based static
+/// data -- see [`tool_definitions::catalog::CatalogEntry::spec`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SpecData<S> {
+    pub summary: S,
+    pub description: S,
+    pub availability: S,
+    pub license_details: S,
+    pub repo_url: Option<S>,
+    pub home_url: Option<S>,
+    pub docs_url: Option<S>,
+    pub paper_url: Option<S>,
+    pub license: License,
+    /// A tool-specific license page, used when `license` is
+    /// [`License::Other`] (or any other variant without a fixed
+    /// [`License::official_url`]).
+    pub license_url: Option<S>,
+}
+
+impl SpecData<&'static str> {
+    /// Copy this static catalog data into an owned, runtime-facing form.
+    pub fn to_owned_data(&self) -> SpecData<String> {
+        SpecData {
+            summary: self.summary.to_owned(),
+            description: self.description.to_owned(),
+            availability: self.availability.to_owned(),
+            license_details: self.license_details.to_owned(),
+            repo_url: self.repo_url.map(str::to_owned),
+            home_url: self.home_url.map(str::to_owned),
+            docs_url: self.docs_url.map(str::to_owned),
+            paper_url: self.paper_url.map(str::to_owned),
+            license: self.license,
+            license_url: self.license_url.map(str::to_owned),
+        }
+    }
+}
+
+/// Tool-specific descriptive data, identified by slug.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Spec {
     pub slug: String,
-    pub summary: String,
-    pub description: String,
-    pub availability: String,
-    pub license_details: String,
-    pub repo_url: Option<String>,
-    pub home_url: Option<String>,
-    pub docs_url: Option<String>,
+    pub data: SpecData<String>,
 }
 
 impl Spec {
@@ -206,25 +264,41 @@ impl Spec {
         repo_url: Option<String>,
         home_url: Option<String>,
         docs_url: Option<String>,
+        paper_url: Option<String>,
+        license: License,
+        license_url: Option<String>,
     ) -> Self {
         Self {
             slug: slug.into(),
-            summary: summary.into(),
-            description: description.into(),
-            availability: availability.into(),
-            license_details: license_details.into(),
-            repo_url,
-            home_url,
-            docs_url,
+            data: SpecData {
+                summary: summary.into(),
+                description: description.into(),
+                availability: availability.into(),
+                license_details: license_details.into(),
+                repo_url,
+                home_url,
+                docs_url,
+                paper_url,
+                license,
+                license_url,
+            },
         }
     }
 
     /// Official links in display order.
     pub fn links(&self) -> Vec<(&'static str, &str)> {
         [
-            ("Documentation", self.docs_url.as_deref()),
-            ("Home page", self.home_url.as_deref()),
-            ("Source code", self.repo_url.as_deref()),
+            ("Documentation", self.data.docs_url.as_deref()),
+            ("Home page", self.data.home_url.as_deref()),
+            ("Paper", self.data.paper_url.as_deref()),
+            ("Source code", self.data.repo_url.as_deref()),
+            (
+                "License",
+                self.data
+                    .license
+                    .official_url()
+                    .or(self.data.license_url.as_deref()),
+            ),
         ]
         .into_iter()
         .filter_map(|(label, url)| url.map(|url| (label, url)))

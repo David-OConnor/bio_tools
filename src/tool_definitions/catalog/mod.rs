@@ -6,7 +6,8 @@
 //! its adapter module, and UI field descriptors.
 
 use crate::{
-    LaunchType, LicenseCategory, ProcessExpense, Spec, ToolCategory, tool_definitions::Tool,
+    LaunchType, LicenseCategory, ProcessExpense, Spec, SpecData, ToolCategory,
+    tool_definitions::Tool,
 };
 
 pub mod fields;
@@ -115,13 +116,7 @@ pub struct CatalogEntry {
     pub license_type: LicenseCategory,
     pub expense: ProcessExpense,
     pub top_choice: bool,
-    pub summary: &'static str,
-    pub description: &'static str,
-    pub availability: &'static str,
-    pub license_details: &'static str,
-    pub repo_url: Option<&'static str>,
-    pub home_url: Option<&'static str>,
-    pub docs_url: Option<&'static str>,
+    pub spec: SpecData<&'static str>,
 }
 
 impl CatalogEntry {
@@ -135,16 +130,10 @@ impl CatalogEntry {
 
     /// The subset of this entry consumed by [`crate::Process::spec`].
     pub fn to_spec(&self) -> Spec {
-        Spec::new(
-            self.slug(),
-            self.summary,
-            self.description,
-            self.availability,
-            self.license_details,
-            self.repo_url.map(str::to_owned),
-            self.home_url.map(str::to_owned),
-            self.docs_url.map(str::to_owned),
-        )
+        Spec {
+            slug: self.slug().to_owned(),
+            data: self.spec.to_owned_data(),
+        }
     }
 }
 

@@ -1,5 +1,8 @@
 use super::{CatalogEntry, Identity};
-use crate::{LaunchType, LicenseCategory, ProcessExpense, ToolCategory, tool_definitions::Tool};
+use crate::{
+    LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
+    tool_definitions::Tool,
+};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::Protenix),
@@ -8,11 +11,17 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: true,
-    summary: "Predict protein or protein-ligand complex structures with Protenix.",
-    description: "Builds Protenix's AlphaFold3-style JSON input and runs the official `protenix pred` CLI, with MSA and PDB template search off by default.",
-    availability: "Linux and a CUDA GPU are required; model weights download on first use.",
-    license_details: "Apache 2.0 (ByteDance). Commercial use is permitted.",
-    repo_url: Some("https://github.com/bytedance/Protenix"),
-    home_url: Some("https://protenix-server.com/"),
-    docs_url: None,
+    spec: SpecData {
+        summary: "Structure prediction for proteins, DNA/RNA, ligands, and ions.",
+        description: "An advanced AI tool for fast, accurate, and user-friendly predictions of 3D structures \
+        of all kinds of molecules, including proteins, ligands, ions, DNA, RNA, and covalent modifications.",
+        availability: "Linux and a CUDA GPU are required; model weights download on first use.",
+        license_details: "Apache 2.0 (ByteDance). Commercial use is permitted.",
+        repo_url: Some("https://github.com/bytedance/Protenix"),
+        home_url: Some("https://protenix-server.com/"),
+        docs_url: None,
+        paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.01.08.631967"),
+        license: License::ApacheV2,
+        license_url: None,
+    },
 };
