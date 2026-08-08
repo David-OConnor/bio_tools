@@ -18,8 +18,10 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Expensive,
     top_choice: false,
     spec: SpecData {
-        summary: "Generate all-atom protein-binder backbones against a target.",
-        description: "Builds a one-target Genie 3 binder-design problem and runs its target-conditioned generation stage.",
+        summary: "Fast protein design through all-atom SE(3)-equivariance",
+        description: "A fast, all-atom SE(3)-equivariant diffusion model for protein design. \
+        It achieves state-of-the-art performance on unconditional generation, motif scaffolding, and binder \
+        design while retaining the computational efficiency of equivariant architectures.",
         availability: "Installed by setup_system.sh into its upstream Conda environment; Linux and a CUDA GPU are required",
         license_details: "Apache 2.0 (AlQuraishi Laboratory). Commercial use is permitted.",
         repo_url: Some("https://github.com/aqlaboratory/genie3"),

@@ -16,9 +16,15 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Expensive,
     top_choice: true,
     spec: SpecData {
-        summary: "Design a protein, peptide, nanobody, or antibody binder.",
-        description: "Builds a BoltzGen design specification YAML and runs the official boltzgen CLI end to end (design, inverse folding, and refolding).",
-        availability: "Installed by setup_system.sh into its own uv environment; approximately 6 GB of model weights download separately",
+        summary: "Designs proteins and peptides that bind to a wide range of biomolecular targets.",
+        description: "It unifies design and structure prediction, resulting in a single model that also
+        achieves state-of-the-art folding performance. 
+BoltzGen was developed at MIT and experimentally validated in a large-scale distributed effort involving
+multiple academic and industry labs.
+Explicitly focuses our experimental validation on targets that are highly dissimilar to any proteins for
+ which bound structures exist.",
+        availability: "Installed by setup_system.sh into its own uv environment; approximately 6 GB of \
+        model weights download separately",
         license_details: "MIT, covering the weights and training data as well as the inference code: unrestricted academic and commercial use.",
         repo_url: Some("https://github.com/HannesStark/boltzgen"),
         home_url: Some("https://boltz.bio/boltzgen"),

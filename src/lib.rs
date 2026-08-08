@@ -213,7 +213,11 @@ impl fmt::Display for LicenseCategory {
 /// data -- see [`tool_definitions::catalog::CatalogEntry::spec`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SpecData<S> {
+    /// Terser than Summary. May also include copy+paste+modify from an tool-official source.
     pub summary: S,
+    /// Note: This may be taken directly (Copy + paste, or modified) directly from the tool's official
+    /// website, docs, or paper. It may include a degree of marketing copy, but we try to make
+    /// it descriptive if that's too heavy.
     pub description: S,
     pub availability: S,
     pub license_details: S,

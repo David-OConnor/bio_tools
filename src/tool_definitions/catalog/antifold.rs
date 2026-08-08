@@ -15,8 +15,10 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Moderate,
     top_choice: false,
     spec: SpecData {
-        summary: "Score or sample antibody sequences from an IMGT-numbered structure.",
-        description: "Invokes AntiFold on a supplied antibody or antibody-antigen PDB structure.",
+        summary: "Structure-based antibody design using inverse folding",
+        description: "AntiFold predicts sequences which fit into an input antibody variable domain structure.
+         The tool outputs residue log-likelihoods in CSV format, and can sample sequences to a FASTA format directly.
+         Sampled sequences show high structural agreement with experimental structures. \nAntiFold is based on the ESM-IF1 model and is fine-tuned on solved and predicted antibody structures from SAbDab and OAS.",
         availability: "Separate AntiFold, PyTorch, and model installation required",
         license_details: "BSD 3-Clause (Oxford Protein Informatics Group).",
         repo_url: Some("https://github.com/oxpig/AntiFold"),

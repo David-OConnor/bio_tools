@@ -15,8 +15,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Expensive,
     top_choice: false,
     spec: SpecData {
-        summary: "Fold a protein from its sequence alone, with no MSA or template search.",
-        description: "Writes a FASTA record and invokes the esm-fold CLI from fair-esm. Predictions are single-sequence, so no alignment or template database is consulted.",
+        summary: "Protein structure prediction; fast.",
+        description: "Similar use cases to AlphaFold3, Boltz-2, and OpenDDE. Faster, but can only fold \
+        single-chain proteins, and doesn't support other molecule types.",
         availability: "Installed by setup_system.sh into its own uv environment (needs nvcc to build OpenFold); ESM-2 weights download on first execution",
         license_details: "fair-esm and the ESM-2 weights are MIT; the OpenFold dependency this environment builds is Apache 2.0. Both allow commercial use.",
         repo_url: Some("https://github.com/facebookresearch/esm"),

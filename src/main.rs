@@ -6,7 +6,10 @@ use std::{env, error::Error, ffi::OsString, path::PathBuf, process, str::FromStr
 use bio_tools::{
     install::{InstallEvent, Installer, StatusKind},
     run::run,
-    tool_definitions::Tool,
+    tool_definitions::{
+        Tool,
+        catalog::{self, CatalogEntry},
+    },
 };
 
 fn format_status(status: &bio_tools::install::ToolStatus) -> String {
@@ -20,7 +23,7 @@ fn format_status(status: &bio_tools::install::ToolStatus) -> String {
     }
 }
 
-const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status-quick <tool>\n  bio_tools [--root <directory>] status-full <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools [--root <directory>] list-quick\n  bio_tools [--root <directory>] list-full\n\n`status` and `list` remain aliases for their full variants. The installation root defaults to $BIO_TOOLS_ROOT, or ./.bio_tools when unset.";
+const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status-quick <tool>\n  bio_tools [--root <directory>] status-full <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools [--root <directory>] list-quick\n  bio_tools [--root <directory>] list-full\n  bio_tools metadata <tool>\n\n`status` and `list` remain aliases for their full variants. The installation root defaults to $BIO_TOOLS_ROOT, or ./.bio_tools when unset.";
 
 fn main() {
     if let Err(error) = real_main() {
@@ -55,6 +58,25 @@ fn real_main() -> Result<(), Box<dyn Error>> {
             };
             println!("{}: {}", tool.name(), format_status(&status));
         }
+        return Ok(());
+    }
+    if command == "metadata" {
+        let slug = args
+            .first()
+            .and_then(|value| value.to_str())
+            .ok_or("missing tool name")?
+            .to_owned();
+        args.remove(0);
+        require_empty(&args, "metadata")?;
+        let entry = catalog::by_slug(&slug).ok_or_else(|| {
+            let slugs = catalog::ALL
+                .iter()
+                .map(|entry| entry.slug())
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("unknown tool {slug:?}; known tools: {slugs}")
+        })?;
+        print_metadata(entry);
         return Ok(());
     }
     let tool = Tool::from_str(
@@ -101,6 +123,50 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         _ => return Err(format!("unknown command {command:?}\n\n{USAGE}").into()),
     }
     Ok(())
+}
+
+fn print_metadata(entry: &CatalogEntry) {
+    let categories = entry
+        .categories
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join(", ");
+    println!("{} ({})\n{}", entry.name(), entry.slug(), "=".repeat(56));
+    println!("Categories: {categories}");
+    println!("Launch type: {}", entry.launch_type);
+    println!("License type: {}", entry.license_type);
+    println!("Expense: {}", entry.expense);
+    println!("Top choice: {}", entry.top_choice);
+    println!(
+        "Install recipe: {}",
+        match entry.identity.tool() {
+            Some(tool) => tool.slug(),
+            None => "none (not installable by bio_tools)",
+        }
+    );
+
+    let spec = &entry.spec;
+    println!("\nSpec\n{}", "-".repeat(56));
+    println!("Summary: {}", spec.summary);
+    println!("Description: {}", spec.description);
+    println!("Availability: {}", spec.availability);
+    println!("License: {}", spec.license);
+    println!("License details: {}", spec.license_details);
+    for (label, url) in [
+        (
+            "License URL",
+            spec.license.official_url().or(spec.license_url),
+        ),
+        ("Repo URL", spec.repo_url),
+        ("Home URL", spec.home_url),
+        ("Docs URL", spec.docs_url),
+        ("Paper URL", spec.paper_url),
+    ] {
+        if let Some(url) = url {
+            println!("{label}: {url}");
+        }
+    }
 }
 
 fn take_root(args: &mut Vec<OsString>) -> Result<PathBuf, Box<dyn Error>> {
