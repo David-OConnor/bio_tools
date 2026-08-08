@@ -111,6 +111,10 @@ pub struct InstallConfig {
     /// Only consulted by the recipes that hand control to an upstream `install.sh`; everything
     /// else resolves [`InstallConfig::micromamba_executable`] instead.
     pub conda_executable: Option<PathBuf>,
+    /// Root for the managed Miniconda installation. On WSL, Conda cannot unpack environments
+    /// onto a Windows-mounted filesystem because its packages contain Unix symlinks. When this is
+    /// unset the installer automatically uses a per-layout directory on WSL's native filesystem.
+    pub conda_root: Option<PathBuf>,
     pub micromamba_executable: Option<PathBuf>,
     /// Project/release root containing optional adapter helper scripts.
     pub support_root: Option<PathBuf>,
@@ -129,6 +133,7 @@ impl InstallConfig {
             torch_backend: TorchBackendPreference::Auto,
             uv_executable: None,
             conda_executable: None,
+            conda_root: None,
             micromamba_executable: None,
             support_root: None,
             opendde_root: None,
@@ -147,6 +152,9 @@ impl InstallConfig {
         }
         if self.conda_executable.is_none() {
             self.conda_executable = first_env_path(&["BIO_TOOLS_CONDA"]);
+        }
+        if self.conda_root.is_none() {
+            self.conda_root = first_env_path(&["BIO_TOOLS_CONDA_ROOT"]);
         }
         if self.micromamba_executable.is_none() {
             self.micromamba_executable = first_env_path(&["BIO_TOOLS_MICROMAMBA"]);
@@ -349,6 +357,9 @@ impl Installer {
     }
 
     pub fn environment_path(&self, tool: Tool) -> PathBuf {
+        if let Some(name) = tool.conda_environment() {
+            return self.conda_environment_root().join("envs").join(name);
+        }
         self.config.layout.environment(tool.slug())
     }
 
@@ -559,6 +570,35 @@ mod tests {
 
         let split = InstallLayout::split("/data/tools", "/data/envs");
         assert_eq!(split.environment("boltz2"), Path::new("/data/envs/boltz2"));
+    }
+
+    #[test]
+    fn named_conda_environment_uses_the_configured_conda_root() {
+        let mut config = InstallConfig::new("/data/app");
+        config.layout = InstallLayout::split("/data/tools", "/data/envs");
+        config.conda_root = Some(PathBuf::from("/native/conda"));
+        let installer = Installer::from_config(config);
+
+        assert_eq!(
+            installer.environment_path(Tool::BindCraft),
+            Path::new("/native/conda/envs/BindCraft")
+        );
+        assert_eq!(
+            installer.environment_path(Tool::Genie3),
+            Path::new("/native/conda/envs/genie3")
+        );
+        assert_eq!(
+            installer.environment_path(Tool::Boltz2),
+            Path::new("/data/envs/boltz2")
+        );
+
+        let mut external = InstallConfig::new("/data/app");
+        external.conda_executable = Some(PathBuf::from("/opt/miniconda/bin/conda"));
+        let installer = Installer::from_config(external);
+        assert_eq!(
+            installer.environment_path(Tool::Genie3),
+            Path::new("/opt/miniconda/envs/genie3")
+        );
     }
 
     #[test]

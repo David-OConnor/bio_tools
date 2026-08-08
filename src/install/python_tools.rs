@@ -694,11 +694,17 @@ fn install_placer(installer: &mut Installer) -> Result<(), InstallError> {
                     "dgl @ https://data.dgl.ai/wheels/torch-2.3/cu118/dgl-2.4.0%2Bcu118-cp310-cp310-manylinux1_x86_64.whl",
                     "torch==2.3.1",
                     "opt_einsum==3.4.0",
-                    "openbabel",
+                    "openbabel-wheel==3.1.1.22",
                     "networkx>=3.2",
                     "numpy<2",
                     "pandas==2.2.3",
-                    "e3nn==0.5.4",
+                    // Upstream pins 0.5.4, but that release exists on conda-forge rather than
+                    // PyPI. Installing its matching Git tag keeps this uv recipe resolvable.
+                    "e3nn @ git+https://github.com/e3nn/e3nn.git@0.5.4",
+                    // PLACER imports NVIDIA's DGL SE(3) Transformer. Upstream's Conda manifest
+                    // installs it from this subdirectory; omitting it leaves a checkout that
+                    // passes dependency resolution but fails as soon as the runner imports.
+                    "se3-transformer @ git+https://github.com/NVIDIA/DeepLearningExamples.git@729963dd47e7c8bd462ad10bfac7a7b0b604e6dd#subdirectory=DGLPyTorch/DrugDiscovery/SE3Transformer",
                 ],
                 &[],
             )

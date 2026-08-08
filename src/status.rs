@@ -347,17 +347,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
 }
 
 fn named_conda_probe(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
-    let executable = installer
-        .config
-        .conda_executable
-        .clone()
-        .unwrap_or_else(|| {
-            installer
-                .config
-                .layout
-                .environments_root
-                .join("conda/bin/conda")
-        });
+    let executable = installer.conda_executable_path();
     let environment = tool.conda_environment()?;
     Some(CommandSpec::new(executable).args(["run", "--name", environment, "python", "--version"]))
 }

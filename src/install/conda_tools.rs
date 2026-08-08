@@ -12,6 +12,13 @@ use super::{
 };
 use crate::tool_definitions::Tool;
 
+// `sokrypton/openfold` is an unmaintained fork whose setup.py asks CUDA 12 to
+// compile retired architectures such as sm_37. This maintained OpenFold revision
+// detects the installed GPU instead (including Ada's sm_89).
+const GENIE3_OPENFOLD_URL: &str =
+    "git+https://github.com/aqlaboratory/openfold.git@be2ec1841f16c966c65ae0e7599ebbadc725757d";
+const LEGACY_GENIE3_OPENFOLD_URL: &str = "git+https://github.com/sokrypton/openfold.git";
+
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
     match tool {
         Tool::HighFold => install_highfold(installer),
@@ -113,16 +120,20 @@ fn install_mber(installer: &mut Installer) -> Result<(), InstallError> {
         .args(["create", "--yes", "--prefix"])
         .arg(&prefix)
         .arg("-f")
-        .arg(environment);
+        .arg(environment)
+        // ANARCI depends on HMMER. The newest HMMER build is MPI-enabled, which makes
+        // micromamba copy Unix symlinks that DrvFS rejects when this layout is under /mnt/c.
+        // Build 3 is the equivalent serial HMMER package and works on both native Linux and WSL.
+        .arg("hmmer=3.4=*_3");
     installer.checked(&mut create)?;
     mamba_pip_install_path(
         installer,
         &prefix,
         &target,
         &[
-            "-e",
             "--extra-index-url",
             "https://download.pytorch.org/whl/cu128",
+            "-e",
         ],
     )?;
     mamba_pip_install_path(installer, &prefix, &target.join("protocols"), &["-e"])?;
@@ -202,6 +213,7 @@ fn install_bindcraft(installer: &mut Installer) -> Result<(), InstallError> {
     let mut probe = Command::new(&conda);
     probe.args(["run", "--name", environment, "python", "--version"]);
     if marker.is_file() && installer.succeeds(&mut probe) {
+        installer.install_conda_environment_shims(Tool::BindCraft)?;
         installer.note("BindCraft is already installed");
         return Ok(());
     }
@@ -223,7 +235,7 @@ fn install_bindcraft(installer: &mut Installer) -> Result<(), InstallError> {
             marker.display()
         )));
     }
-    Ok(())
+    installer.install_conda_environment_shims(Tool::BindCraft)
 }
 
 fn install_germinal(installer: &mut Installer) -> Result<(), InstallError> {
@@ -265,6 +277,7 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
         "import torch; assert torch.cuda.is_available()",
     ]);
     if target.join("pretrained").is_dir() && installer.succeeds(&mut existing) {
+        installer.install_conda_environment_shims(Tool::Genie3)?;
         installer.note("Genie 3 is already installed");
         return Ok(());
     }
@@ -288,6 +301,7 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
         "cuda-toolkit",
     ]);
     installer.checked(&mut nvcc)?;
+    patch_genie3_openfold_source(&target.join("scripts/setup/setup.sh"))?;
     run_bash_with_conda(
         installer,
         &target.join("scripts/setup/setup.sh"),
@@ -309,7 +323,33 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
         "-c",
         "import torch; assert torch.cuda.is_available(), 'Genie 3 requires CUDA'",
     ]);
-    installer.checked(&mut verify)
+    installer.checked(&mut verify)?;
+    installer.install_conda_environment_shims(Tool::Genie3)
+}
+
+fn patch_genie3_openfold_source(script: &Path) -> Result<(), InstallError> {
+    let source = fs::read_to_string(script).map_err(|error| {
+        InstallError::InvalidConfiguration(format!(
+            "unable to read Genie 3 setup script {}: {error}",
+            script.display()
+        ))
+    })?;
+    if source.contains(GENIE3_OPENFOLD_URL) {
+        return Ok(());
+    }
+    let updated = source.replace(LEGACY_GENIE3_OPENFOLD_URL, GENIE3_OPENFOLD_URL);
+    if updated == source {
+        return Err(InstallError::InvalidConfiguration(format!(
+            "Genie 3 setup script {} no longer contains its expected OpenFold source",
+            script.display()
+        )));
+    }
+    fs::write(script, updated).map_err(|error| {
+        InstallError::InvalidConfiguration(format!(
+            "unable to update Genie 3 setup script {}: {error}",
+            script.display()
+        ))
+    })
 }
 
 fn run_bash_with_conda(

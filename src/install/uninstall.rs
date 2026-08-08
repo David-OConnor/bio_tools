@@ -63,6 +63,18 @@ fn removable_paths(
     report: &mut UninstallReport,
 ) -> Vec<PathBuf> {
     let mut paths = vec![installer.venv_dir(tool.slug())];
+    if let Some(name) = tool.conda_environment() {
+        let compatibility = installer
+            .config
+            .layout
+            .environments_root
+            .join("conda")
+            .join("envs")
+            .join(name);
+        if installer.environment_path(tool) != compatibility {
+            paths.push(compatibility);
+        }
+    }
     // GROMACS is the one recipe whose install prefix an operator may point anywhere. Inside the
     // managed tree it is ours to remove; outside it, they chose that location and may well have
     // put other things there, so it stays.
@@ -155,17 +167,6 @@ fn remove_conda_environment(installer: &mut Installer, name: &str, report: &mut 
 /// A Conda that is already installed, never a freshly bootstrapped one: uninstalling must not
 /// download the several hundred megabytes that [`Installer::ensure_conda`] would.
 fn existing_conda(installer: &Installer) -> Option<PathBuf> {
-    installer
-        .config
-        .conda_executable
-        .clone()
-        .filter(|path| path.is_file())
-        .or_else(|| {
-            let bootstrapped = installer
-                .config
-                .layout
-                .environments_root
-                .join("conda/bin/conda");
-            bootstrapped.is_file().then_some(bootstrapped)
-        })
+    let conda = installer.conda_executable_path();
+    conda.is_file().then_some(conda)
 }

@@ -261,6 +261,11 @@ impl PyInstaller {
             .map_err(install_error)
     }
 
+    /// The actual managed environment, including native-filesystem Conda environments on WSL.
+    fn environment_path(&self, tool: &PyTool) -> PyResult<PathBuf> {
+        Ok(self.inner.environment_path(tool.recipe()?))
+    }
+
     fn uninstall(&mut self, py: Python<'_>, tool: &PyTool) -> PyResult<PyUninstallReport> {
         let tool = tool.recipe()?;
         py.detach(|| self.inner.uninstall(tool))

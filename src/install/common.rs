@@ -10,6 +10,7 @@ use std::{
 };
 
 use super::{InstallError, Installer, TorchBackendPreference};
+use crate::tool_definitions::Tool;
 
 const CUDA_126_INDEX: &str = "https://download.pytorch.org/whl/cu126";
 const CPU_TORCH_INDEX: &str = "https://download.pytorch.org/whl/cpu";
@@ -535,18 +536,55 @@ impl Installer {
     /// Full Conda, needed only by the recipes that delegate to an upstream `install.sh`: those
     /// scripts call `conda info --base`, `conda shell.bash hook`, and `conda activate`, none of
     /// which micromamba provides. Everything we drive ourselves uses [`Self::micromamba_command`].
+    pub(crate) fn conda_root(&self) -> PathBuf {
+        if let Some(root) = &self.config.conda_root {
+            return root.clone();
+        }
+        let environments = &self.config.layout.environments_root;
+        if is_wsl_windows_mount(environments)
+            && let Some(home) = home_dir()
+        {
+            // Miniconda and a number of Conda packages contain Unix symlinks. DrvFS/9P mounts
+            // without WSL metadata reject those links, so installing under /mnt/c fails partway
+            // through extraction. A stable layout-specific directory avoids both that failure
+            // and named-environment collisions between separate applications.
+            return home
+                .join(".cache")
+                .join("bio_tools")
+                .join("conda")
+                .join(stable_path_id(environments));
+        }
+        environments.join("conda")
+    }
+
+    pub(crate) fn conda_executable_path(&self) -> PathBuf {
+        self.config
+            .conda_executable
+            .clone()
+            .unwrap_or_else(|| conda_executable_in(&self.conda_root()))
+    }
+
+    pub(crate) fn conda_environment_root(&self) -> PathBuf {
+        if self.config.conda_root.is_none()
+            && let Some(executable) = &self.config.conda_executable
+            && let Some(bin) = executable.parent()
+            && matches!(
+                bin.file_name().and_then(OsStr::to_str),
+                Some("bin" | "Scripts")
+            )
+            && let Some(root) = bin.parent()
+        {
+            return root.to_path_buf();
+        }
+        self.conda_root()
+    }
+
     pub(crate) fn ensure_conda(&mut self) -> Result<PathBuf, InstallError> {
         if let Some(path) = &self.conda {
             return Ok(path.clone());
         }
-        let managed_root = self.config.layout.environments_root.join("conda");
-        let managed = managed_root
-            .join(if cfg!(target_os = "windows") {
-                "Scripts"
-            } else {
-                "bin"
-            })
-            .join(executable_name("conda"));
+        let managed_root = self.conda_root();
+        let managed = conda_executable_in(&managed_root);
         let candidates = self
             .config
             .conda_executable
@@ -572,6 +610,15 @@ impl Installer {
             "Installing Miniconda into {}",
             managed_root.display()
         ));
+        if self.config.conda_root.is_none()
+            && self.config.conda_executable.is_none()
+            && is_wsl_windows_mount(&self.config.layout.environments_root)
+        {
+            self.note(format!(
+                "Using the native filesystem for Conda because {} is a WSL Windows mount",
+                self.config.layout.environments_root.display()
+            ));
+        }
         let scratch = ScratchDir::new_in(&self.config.layout.environments_root, "miniconda")?;
         let installer = scratch.path().join("miniconda.sh");
         self.download(
@@ -599,6 +646,48 @@ impl Installer {
         self.conda = Some(managed.clone());
         self.accept_conda_terms(&managed);
         Ok(managed)
+    }
+
+    /// Keep the original `<environments>/conda/envs/<name>/bin/...` contract usable when WSL
+    /// forces the real Conda tree onto its native filesystem. These are small launchers rather
+    /// than symlinks because the inability to create Unix symlinks is why the fallback exists.
+    pub(crate) fn install_conda_environment_shims(&self, tool: Tool) -> Result<(), InstallError> {
+        if !cfg!(unix) {
+            return Ok(());
+        }
+        let Some(name) = tool.conda_environment() else {
+            return Ok(());
+        };
+        let actual = self.conda_environment_root().join("envs").join(name);
+        let compatibility = self
+            .config
+            .layout
+            .environments_root
+            .join("conda")
+            .join("envs")
+            .join(name);
+        if actual == compatibility {
+            return Ok(());
+        }
+
+        let source_bin = actual.join("bin");
+        let target_bin = compatibility.join("bin");
+        fs::create_dir_all(&target_bin).map_err(|error| {
+            InstallError::io(format!("unable to create {}", target_bin.display()), error)
+        })?;
+        for executable in ["python", tool.console_script()] {
+            let source = source_bin.join(executable);
+            if !source.is_file() {
+                continue;
+            }
+            let target = target_bin.join(executable);
+            let quoted = source.to_string_lossy().replace('\'', "'\"'\"'");
+            fs::write(&target, format!("#!/bin/sh\nexec '{quoted}' \"$@\"\n")).map_err(
+                |error| InstallError::io(format!("unable to write {}", target.display()), error),
+            )?;
+            make_executable(&target)?;
+        }
+        Ok(())
     }
 
     /// Conda 24.9+ refuses to touch the Anaconda `defaults` channels non-interactively until their
@@ -914,6 +1003,15 @@ fn miniconda_install_command(installer: &Path, target: &Path, update: bool) -> C
     command
 }
 
+fn conda_executable_in(root: &Path) -> PathBuf {
+    root.join(if cfg!(target_os = "windows") {
+        "Scripts"
+    } else {
+        "bin"
+    })
+    .join(executable_name("conda"))
+}
+
 fn home_dir() -> Option<PathBuf> {
     env::var_os(if cfg!(target_os = "windows") {
         "USERPROFILE"
@@ -921,6 +1019,33 @@ fn home_dir() -> Option<PathBuf> {
         "HOME"
     })
     .map(PathBuf::from)
+}
+
+fn is_wsl_windows_mount(path: &Path) -> bool {
+    if !cfg!(target_os = "linux")
+        || (env::var_os("WSL_DISTRO_NAME").is_none() && env::var_os("WSL_INTEROP").is_none())
+    {
+        return false;
+    }
+    let mut components = path.components();
+    matches!(components.next(), Some(std::path::Component::RootDir))
+        && components
+            .next()
+            .is_some_and(|part| part.as_os_str() == "mnt")
+        && components.next().is_some_and(|part| {
+            let drive = part.as_os_str().to_string_lossy();
+            drive.len() == 1 && drive.as_bytes()[0].is_ascii_alphabetic()
+        })
+}
+
+fn stable_path_id(path: &Path) -> String {
+    // FNV-1a is sufficient here: this is a stable directory label, not a security boundary.
+    let mut hash = 0xcbf29ce484222325_u64;
+    for byte in path.to_string_lossy().as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    format!("{hash:016x}")
 }
 
 fn find_nvidia_smi() -> Option<PathBuf> {
@@ -1129,6 +1254,46 @@ mod tests {
         assert_eq!(
             repair.get_args().collect::<Vec<_>>(),
             ["miniconda.sh", "-b", "-u", "-p", "environments/conda"]
+        );
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn wsl_drive_mount_detection_is_narrow() {
+        if env::var_os("WSL_DISTRO_NAME").is_none() && env::var_os("WSL_INTEROP").is_none() {
+            return;
+        }
+        assert!(is_wsl_windows_mount(Path::new("/mnt/c/projects/tools")));
+        assert!(!is_wsl_windows_mount(Path::new("/home/user/tools")));
+        assert!(!is_wsl_windows_mount(Path::new("/mnt/shared/tools")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn native_conda_environment_gets_compatibility_launchers() {
+        let scratch = ScratchDir::new_in(&env::temp_dir(), "conda-shims").unwrap();
+        let environments = scratch.path().join("mounted-environments");
+        let native_conda = scratch.path().join("native-conda");
+        let source = native_conda.join("envs/genie3/bin");
+        fs::create_dir_all(&source).unwrap();
+        fs::write(source.join("python"), "python").unwrap();
+        fs::write(source.join("genie3"), "genie3").unwrap();
+
+        let mut config = super::super::InstallConfig::new(scratch.path());
+        config.layout = super::super::InstallLayout::split(scratch.path(), &environments);
+        config.conda_root = Some(native_conda);
+        let installer = Installer::from_config(config);
+        installer
+            .install_conda_environment_shims(Tool::Genie3)
+            .unwrap();
+
+        let target = environments.join("conda/envs/genie3/bin");
+        assert!(target.join("python").is_file());
+        assert!(target.join("genie3").is_file());
+        assert!(
+            fs::read_to_string(target.join("python"))
+                .unwrap()
+                .contains("native-conda/envs/genie3/bin/python")
         );
     }
 }
