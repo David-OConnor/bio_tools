@@ -281,6 +281,17 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
         installer.note("Genie 3 is already installed");
         return Ok(());
     }
+    if installer.succeeds(&mut existing) {
+        installer.note("Genie 3 environment is ready; downloading missing model weights");
+        run_bash_in_conda_environment(
+            installer,
+            environment,
+            &target.join("scripts/setup/download.sh"),
+            &["--weights"],
+            &target,
+        )?;
+        return installer.install_conda_environment_shims(Tool::Genie3);
+    }
     installer.clone_or_update("https://github.com/aqlaboratory/genie3", &target)?;
     let mut remove = Command::new(&conda);
     remove.args(["env", "remove", "--name", environment, "-y"]);
@@ -308,8 +319,9 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
         &[],
         &target,
     )?;
-    run_bash_with_conda(
+    run_bash_in_conda_environment(
         installer,
+        environment,
         &target.join("scripts/setup/download.sh"),
         &["--weights"],
         &target,
@@ -378,5 +390,28 @@ fn run_bash_with_conda(
         })?;
         command.env("PATH", joined);
     }
+    installer.checked(&mut command)
+}
+
+fn run_bash_in_conda_environment(
+    installer: &mut Installer,
+    environment: &str,
+    script: &Path,
+    arguments: &[&str],
+    cwd: &Path,
+) -> Result<(), InstallError> {
+    if !script.is_file() {
+        return Err(InstallError::InvalidConfiguration(format!(
+            "upstream installer {} was not found",
+            script.display()
+        )));
+    }
+    let conda = installer.ensure_conda()?;
+    let mut command = Command::new(conda);
+    command
+        .args(["run", "--name", environment, "bash"])
+        .arg(script)
+        .args(arguments)
+        .current_dir(cwd);
     installer.checked(&mut command)
 }
