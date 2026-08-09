@@ -33,6 +33,9 @@ Handles the following tasks:
 - Check status/health
 - View metadata
 
+**Note**: Many of these tools only work on Linux. If you attempt to install one of these on Windows,
+you will get an error explicitly stating this. The `list` commands also will state which tools
+are Linux only, if you are on a different OS.
 
 ## Quickstart
 
