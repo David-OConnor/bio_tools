@@ -54,8 +54,12 @@ macro_rules! python_enum {
                 format!("<{}.{}: {}>", $python_name, self.name, self.value)
             }
 
-            fn __eq__(&self, other: &Self) -> bool {
-                self.inner == other.inner
+            /// Comparison against an unrelated object is `False` rather than a
+            /// `TypeError`, matching how Python's own enums behave.
+            fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
+                other
+                    .cast::<Self>()
+                    .is_ok_and(|other| self.inner == other.borrow().inner)
             }
 
             fn __hash__(&self) -> u8 {

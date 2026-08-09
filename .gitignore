@@ -4,7 +4,7 @@
 
 # Rust
 /target
-Cargo.lock
+# Cargo.lock is committed, since this crate ships a binary.
 
 /python/target/
 
@@ -14,3 +14,5 @@ Cargo.lock
 applications
 
 /.claude
+
+/python/dist/

@@ -2,18 +2,38 @@
 name = "bio_tools"
 version = "0.1.0"
 edition = "2024"
+authors = ["David O'Connor <the_alchemist@fastmail.com>"]
+description = "Install, run, and inspect computational biology and chemistry tools, e.g. AlphaFold, Boltz, RFdiffusion, and ProteinMPNN"
+keywords = ["biology", "bioinformatics", "alphafold", "proteins", "installer"]
+categories = [
+    "science::bioinformatics",
+    "science::computational-biology::structural-modeling",
+    "science::computational-chemistry::cheminformatics",
+    "command-line-utilities",
+]
+repository = "https://github.com/David-OConnor/bio_tools"
+documentation = "https://docs.rs/bio_tools"
+readme = "README.md"
+license = "MIT"
+exclude = [".gitignore", ".idea/**", "python/**"]
+
 
 [features]
-default = []
+default = ["cli"]
+# Builds the standalone `bio_tools` executable. Adds no dependencies.
 cli = []
 
+
+# The standalone CLI application.
 [[bin]]
 name = "bio_tools"
 path = "src/main.rs"
 required-features = ["cli"]
+
+
 [dependencies]
-ureq = "3.3.0"
-url = "2.5.8"
+ureq = "3.3.0"  # Downloading tool assets and source distributions.
+url = "2.5.8"  # Validating download URLs prior to fetching them.
 
 # todo: These A/R
 #na_seq = "0.3.15"

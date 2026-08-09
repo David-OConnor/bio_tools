@@ -421,14 +421,10 @@ impl CommandRunner {
         let mut child = match command.spawn() {
             Ok(child) => child,
             Err(source) => {
-                if let Some(run_log) = &run_log {
-                    if let Err(log_error) = run_log.record_start_error(&source) {
-                        append_log_error(
-                            run_log.directory(),
-                            "recording start failure",
-                            &log_error,
-                        );
-                    }
+                if let Some(run_log) = &run_log
+                    && let Err(log_error) = run_log.record_start_error(&source)
+                {
+                    append_log_error(run_log.directory(), "recording start failure", &log_error);
                 }
                 return Err(RunError::Start {
                     program: spec.program.clone(),

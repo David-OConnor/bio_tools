@@ -1,8 +1,19 @@
-//! Much of this module is adapted from `bio_web`; ideally it replaces it.
+//! Install, run, and inspect third-party computational biology and chemistry tools, e.g.
+//! AlphaFold, Boltz, RFdiffusion, and ProteinMPNN.
+//!
+//! The crate has three parts, usable independently:
+//!
+//! - [`tool_definitions::catalog`]: static, tool-agnostic metadata (summary, description,
+//!   license, official links, cost, category) for every supported tool.
+//! - [`install`]: [`install::Installer`] owns per-tool environments and assets under a
+//!   caller-chosen root, replacing application-specific shell and PowerShell scripts.
+//! - [`run`]: [`run::CommandSpec`] describes a shell-free invocation; [`run::run`] executes it
+//!   with bounded capture, a timeout, and an optional on-disk run log.
+//!
+//! The `cli` feature (on by default) additionally builds the standalone `bio_tools` executable.
+//! See the README for worked Rust and Python examples.
 
 use std::{fmt, io, path::Path};
-
-use crate::input::InputField;
 
 mod input;
 pub mod install;
@@ -66,35 +77,6 @@ impl fmt::Display for ToolCategory {
         };
         write!(f, "{}", s)
     }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ComputationDeviceConfigured {
-    /// CPU only; maybe only supports CPU, or maybe GPU is not configured or available
-    Cpu,
-    /// Or CPU + GPU
-    Gpu,
-}
-
-/// These fields can be `None` if not able to be determined, or if not applicable for a given tool.
-#[derive(Clone, Debug)]
-pub struct InstallationMetadata {
-    /// The version of the tool installed
-    pub version: String,
-    pub computation_device: Option<ComputationDeviceConfigured>,
-    /// E.g. CUDA version in use, CPU AVX/SSE instructions available etc or number of cores detected.
-    pub computation_details: Option<String>,
-    /// Per tool specifics if available.
-    pub details: String,
-}
-
-/// The status of an individual tool's installation or availability.
-/// Each includes descriptive text
-#[derive(Clone, Debug)]
-pub enum Status {
-    Pass(InputField),
-    Fault(InstallationMetadata),
-    NotFound,
 }
 
 /// Used to categorize tools by which OS they support.
@@ -350,15 +332,6 @@ impl Process {
             top_choice,
             spec,
         }
-    }
-
-    /// Status probing requires installation layout and is exposed by
-    /// install::Installer.
-    pub fn status(&self) -> io::Result<Status> {
-        Err(io::Error::new(
-            io::ErrorKind::Unsupported,
-            "use Installer::status with a configured installation layout",
-        ))
     }
 
     /// Install this process to the caller's managed tools directory.

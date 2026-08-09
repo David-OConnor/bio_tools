@@ -13,7 +13,7 @@ use pyo3::{exceptions::PyRuntimeError, prelude::*};
 
 use crate::run::{PyCommandOutput, command_label, execute};
 
-#[pyclass(name = "Status", frozen, skip_from_py_object)]
+#[pyclass(name = "Status", module = "bio_tools", frozen, skip_from_py_object)]
 #[derive(Clone)]
 struct PyStatus {
     #[pyo3(get)]
@@ -49,7 +49,7 @@ impl PyStatus {
     }
 }
 
-#[pyclass(name = "UninstallReport", frozen, skip_from_py_object)]
+#[pyclass(name = "UninstallReport", module = "bio_tools", frozen, skip_from_py_object)]
 #[derive(Clone)]
 struct PyUninstallReport {
     #[pyo3(get)]
@@ -81,7 +81,7 @@ impl PyUninstallReport {
     }
 }
 
-#[pyclass(name = "Tool", frozen, skip_from_py_object)]
+#[pyclass(name = "Tool", module = "bio_tools", frozen, skip_from_py_object)]
 #[derive(Clone)]
 struct PyTool {
     slug: String,
@@ -239,7 +239,7 @@ impl PyTool {
     }
 }
 
-#[pyclass(name = "Installer", unsendable)]
+#[pyclass(name = "Installer", module = "bio_tools", unsendable)]
 struct PyInstaller {
     inner: RustInstaller,
 }
@@ -596,6 +596,7 @@ fn failing(detail: impl Into<String>) -> PyStatus {
 
 #[pymodule]
 fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     metadata::register(m)?;
     run::register(m)?;
     m.add_class::<PyTool>()?;

@@ -1,5 +1,10 @@
 //! A descriptor of CLI input arguments to a program. These are applicable to both GUis,
 //! and APIs.
+//!
+//! todo: Not yet wired into the public API; `tool_definitions::catalog::fields` serves this
+//! todo: role for now.
+
+#![allow(dead_code)]
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum FieldType {

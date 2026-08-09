@@ -3,26 +3,33 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "bio-tools"
-description = "Install and inspect computational biology tools using the bio_tools Rust library"
+name = "athanor_bio_tools"
+description = "Install, run, and inspect computational biology and chemistry tools, e.g. AlphaFold, Boltz, RFdiffusion, and ProteinMPNN"
 requires-python = ">=3.10"
 authors = [{ name = "David O'Connor", email = "the_alchemist@fastmail.com" }]
 readme = "PYPI_README.md"
 license = { file = "PYPI_LICENSE" }
-keywords = ["biology", "bioinformatics", "installer", "scientific-computing"]
+keywords = ["biology", "bioinformatics", "alphafold", "proteins", "installer"]
 dynamic = ["version"]
 
 classifiers = [
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
+    "Operating System :: OS Independent",
 ]
 
 [project.urls]
 homepage = "https://github.com/David-OConnor/bio_tools"
 repository = "https://github.com/David-OConnor/bio_tools"
+documentation = "https://docs.rs/bio_tools"
 
 [tool.maturin]
+# The distribution is `athanor_bio_tools`; the module it installs is `bio_tools`.
 module-name = "bio_tools"
+# Using ABI3 allows this to work on any Python version > 3.10; not just 3.10.
 features = ["pyo3/extension-module", "pyo3/abi3-py310"]

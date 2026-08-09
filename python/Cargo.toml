@@ -2,6 +2,11 @@
 name = "bio_tools_py"
 version = "0.1.0"
 edition = "2024"
+authors = ["David O'Connor <the_alchemist@fastmail.com>"]
+description = "Python bindings for the bio_tools crate"
+license = "MIT"
+# This crate builds the PyPI wheel; the Rust library is published from the parent directory.
+publish = false
 
 [lib]
 name = "bio_tools"
