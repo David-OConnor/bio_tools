@@ -40,29 +40,21 @@ Handles the following tasks:
 Install a prebuilt binary for Linux, Windows, or Mac from the
 [Releases page](https://github.com/David-OConnor/bio_tools/releases), or build it with Cargo:
 
-```sh
-cargo install bio_tools
-```
+`cargo install bio_tools`
 
 Either way you end up with `bio_tools` on your path.
 
 ### As a Rust library
-
-```sh
-cargo add bio_tools
-```
+`cargo add bio_tools``
 
 ### As a Python library
 
 The PyPI distribution is named `athanor_bio_tools`. The module you import is `bio_tools`.
 
-```sh
-pip install athanor_bio_tools
-```
+`pip install athanor_bio_tools`
+Or
+`uv add athanor_bio_tools`
 
-```sh
-uv add athanor_bio_tools
-```
 
 ### Usage
 Run the program with no parameters to see its functionality:
@@ -82,7 +74,6 @@ Examples:
 - `bio_tools install boltz`
 - `bio_tools uninstall proteinmpnn`
 - `bio_tools list-quick`
-- 
 
 ## Generic interfaces and code consolidation
 

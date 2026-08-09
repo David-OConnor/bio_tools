@@ -131,18 +131,40 @@ foreach ($tool in @('git', 'cargo', 'uv')) {
 }
 
 # Credentials are checked now rather than at upload time, so a missing PyPI token cannot
-# strand us with the crate published and the wheel not.
+# strand us with the crate published and the wheel not. A missing token is asked for once
+# and saved to the user's environment, so later runs find it already there.
 if (-not $DryRun) {
     if (-not $SkipRust) {
         $cargoCredentials = Join-Path $HOME '.cargo/credentials.toml'
         if (-not $env:CARGO_REGISTRY_TOKEN -and -not (Test-Path $cargoCredentials)) {
-            throw "No crates.io credentials. Run ``cargo login`` or set CARGO_REGISTRY_TOKEN."
+            Write-Step 'crates.io login needed'
+            Write-Host '    Get a token at https://crates.io/settings/tokens' -ForegroundColor DarkGray
+            & cargo login
+            if ($LASTEXITCODE -ne 0 -or -not (Test-Path $cargoCredentials)) {
+                throw 'crates.io login did not complete.'
+            }
         }
     }
     if (-not $SkipPython) {
         $pypirc = Join-Path $HOME '.pypirc'
+        if (-not $env:UV_PUBLISH_TOKEN) {
+            # A User-scope variable set on an earlier run is not in this process if the shell
+            # predates it, so read it back explicitly before asking again.
+            $saved = [Environment]::GetEnvironmentVariable('UV_PUBLISH_TOKEN', 'User')
+            if ($saved) { $env:UV_PUBLISH_TOKEN = $saved }
+        }
         if (-not $env:UV_PUBLISH_TOKEN -and -not (Test-Path $pypirc)) {
-            throw "No PyPI credentials. Set UV_PUBLISH_TOKEN to a PyPI API token, or create ~/.pypirc."
+            Write-Step 'PyPI login needed'
+            Write-Host '    Create an API token at https://pypi.org/manage/account/token/' -ForegroundColor DarkGray
+            Write-Host '    (scope it to athanor-bio-tools, or "Entire account" for the first upload)' -ForegroundColor DarkGray
+            Write-Host ''
+            $token = (Read-Host '    Paste the token (starts with pypi-)').Trim()
+            if ($token -notlike 'pypi-*') {
+                throw 'That does not look like a PyPI API token; it should start with "pypi-".'
+            }
+            $env:UV_PUBLISH_TOKEN = $token
+            [Environment]::SetEnvironmentVariable('UV_PUBLISH_TOKEN', $token, 'User')
+            Write-Host '    Saved for future runs; you will not be asked again.' -ForegroundColor DarkGray
         }
     }
 }
