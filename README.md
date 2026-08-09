@@ -41,7 +41,10 @@ Handles the following tasks:
 Download a prebuilt binary for Linux or Windows from the
 [Releases page](https://github.com/David-OConnor/bio_tools/releases), or build it with Cargo:
 
-`cargo install bio_tools`
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo install bio_tools
+```
 
 Either way, you end up with `bio_tools` on your path.
 
@@ -250,3 +253,16 @@ The `python/` package builds an ABI3 wheel with PyO3 and maturin, published to P
 `athanor_bio_tools`. It exposes the same process metadata, command runner, installer, and status
 probes; see the examples above, and [the Rust docs](https://docs.rs/bio_tools) for details on the
 underlying types.
+
+
+## Compiling from source
+Run this from the project root. You only need the first step if you don't have the Rust
+toolchain installed. (And that specific command is for Linux; MacOS and Windows have similarly
+straightforward ways to install it)
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo b --release
+```
+
+The binary will be placed in `bio_tools/target/release`
