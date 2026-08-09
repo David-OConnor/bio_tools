@@ -53,12 +53,12 @@ override is required only on certain Linux distributions.
 
 ### As a CLI application
 
-`pip install bio_tools_app`
+`pip install bio_tools_app `
+(See note above about `--break-system-packages` if you get an error when running this)
 
-This installs the prebuilt `bio_tools` executable onto your PATH. (`uv tool install bio_tools_app` works too.)
+This installs the prebuilt `bio_tools` executable onto your PATH. `uv tool install bio_tools_app` works too.
 
-Alternatively, download a prebuilt binary for Linux or Windows from the
-[Releases page](https://github.com/David-OConnor/bio_tools/releases), or build it with Cargo:
+Alternatively, download a prebuilt binary from the [Releases page](https://github.com/David-OConnor/bio_tools/releases), or build it with Cargo:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -79,7 +79,7 @@ The PyPI distribution is named `athanor_bio_tools`. The module you import is `bi
 `cargo add bio_tools`
 
 
-### Usage
+### CLI application usage
 Run the program with no parameters to see its functionality:
 `bio_tools`
 ```bash
@@ -98,6 +98,7 @@ Examples:
 - `bio_tools install boltz`
 - `bio_tools uninstall proteinmpnn`
 - `bio_tools list-quick`
+
 
 ## Generic interfaces and code consolidation
 
