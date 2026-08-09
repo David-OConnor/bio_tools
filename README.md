@@ -30,7 +30,8 @@ Handles the following tasks:
 - Install
 - Uninstall
 - Run (Including abstractions over what inputs are accepted per tool)
-- Check status
+- Check status/health
+- View metadata
 
 
 ## Quickstart
