@@ -50,14 +50,18 @@ fn real_main() -> Result<(), Box<dyn Error>> {
             return Err(format!("{command} does not accept arguments").into());
         }
         let installer = Installer::from_environment(root)?;
+
+        println!("\nStatuses by tool\n====================");
         for tool in Tool::ALL {
             let status = if command == "list-quick" {
                 installer.status_quick(tool)
             } else {
                 installer.status_full(tool)
             };
-            println!("{}: {}", tool.name(), format_status(&status));
+            println!("- {}: {}", tool.name(), format_status(&status));
         }
+        println!("====================");
+
         return Ok(());
     }
     if command == "metadata" {

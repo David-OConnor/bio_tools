@@ -35,29 +35,30 @@ Handles the following tasks:
 
 ## Quickstart
 
-### As a standalone CLI application
+### As a CLI application
 
-Install a prebuilt binary for Linux, Windows, or Mac from the
+Download a prebuilt binary for Linux or Windows from the
 [Releases page](https://github.com/David-OConnor/bio_tools/releases), or build it with Cargo:
 
 `cargo install bio_tools`
 
-Either way you end up with `bio_tools` on your path.
-
-### As a Rust library
-`cargo add bio_tools``
+Either way, you end up with `bio_tools` on your path.
 
 ### As a Python library
+`uv add athanor_bio_tools`
+Or
+`pip install athanor_bio_tools`
 
 The PyPI distribution is named `athanor_bio_tools`. The module you import is `bio_tools`.
 
-`pip install athanor_bio_tools`
-Or
-`uv add athanor_bio_tools`
+
+### As a Rust library
+`cargo add bio_tools`
 
 
 ### Usage
 Run the program with no parameters to see its functionality:
+`bio_tools`
 ```bash
 Usage:
   bio_tools [--root <directory>] install <tool>
