@@ -5,13 +5,13 @@ use std::{env, path::PathBuf, time::Duration};
 
 use bio_tools_rs::{
     install::{Installer as RustInstaller, UninstallReport},
-    run::{CaptureLimits, CommandSpec, ExitPolicy},
+    run::{CaptureLimits, CommandSpec, ExitPolicy, RunLogSpec},
     status::{StatusKind, ToolStatus},
     tool_definitions::Tool,
 };
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
 
-use crate::run::{PyCommandOutput, execute};
+use crate::run::{PyCommandOutput, command_label, execute};
 
 #[pyclass(name = "Status", frozen, skip_from_py_object)]
 #[derive(Clone)]
@@ -274,7 +274,17 @@ impl PyInstaller {
     }
 
     /// Run a tool's console entry point with its managed environment activated.
-    #[pyo3(signature = (tool, arguments=Vec::new(), *, cwd=None, timeout=None, check=true))]
+    #[pyo3(signature = (
+        tool,
+        arguments=Vec::new(),
+        *,
+        cwd=None,
+        timeout=None,
+        check=true,
+        run_log_dir=None,
+        run_name=None,
+        artifacts=None
+    ))]
     fn run(
         &self,
         py: Python<'_>,
@@ -283,6 +293,9 @@ impl PyInstaller {
         cwd: Option<PathBuf>,
         timeout: Option<f64>,
         check: bool,
+        run_log_dir: Option<PathBuf>,
+        run_name: Option<String>,
+        artifacts: Option<Vec<PathBuf>>,
     ) -> PyResult<PyCommandOutput> {
         let tool = tool.recipe()?;
         if timeout.is_some_and(|seconds| !seconds.is_finite() || seconds < 0.0) {
@@ -291,7 +304,7 @@ impl PyInstaller {
             ));
         }
         let mut command = self.inner.tool_command(tool).args(arguments.clone());
-        if let Some(path) = cwd {
+        if let Some(path) = &cwd {
             command = command.current_dir(path);
         }
         command = command.timeout(timeout.map(std::time::Duration::from_secs_f64));
@@ -300,6 +313,12 @@ impl PyInstaller {
         } else {
             ExitPolicy::AllowFailure
         });
+        if let Some(root) = run_log_dir {
+            let label = run_name.unwrap_or_else(|| command_label(tool.slug()));
+            let artifacts =
+                artifacts.unwrap_or_else(|| cwd.iter().map(|_| PathBuf::from(".")).collect());
+            command = command.run_log(RunLogSpec::new(root, label).artifacts(artifacts));
+        }
         let display = std::iter::once(command.program.to_string_lossy().into_owned())
             .chain(arguments)
             .collect();

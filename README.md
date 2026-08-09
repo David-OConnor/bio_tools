@@ -19,18 +19,21 @@ can add many of them without repeating code
 
 `run::CommandSpec` describes a shell-free invocation independently of any one
 tool. `CommandRunner` builds a `std::process::Command`, overlays environment
-variables, writes optional stdin, drains bounded stdout and stderr concurrently,
-enforces a timeout, and either returns or rejects non-zero exits according to
-`ExitPolicy`:
+variables, writes optional stdin (or closes it when absent), drains bounded
+stdout and stderr concurrently, enforces a timeout, and either returns or
+rejects non-zero exits according to `ExitPolicy`:
 
 ```rust
 use std::time::Duration;
-use bio_tools::run::{run, CommandSpec};
+use bio_tools::run::{run, CommandSpec, RunLogSpec};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let command = CommandSpec::new("opendde")
         .args(["predict", "input.yaml"])
         .current_dir("work")
+        .run_log(
+            RunLogSpec::new("process_executables/run_logs", "opendde").artifact("."),
+        )
         .timeout(Duration::from_secs(600));
     let output = run(&command)?;
     println!("{}", output.stdout_lossy());
@@ -112,6 +115,16 @@ result = bio_tools.Command(
     ["opendde", "predict", "input.yaml"],
     cwd=Path("work"),
     timeout=600,
+    run_log_dir=Path("process_executables/run_logs"),
+    run_name="opendde",
 ).run()
 print(result.stdout)
+print(result.run_log_dir)
 ```
+
+When `run_log_dir` is set, each invocation gets a unique directory below the
+given root and run name. `run.log` combines the exact argument vector, optional
+stdin, result, and complete stdout/stderr. The same streams are also available
+as `stdout.txt` and `stderr.txt`; `inputs/` contains the pre-run artifact
+snapshot and `outputs/` contains only files created or changed by the command.
+The in-memory output limit does not truncate these on-disk stream files.

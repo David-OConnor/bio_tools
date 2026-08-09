@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::PathBuf, time::Duration};
 
-use bio_tools_rs::run::{CaptureLimits, CommandSpec, ExitPolicy};
+use bio_tools_rs::run::{CaptureLimits, CommandSpec, ExitPolicy, RunLogSpec};
 use pyo3::{create_exception, exceptions::PyRuntimeError, prelude::*};
 
 create_exception!(bio_tools, CommandError, PyRuntimeError);
@@ -22,6 +22,8 @@ pub(crate) struct PyCommandOutput {
     stderr: String,
     #[pyo3(get)]
     elapsed_seconds: f64,
+    #[pyo3(get)]
+    run_log_dir: Option<PathBuf>,
 }
 
 /// Execute a prepared Rust command specification for any Python-facing API.
@@ -37,6 +39,7 @@ pub(crate) fn execute(
             stdout: output.stdout_lossy(),
             stderr: output.stderr_lossy(),
             elapsed_seconds: output.elapsed.as_secs_f64(),
+            run_log_dir: output.run_log_dir,
         })
         .map_err(|error| CommandError::new_err(error.to_string()))
 }
@@ -61,6 +64,9 @@ pub(crate) struct PyCommand {
     env: HashMap<String, String>,
     check: bool,
     output_limit: usize,
+    run_log_dir: Option<PathBuf>,
+    run_name: Option<String>,
+    artifacts: Option<Vec<PathBuf>>,
 }
 
 #[pymethods]
@@ -74,7 +80,10 @@ impl PyCommand {
         stdin=None,
         env=None,
         check=true,
-        output_limit=100_000
+        output_limit=100_000,
+        run_log_dir=None,
+        run_name=None,
+        artifacts=None
     ))]
     fn new(
         command: Vec<String>,
@@ -84,6 +93,9 @@ impl PyCommand {
         env: Option<HashMap<String, String>>,
         check: bool,
         output_limit: usize,
+        run_log_dir: Option<PathBuf>,
+        run_name: Option<String>,
+        artifacts: Option<Vec<PathBuf>>,
     ) -> PyResult<Self> {
         if command.first().is_none_or(String::is_empty) {
             return Err(pyo3::exceptions::PyValueError::new_err(
@@ -103,6 +115,9 @@ impl PyCommand {
             env: env.unwrap_or_default(),
             check,
             output_limit,
+            run_log_dir,
+            run_name,
+            artifacts,
         })
     }
 
@@ -123,6 +138,17 @@ impl PyCommand {
         if let Some(stdin) = &self.stdin {
             spec = spec.stdin(stdin.as_bytes().to_vec());
         }
+        if let Some(root) = &self.run_log_dir {
+            let label = self
+                .run_name
+                .clone()
+                .unwrap_or_else(|| command_label(&self.command[0]));
+            let artifacts = self
+                .artifacts
+                .clone()
+                .unwrap_or_else(|| self.cwd.iter().map(|_| PathBuf::from(".")).collect());
+            spec = spec.run_log(RunLogSpec::new(root, label).artifacts(artifacts));
+        }
 
         execute(py, spec, self.command.clone())
     }
@@ -133,6 +159,15 @@ impl PyCommand {
             self.command, self.cwd, self.timeout, self.check
         )
     }
+}
+
+pub(crate) fn command_label(program: &str) -> String {
+    std::path::Path::new(program)
+        .file_stem()
+        .and_then(|name| name.to_str())
+        .filter(|name| !name.is_empty())
+        .unwrap_or("command")
+        .to_owned()
 }
 
 pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -8,6 +8,7 @@ mod input;
 pub mod install;
 mod output;
 pub mod run;
+mod run_log;
 pub mod status;
 pub mod tool_definitions;
 

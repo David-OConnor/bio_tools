@@ -12,12 +12,16 @@ use std::{
     error::Error,
     ffi::{OsStr, OsString},
     fmt,
+    fs::File,
     io::{self, Read, Write},
     path::PathBuf,
     process::{Command, ExitStatus, Stdio},
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
+
+pub use crate::run_log::RunLogSpec;
+use crate::run_log::{ActiveRunLog, append_log_error};
 
 /// Whether a non-zero exit status is returned to the caller or treated as an
 /// execution error.
@@ -73,6 +77,7 @@ pub struct CommandSpec {
     pub environment: BTreeMap<OsString, OsString>,
     pub exit_policy: ExitPolicy,
     pub capture_limits: CaptureLimits,
+    pub run_log: Option<RunLogSpec>,
 }
 
 impl CommandSpec {
@@ -87,6 +92,7 @@ impl CommandSpec {
             environment: BTreeMap::new(),
             exit_policy: ExitPolicy::RequireSuccess,
             capture_limits: CaptureLimits::default(),
+            run_log: None,
         }
     }
 
@@ -153,6 +159,11 @@ impl CommandSpec {
         self
     }
 
+    pub fn run_log(mut self, settings: RunLogSpec) -> Self {
+        self.run_log = Some(settings);
+        self
+    }
+
     /// A shell-free, diagnostic representation of the argument vector.
     pub fn display_command(&self) -> String {
         std::iter::once(self.program.as_os_str())
@@ -182,6 +193,7 @@ pub struct CommandOutput {
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
     pub elapsed: Duration,
+    pub run_log_dir: Option<PathBuf>,
 }
 
 impl CommandOutput {
@@ -228,6 +240,10 @@ pub enum RunError {
     Wait {
         source: io::Error,
     },
+    Log {
+        action: &'static str,
+        source: io::Error,
+    },
     Timeout {
         timeout: Duration,
         output: CommandOutput,
@@ -250,7 +266,8 @@ impl RunError {
             Self::Start { source, .. }
             | Self::Input { source }
             | Self::Output { source, .. }
-            | Self::Wait { source } => Some(source.kind()),
+            | Self::Wait { source }
+            | Self::Log { source, .. } => Some(source.kind()),
             _ => None,
         }
     }
@@ -277,6 +294,12 @@ impl fmt::Display for RunError {
             }
             Self::Wait { source } => {
                 write!(formatter, "The tool could not be waited on: {source}.")
+            }
+            Self::Log { action, source } => {
+                write!(
+                    formatter,
+                    "The tool run could not be audited while {action}: {source}."
+                )
             }
             Self::Timeout { timeout, .. } => write!(
                 formatter,
@@ -309,7 +332,8 @@ impl Error for RunError {
             Self::Start { source, .. }
             | Self::Input { source }
             | Self::Output { source, .. }
-            | Self::Wait { source } => Some(source),
+            | Self::Wait { source }
+            | Self::Log { source, .. } => Some(source),
             _ => None,
         }
     }
@@ -344,6 +368,16 @@ impl CommandRunner {
             return Err(RunError::EmptyProgram);
         }
 
+        let run_log = spec
+            .run_log
+            .as_ref()
+            .map(|settings| ActiveRunLog::start(spec, settings))
+            .transpose()
+            .map_err(|source| RunError::Log {
+                action: "preparing the log",
+                source,
+            })?;
+
         let mut command = Command::new(&spec.program);
         command
             .args(&spec.arguments)
@@ -362,20 +396,53 @@ impl CommandRunner {
 
         if spec.stdin.is_some() {
             command.stdin(Stdio::piped());
+        } else {
+            command.stdin(Stdio::null());
         }
 
+        let stdout_log = run_log
+            .as_ref()
+            .map(ActiveRunLog::stdout_file)
+            .transpose()
+            .map_err(|source| RunError::Log {
+                action: "opening stdout.txt",
+                source,
+            })?;
+        let stderr_log = run_log
+            .as_ref()
+            .map(ActiveRunLog::stderr_file)
+            .transpose()
+            .map_err(|source| RunError::Log {
+                action: "opening stderr.txt",
+                source,
+            })?;
+
         let started = Instant::now();
-        let mut child = command.spawn().map_err(|source| RunError::Start {
-            program: spec.program.clone(),
-            source,
-        })?;
+        let mut child = match command.spawn() {
+            Ok(child) => child,
+            Err(source) => {
+                if let Some(run_log) = &run_log {
+                    if let Err(log_error) = run_log.record_start_error(&source) {
+                        append_log_error(
+                            run_log.directory(),
+                            "recording start failure",
+                            &log_error,
+                        );
+                    }
+                }
+                return Err(RunError::Start {
+                    program: spec.program.clone(),
+                    source,
+                });
+            }
+        };
 
         let stdout = child.stdout.take().expect("stdout was configured as piped");
         let stderr = child.stderr.take().expect("stderr was configured as piped");
         let stdout_limit = spec.capture_limits.stdout;
         let stderr_limit = spec.capture_limits.stderr;
-        let stdout_reader = thread::spawn(move || read_tail(stdout, stdout_limit));
-        let stderr_reader = thread::spawn(move || read_tail(stderr, stderr_limit));
+        let stdout_reader = thread::spawn(move || read_tail(stdout, stdout_limit, stdout_log));
+        let stderr_reader = thread::spawn(move || read_tail(stderr, stderr_limit, stderr_log));
 
         let input_writer = spec.stdin.as_ref().map(|input| {
             let mut stdin = child.stdin.take().expect("stdin was configured as piped");
@@ -423,7 +490,19 @@ impl CommandRunner {
             stdout,
             stderr,
             elapsed: started.elapsed(),
+            run_log_dir: run_log
+                .as_ref()
+                .map(|run_log| run_log.directory().to_owned()),
         };
+
+        if let Some(run_log) = &run_log {
+            run_log
+                .finish(&output, timed_out)
+                .map_err(|source| RunError::Log {
+                    action: "finalizing the log",
+                    source,
+                })?;
+        }
 
         if timed_out {
             return Err(RunError::Timeout {
@@ -443,13 +522,23 @@ pub fn run(spec: &CommandSpec) -> Result<CommandOutput, RunError> {
     CommandRunner::default().run(spec)
 }
 
-fn read_tail(mut reader: impl Read, limit: usize) -> io::Result<Vec<u8>> {
+fn read_tail(
+    mut reader: impl Read,
+    limit: usize,
+    mut full_log: Option<File>,
+) -> io::Result<Vec<u8>> {
     let mut retained = Vec::with_capacity(limit.min(8 * 1024));
     let mut buffer = [0_u8; 8 * 1024];
     loop {
         let count = reader.read(&mut buffer)?;
         if count == 0 {
+            if let Some(log) = &mut full_log {
+                log.flush()?;
+            }
             return Ok(retained);
+        }
+        if let Some(log) = &mut full_log {
+            log.write_all(&buffer[..count])?;
         }
         if limit == 0 {
             continue;
@@ -541,6 +630,60 @@ mod tests {
         let output = run(&spec).unwrap();
         assert!(output.stdout.ends_with(b"6789\r\n") || output.stdout.ends_with(b"6789\n"));
         assert!(output.stdout.len() <= 6);
+    }
+
+    #[test]
+    fn durable_log_keeps_full_streams_and_changed_artifacts() {
+        let root = std::env::temp_dir().join(format!(
+            "bio-tools-run-log-test-{}-{}",
+            std::process::id(),
+            crate::run_log::test_sequence()
+        ));
+        let work = root.join("work");
+        std::fs::create_dir_all(&work).unwrap();
+        std::fs::write(work.join("input.txt"), "input").unwrap();
+
+        let script = if cfg!(windows) {
+            "type input.txt & echo result>output.txt & echo warning 1>&2"
+        } else {
+            "cat input.txt; printf result > output.txt; printf warning >&2"
+        };
+        let spec = shell(script)
+            .current_dir(&work)
+            .capture_limits(CaptureLimits::new(2, 2))
+            .run_log(RunLogSpec::new(root.join("run_logs"), "example").artifact(&work));
+        let output = run(&spec).unwrap();
+        let log = output.run_log_dir.unwrap();
+
+        assert_eq!(output.stdout.len(), 2);
+        assert!(
+            std::fs::read_to_string(log.join("stdout.txt"))
+                .unwrap()
+                .contains("input")
+        );
+        assert!(
+            std::fs::read_to_string(log.join("stderr.txt"))
+                .unwrap()
+                .contains("warning")
+        );
+        assert_eq!(
+            std::fs::read_to_string(log.join("inputs/00-work/input.txt")).unwrap(),
+            "input"
+        );
+        assert_eq!(
+            std::fs::read_to_string(log.join("outputs/00-work/output.txt"))
+                .unwrap()
+                .trim(),
+            "result"
+        );
+        assert!(!log.join("outputs/00-work/input.txt").exists());
+        assert!(
+            std::fs::read_to_string(log.join("run.log"))
+                .unwrap()
+                .contains("===== STDOUT =====")
+        );
+
+        std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
