@@ -1,0 +1,38 @@
+[build-system]
+requires = ["maturin>=1.9,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "bio_tools_app"
+description = "The bio_tools command-line application, as a prebuilt binary. Install, run, and inspect computational biology and chemistry tools, e.g. AlphaFold, Boltz, RFdiffusion, and ProteinMPNN"
+requires-python = ">=3.10"
+authors = [{ name = "David O'Connor", email = "the_alchemist@fastmail.com" }]
+readme = "PYPI_README.md"
+license = { file = "PYPI_LICENSE" }
+keywords = ["biology", "bioinformatics", "alphafold", "proteins", "installer"]
+dynamic = ["version"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Programming Language :: Rust",
+]
+
+[project.urls]
+homepage = "https://github.com/David-OConnor/bio_tools"
+repository = "https://github.com/David-OConnor/bio_tools"
+documentation = "https://docs.rs/bio_tools"
+
+[tool.maturin]
+# The wheel contains the compiled `bio_tools` executable and no Python code: maturin puts the
+# binary in the wheel's `scripts` directory, so `pip install bio_tools_app` places it on PATH the
+# same way `cargo install bio_tools` does. Nothing here is imported from Python.
+bindings = "bin"
+# Built from the crate in the parent directory, so the executable and the version stay in step
+# with crates.io without a second copy of the source.
+manifest-path = "../Cargo.toml"
+strip = true

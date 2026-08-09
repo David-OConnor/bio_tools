@@ -30,34 +30,52 @@ Handles the following tasks:
 - Install
 - Uninstall
 - Run (Including abstractions over what inputs are accepted per tool)
-- Check status
+- Check status/health
+- View metadata
 
+**Note**: Many of these tools only work on Linux. If you attempt to install one of these on Windows,
+you will get an error explicitly stating this. The `list` commands also will state which tools
+are Linux only, if you are on a different OS.
 
 ## Quickstart
 
-### As a standalone CLI application
+```bash
+pip install bio_tools_app
+bio_tools install open_dde
+bio_tools run open_dde --version
+```
 
-Install a prebuilt binary for Linux, Windows, or Mac from the
+### As a CLI application
+
+`pip install bio_tools_app`
+
+This installs the prebuilt `bio_tools` executable onto your PATH. (`uv tool install bio_tools_app` works too.)
+
+Alternatively, download a prebuilt binary for Linux or Windows from the
 [Releases page](https://github.com/David-OConnor/bio_tools/releases), or build it with Cargo:
 
-`cargo install bio_tools`
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo install bio_tools
+```
 
-Either way you end up with `bio_tools` on your path.
-
-### As a Rust library
-`cargo add bio_tools``
+Any of these leaves you with `bio_tools` on your path.
 
 ### As a Python library
+`uv add athanor_bio_tools`
+Or
+`pip install athanor_bio_tools`
 
 The PyPI distribution is named `athanor_bio_tools`. The module you import is `bio_tools`.
 
-`pip install athanor_bio_tools`
-Or
-`uv add athanor_bio_tools`
+
+### As a Rust library
+`cargo add bio_tools`
 
 
 ### Usage
 Run the program with no parameters to see its functionality:
+`bio_tools`
 ```bash
 Usage:
   bio_tools [--root <directory>] install <tool>
@@ -248,3 +266,22 @@ The `python/` package builds an ABI3 wheel with PyO3 and maturin, published to P
 `athanor_bio_tools`. It exposes the same process metadata, command runner, installer, and status
 probes; see the examples above, and [the Rust docs](https://docs.rs/bio_tools) for details on the
 underlying types.
+
+The `python_cli/` package is unrelated to those bindings: it wraps the compiled `bio_tools`
+executable in a wheel, published to PyPI as `bio_tools_app`, so the CLI can be installed with
+`pip`. It builds the crate in the repository root, so there is no second copy of the source.
+Because it ships a binary, its wheels are per-platform and are published one platform at a time:
+`publish.ps1` builds the Windows wheel, and `publish_cli.sh` the Linux one.
+
+
+## Compiling from source
+Run this from the project root. You only need the first step if you don't have the Rust
+toolchain installed. (And that specific command is for Linux; MacOS and Windows have similarly
+straightforward ways to install it)
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo b --release
+```
+
+The binary will be placed in `bio_tools/target/release`

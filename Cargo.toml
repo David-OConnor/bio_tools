@@ -15,7 +15,7 @@ repository = "https://github.com/David-OConnor/bio_tools"
 documentation = "https://docs.rs/bio_tools"
 readme = "README.md"
 license = "MIT"
-exclude = [".gitignore", ".idea/**", "python/**"]
+exclude = [".gitignore", ".idea/**", "python/**", "python_cli/**"]
 
 
 [features]

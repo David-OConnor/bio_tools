@@ -16,3 +16,4 @@ applications
 /.claude
 
 /python/dist/
+/python_cli/dist/
