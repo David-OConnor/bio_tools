@@ -87,10 +87,10 @@ Usage:
   bio_tools [--root <directory>] install <tool>
   bio_tools [--root <directory>] uninstall <tool>
   bio_tools [--root <directory>] status-quick <tool>
-  bio_tools [--root <directory>] status-full <tool>
+  bio_tools [--root <directory>] status or status-full <tool>
   bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]
   bio_tools [--root <directory>] list-quick
-  bio_tools [--root <directory>] list-full
+  bio_tools [--root <directory>] list or list-full
   bio_tools metadata <tool>
 ```
 
@@ -242,12 +242,12 @@ The `bio_tools` executable wraps the same installer, status, and command-runner 
 ```sh
 bio_tools install opendde
 bio_tools status-quick opendde
-bio_tools status-full opendde
+bio_tools status opendde
 bio_tools metadata opendde
 bio_tools run opendde -- --help
 
 bio_tools list-quick
-bio_tools list-full
+bio_tools list
 
 bio_tools dir
 
@@ -258,14 +258,14 @@ bio_tools uninstall opendde
 and Python environments, and which of the settings below chose it. It creates nothing.
 
 `status-quick` inspects installation markers, executables, and required assets without launching the
-tool. `status-full` also runs the tool's help/version probe and imports Torch or JAX where applicable
-to report its compute device. The corresponding list commands are `list-quick` and `list-full`; the
-older `status` and `list` commands remain aliases for the full variants. `run` resolves an installed
+tool. `status` or `status-full` (They do the same) also runs the tool's help/version probe and imports Torch or JAX where applicable
+to report its compute device. The corresponding list commands are `list-quick` and `list` or `list-full`.
+`run` resolves an installed
 console entry point inside that managed environment, so it does not require the tool on `PATH`. Tools
 that only expose a Python module or checkout script still need a tool-specific library invocation.
 
 
-## Installation directory
+## Tool installation directory
 
 The CLI installs into one per-user directory, so the same tools are found no matter which directory
 `bio_tools` is launched from. Environments and model weights can reach tens of gigabytes, so it is
