@@ -1,10 +1,17 @@
 //! Optional standalone CLI application; a thin wrapper around the library API which can be launched
 //! without using it in a rust or python program
 
-use std::{env, error::Error, ffi::OsString, path::PathBuf, process, str::FromStr};
+use std::{
+    env,
+    error::Error,
+    ffi::OsString,
+    path::{Path, PathBuf},
+    process,
+    str::FromStr,
+};
 
 use bio_tools::{
-    install::{InstallEvent, Installer, StatusKind},
+    install::{InstallConfig, InstallEvent, Installer, StatusKind, default_root},
     run::run,
     tool_definitions::{
         Tool,
@@ -23,7 +30,7 @@ fn format_status(status: &bio_tools::install::ToolStatus) -> String {
     }
 }
 
-const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status-quick <tool>\n  bio_tools [--root <directory>] status-full <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools [--root <directory>] list-quick\n  bio_tools [--root <directory>] list-full\n  bio_tools metadata <tool>\n\n`status` and `list` remain aliases for their full variants. The installation root defaults to $BIO_TOOLS_ROOT, or ./.bio_tools when unset.";
+const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status-quick <tool>\n  bio_tools [--root <directory>] status-full <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools [--root <directory>] list-quick\n  bio_tools [--root <directory>] list-full\n  bio_tools [--root <directory>] dir\n  bio_tools metadata <tool>\n\n`status` and `list` remain aliases for their full variants. `dir` prints the directory tools are installed to.\nThat directory is $BIO_TOOLS_ROOT when set, otherwise this platform's per-user data directory; `--root <directory>` overrides both.";
 
 fn main() {
     if let Err(error) = real_main() {
@@ -38,13 +45,20 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         println!("{USAGE}");
         return Ok(());
     }
-    let root = take_root(&mut args)?;
+    let (root, root_source) = take_root(&mut args)?;
     let command = args
         .first()
         .and_then(|value| value.to_str())
         .ok_or("missing command")?
         .to_owned();
     args.remove(0);
+    if command == "dir" {
+        if !args.is_empty() {
+            return Err("dir does not accept arguments".into());
+        }
+        print_dir(&root, &root_source);
+        return Ok(());
+    }
     if matches!(command.as_str(), "list" | "list-full" | "list-quick") {
         if !args.is_empty() {
             return Err(format!("{command} does not accept arguments").into());
@@ -173,17 +187,58 @@ fn print_metadata(entry: &CatalogEntry) {
     }
 }
 
-fn take_root(args: &mut Vec<OsString>) -> Result<PathBuf, Box<dyn Error>> {
+/// Where the installation root came from, so `dir` can say which knob to reach for.
+enum RootSource {
+    Flag,
+    Environment,
+    Platform,
+}
+
+impl RootSource {
+    fn describe(&self) -> &'static str {
+        match self {
+            Self::Flag => "--root",
+            Self::Environment => "$BIO_TOOLS_ROOT",
+            Self::Platform => "this platform's per-user data directory (the default)",
+        }
+    }
+}
+
+fn take_root(args: &mut Vec<OsString>) -> Result<(PathBuf, RootSource), Box<dyn Error>> {
     if args.first().is_some_and(|arg| arg == "--root") {
         if args.len() < 2 {
             return Err("--root needs a directory".into());
         }
         args.remove(0);
-        return Ok(PathBuf::from(args.remove(0)));
+        return Ok((PathBuf::from(args.remove(0)), RootSource::Flag));
     }
-    Ok(env::var_os("BIO_TOOLS_ROOT")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(".bio_tools")))
+    // A root relative to the working directory would put a separate copy of every environment and
+    // model file beside each directory bio_tools happens to be launched from, so the fallback is
+    // the platform's canonical per-user location rather than `./.bio_tools`.
+    match env::var_os("BIO_TOOLS_ROOT").filter(|value| !value.is_empty()) {
+        Some(value) => Ok((PathBuf::from(value), RootSource::Environment)),
+        None => Ok((default_root(), RootSource::Platform)),
+    }
+}
+
+/// Report the resolved installation root, without creating or touching it.
+fn print_dir(root: &Path, source: &RootSource) {
+    let layout = &InstallConfig::new(root).layout;
+    println!(
+        "Installation root: {}{}",
+        root.display(),
+        if root.is_dir() {
+            ""
+        } else {
+            " (does not exist yet)"
+        }
+    );
+    println!("  Tool assets:         {}", layout.tools_root.display());
+    println!(
+        "  Python environments: {}",
+        layout.environment("<tool>").display()
+    );
+    println!("Set by: {}", source.describe());
 }
 
 fn run_tool(

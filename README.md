@@ -40,10 +40,16 @@ are Linux only, if you are on a different OS.
 ## Quickstart
 
 ```bash
-pip install bio_tools_app
+pip install bio_tools_app --break-system-packages
+
 bio_tools install open_dde
 bio_tools run open_dde --version
+
+bio_tools list-quick
 ```
+Note: Does not break system packages; this just downloads a binary and adds it to the path. That 
+override is required only on certain Linux distributions.
+
 
 ### As a CLI application
 
@@ -242,10 +248,13 @@ bio_tools run opendde -- --help
 bio_tools list-quick
 bio_tools list-full
 
+bio_tools dir
+
 bio_tools uninstall opendde
 ```
 
-It uses `$BIO_TOOLS_ROOT`, or `./.bio_tools` when unset; `--root <directory>` overrides both.
+`dir` prints the directory tools are installed to, along with the sub-directories holding tool assets
+and Python environments, and which of the settings below chose it. It creates nothing.
 
 `status-quick` inspects installation markers, executables, and required assets without launching the
 tool. `status-full` also runs the tool's help/version probe and imports Torch or JAX where applicable
@@ -253,6 +262,31 @@ to report its compute device. The corresponding list commands are `list-quick` a
 older `status` and `list` commands remain aliases for the full variants. `run` resolves an installed
 console entry point inside that managed environment, so it does not require the tool on `PATH`. Tools
 that only expose a Python module or checkout script still need a tool-specific library invocation.
+
+
+## Installation directory
+
+The CLI installs into one per-user directory, so the same tools are found no matter which directory
+`bio_tools` is launched from. Environments and model weights can reach tens of gigabytes, so it is
+the platform's per-user *data* directory rather than a configuration or roaming one:
+
+| OS | Directory | Typical path |
+| --- | --- | --- |
+| Linux | `$XDG_DATA_HOME/bio_tools`, or `~/.local/share/bio_tools` when `XDG_DATA_HOME` is unset | `/home/alice/.local/share/bio_tools` |
+| macOS | `~/Library/Application Support/bio_tools` | `/Users/alice/Library/Application Support/bio_tools` |
+| Windows | `%LOCALAPPDATA%\bio_tools`, i.e. `%USERPROFILE%\AppData\Local\bio_tools` | `C:\Users\alice\AppData\Local\bio_tools` |
+
+Inside it, `tools/` holds source checkouts, binary distributions, and model data, and each tool's
+isolated Python environment is a sibling directory named `<tool>-venv`.
+
+Two settings override that default, highest precedence first:
+
+- `--root <directory>`, for one invocation
+- `$BIO_TOOLS_ROOT`, for every invocation in that environment
+
+Run `bio_tools dir` to print the directory in effect and which of the three chose it. The library
+API takes its root as an argument and has no default; `bio_tools::install::default_root()` returns
+the same canonical directory for callers that want it.
 
 
 ## Example uses

@@ -34,6 +34,56 @@ pub use uninstall::UninstallReport;
 
 use crate::tool_definitions::Tool;
 
+/// Directory created inside the platform's per-user data directory by [`default_root`].
+const DEFAULT_ROOT_NAME: &str = "bio_tools";
+
+/// The canonical per-user installation root, for callers that have no directory of their own.
+///
+/// Tool environments and model weights are machine-local and can reach tens of gigabytes, so this
+/// is the platform's per-user *data* directory rather than a configuration or roaming one:
+///
+/// - Linux (and other Unix): `$XDG_DATA_HOME/bio_tools`, or `~/.local/share/bio_tools`
+/// - macOS: `~/Library/Application Support/bio_tools`
+/// - Windows: `%LOCALAPPDATA%\bio_tools`, or `%USERPROFILE%\AppData\Local\bio_tools`
+///
+/// If the home directory cannot be determined, this falls back to `.bio_tools` in the working
+/// directory, which is the only location guaranteed to be writable.
+pub fn default_root() -> PathBuf {
+    match platform_data_dir() {
+        Some(directory) => directory.join(DEFAULT_ROOT_NAME),
+        None => PathBuf::from(".bio_tools"),
+    }
+}
+
+/// `cfg!` rather than `#[cfg]` so every branch is type-checked on every platform.
+fn platform_data_dir() -> Option<PathBuf> {
+    if cfg!(windows) {
+        // LOCALAPPDATA rather than APPDATA: multi-gigabyte environments must not follow a roaming
+        // profile between machines.
+        return first_env_path(&["LOCALAPPDATA"])
+            .or_else(|| Some(home_dir()?.join("AppData").join("Local")));
+    }
+    let home = home_dir()?;
+    if cfg!(target_os = "macos") {
+        return Some(home.join("Library").join("Application Support"));
+    }
+    // The XDG base directory specification requires a relative XDG_DATA_HOME to be ignored.
+    Some(
+        first_env_path(&["XDG_DATA_HOME"])
+            .filter(|path| path.is_absolute())
+            .unwrap_or_else(|| home.join(".local").join("share")),
+    )
+}
+
+fn home_dir() -> Option<PathBuf> {
+    let names: &[&str] = if cfg!(windows) {
+        &["USERPROFILE"]
+    } else {
+        &["HOME"]
+    };
+    first_env_path(names)
+}
+
 /// How per-tool environments and non-Python assets are laid out.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InstallLayout {
