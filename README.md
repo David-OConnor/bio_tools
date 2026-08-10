@@ -7,10 +7,10 @@
 [Home page](https://www.athanorlab.com/rust-tools)
 
 An interface for running arbitrary CLI applications for biology and chemistry. It focuses on tools with permissive
-licencing, and ones which are most popular. Available as a rust library, a python library, and a standalone
-CLI application.
+licencing, and ones which are popular. Available as a rust library, a python library, and a standalone
+CLI application. If you'd like support for a new tool, please [create an issue on Github](https://github.com/David-OConnor/bio_tools/issues/new).
 
-Includes the most popular tools for structure prediction, sequence prediction, and drug design broadly. For example:
+Includes the most popular tools for structure prediction, sequence prediction, and drug design. Examples:
 
 - [AlphaFold 3](https://deepmind.google/science/alphafold/)
 - [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) and [LigandMPNN](https://github.com/dauparas/LigandMPNN)
@@ -23,13 +23,13 @@ Includes the most popular tools for structure prediction, sequence prediction, a
 - [ImmuneBuilder](https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabpred/abodybuilder2/)
 - [ThermoMPNN](https://github.com/Kuhlman-Lab/ThermoMPNN)
 
-Around 35 more are covered; see `Tool::ALL` and `tool_definitions::catalog` for the full set, each with its
+Around 35 more are covered; see [Tool::ALL](https://docs.rs/bio_tools/latest/bio_tools/tool_definitions/enum.Tool.html) and `tool_definitions::catalog` for the full set, each with its
 own summary, license, and official links.
 
 Handles the following tasks:
 - Install
 - Uninstall
-- Run (Including abstractions over what inputs are accepted per tool)
+- Run (Including abstractions over what inputs are accepted per tool, e.g. for the purposes of building a UI)
 - Check status/health
 - View metadata
 
@@ -43,7 +43,7 @@ are Linux only, if you are on a different OS.
 ```bash
 pip install bio_tools_app --break-system-packages
 
-bio_tools install open_dde
+bio_tools install boltz2
 bio_tools run open_dde --version
 
 bio_tools list-quick
@@ -67,6 +67,7 @@ cargo install bio_tools
 ```
 
 Any of these leaves you with `bio_tools` on your path.
+
 
 ### As a Python library
 `uv add athanor_bio_tools`
@@ -115,12 +116,12 @@ for each tool.
 
 ## Installing tools
 
-Handles installing applications. Details depend on the tool; some work by placing application executables in the
-appropriate places. Since many of these use Python, it uses [uv](https://docs.astral.sh/uv/) to set up isolated environments.
+(todo: Clean up these sections which describe implementation and code samples. And create an example
+folder with excerpts from *Bio Web* and *Molchanica.*)
 
-The Rust installer replaces application-owned shell and PowerShell orchestration. The caller owns
-the outer directory; `bio_tools` owns the stable per-tool layout, downloads, environments, GPU
-selection, and verification.
+Details depend on the tool; most work by downloading and placing application executables in the
+appropriate places. Many of these use Python; it sets them up using [uv](https://docs.astral.sh/uv/), [Micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), or MiniConda in isolated environments. Micromamba is a faster, less-encumbered version of Conda which works for some, but not all Conda packages.
+
 
 `InstallLayout::process_executables` standardizes both consumers on assets under
 `process_executables/` and environments under `process_executables/python_envs/`.
@@ -227,13 +228,16 @@ print(result.run_log_dir)
 `Installer::tool_command` (Python: `Installer.run`) is the variant to reach for when the tool lives in a
 managed environment rather than on `PATH`; it resolves the installed console entry point for you.
 
+
 ### Run logs
 
-When a run log is configured, each invocation gets a unique directory below the given root and run
+When a run log is configured, each invocation is assigned a unique directory below the given root and run
 name. `run.log` combines the exact argument vector, optional stdin, result, and complete
 stdout/stderr. The same streams are also available as `stdout.txt` and `stderr.txt`; `inputs/`
 contains the pre-run artifact snapshot and `outputs/` contains only files created or changed by the
-command. The in-memory output limit does not truncate these on-disk stream files.
+command.
+
+In general, these logs hold the full information used to invoke the tool, and its output. This includes *stdout*, *stderr*, params and input files it was run with, and its entire output including stdout, stderr, and output files (e.g. mmCIF).
 
 
 ## Standalone CLI
@@ -298,18 +302,17 @@ the same canonical directory for callers that want it.
 
 ## Python bindings
 
-The `python/` package builds an ABI3 wheel with PyO3 and maturin, published to PyPI as
-`athanor_bio_tools`. It exposes the same process metadata, command runner, installer, and status
+The `python/` package builds an ABI3 wheel with [PyO3](https://github.com/pyo3/pyo3) and [maturin](https://www.maturin.rs/), published to PyPI as
+[athanor_bio_tools](https://pypi.org/project/athanor_bio_tools/). It exposes the same process metadata, command runner, installer, and status
 probes; see the examples above, and [the Rust docs](https://docs.rs/bio_tools) for details on the
 underlying types.
 
 The `python_cli/` package is unrelated to those bindings: it wraps the compiled `bio_tools`
-executable in a wheel, published to PyPI as `bio_tools_app`, so the CLI can be installed with
-`pip`.
+executable in a wheel, published to PyPI as [bio_tools_app](https://pypi.org/project/bio_tools_app/), so the CLI can be installed with `pip`. This makes it easy to install and add to *PATH* for python users.
 
 
 ## Compiling from source
-Run this from the project root. You only need the first step if you don't have the Rust
+Run this from the project root. You only need the first line if you don't have the Rust
 toolchain installed. (And that specific command is for Linux; MacOS and Windows have similarly
 straightforward ways to install it)
 
@@ -318,4 +321,4 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 cargo b --release
 ```
 
-The binary will be placed in `bio_tools/target/release`
+The binary will be placed in `target/release`
