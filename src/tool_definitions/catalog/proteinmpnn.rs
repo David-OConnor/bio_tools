@@ -29,6 +29,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/dauparas/ProteinMPNN"),
         home_url: None,
         docs_url: None,
+        // todo: or www.biorxiv.org/content/10.1101/2022.06.03.494563v1
         paper_url: Some("https://doi.org/10.1126/science.add2187"),
         license: License::Mit,
         license_url: None,

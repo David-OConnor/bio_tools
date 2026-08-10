@@ -33,9 +33,10 @@ Handles the following tasks:
 - Check status/health
 - View metadata
 
-**Note**: Many of these tools only work on Linux. If you attempt to install one of these on Windows,
-you will get an error explicitly stating this. The `list` commands also will state which tools
+Many of these tools only work on Linux. If you attempt to install one of these on Windows,
+you will get an error explicitly stating this. The `list` commands states which tools
 are Linux only, if you are on a different OS.
+
 
 ## Quickstart
 
@@ -95,7 +96,7 @@ Usage:
 ```
 
 Examples:
-- `bio_tools install boltz`
+- `bio_tools install boltz2`
 - `bio_tools uninstall proteinmpnn`
 - `bio_tools list-quick`
 
@@ -104,10 +105,10 @@ Examples:
 
 This library provides an interface for input and output. This abstracts over the differences between tools, so applications
 can add many of them without repeating code. This library was built as the backbone of the
-[Athanor Bio Tools](https://athanortools.com/) web UI, and the external tool integrations in [Molchanica](https://www.athanorlab.com/molchanica). These use the Python and Rust libraries respectively. *Bio Tools* is designed
+[Athanor Bio Tools](https://athanortools.com/) web UI, and the integrations in [Molchanica](https://www.athanorlab.com/molchanica). These use the Python and Rust libraries respectively. *Bio Tools* is designed
 to reduce repetition between these projects.
 
-The CLI application is intended for cases where you're not writing software, but want to easily
+The CLI application is intended for cases where you're not writing software, but want to
 install these tools directly, without handling the system dependencies and python environments
 for each tool.
 

@@ -4,7 +4,7 @@
 
 # Rust
 /target
-# Cargo.lock is committed, since this crate ships a binary.
+# Cargo.lock is committed, since this crate ships a binary. (todo: Assess)
 
 /python/target/
 
