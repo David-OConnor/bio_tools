@@ -28,7 +28,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         license_details: "MIT, covering the model weights as well as the code: unrestricted academic and commercial use.",
         repo_url: Some("https://github.com/jwohlwend/boltz"),
         home_url: Some("https://boltz.bio/"),
-        docs_url: Some("https://github.com/jwohlwend/boltz/blob/main/docs/prediction.md"),
+        docs_url: Some("https://api.boltz.bio/docs/"),
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.06.14.659707"),
         license: License::Mit,
         license_url: None,
