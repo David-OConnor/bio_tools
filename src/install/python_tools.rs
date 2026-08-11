@@ -76,15 +76,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                 )
             },
         ),
-        Tool::Protenix => install_recipe(
-            installer,
-            UvRecipe {
-                gpu_probe: Some(
-                    "import torch; assert torch.cuda.is_available(), 'Protenix requires CUDA'",
-                ),
-                ..UvRecipe::simple(Tool::Protenix.slug(), "3.11", &["protenix"], &["protenix"])
-            },
-        ),
+        Tool::Protenix => install_protenix(installer),
         Tool::EsmFold2 => install_esmfold(installer),
         Tool::ImmuneBuilder => install_recipe(
             installer,
@@ -283,11 +275,18 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
         Tool::EsmFold2.slug(),
         "12.6",
         &[
-            "libcusparse-dev=12.6",
-            "libcublas-dev=12.6",
-            "libcusolver-dev=12.6",
-            "libcurand-dev=12.6",
-            "libcufft-dev=12.6",
+            // Unpinned: conda-forge versions these by the library's own release, not the CUDA
+            // toolkit release (e.g. libcusparse-dev's "12.x" isn't the same axis as cuda-version
+            // 12.6), so pinning them to "=12.6" here used to fight the `cuda-version=12.6`
+            // constraint above instead of complementing it, and broke as conda-forge's indexed
+            // builds for that literal version drifted. Letting the solver pick each library's
+            // build for the pinned `cuda-version` is what `ensure_cuda_toolchain` already expects
+            // callers to do (see its own doc comment).
+            "libcusparse-dev",
+            "libcublas-dev",
+            "libcusolver-dev",
+            "libcurand-dev",
+            "libcufft-dev",
             "gcc_linux-64=13",
             "gxx_linux-64=13",
         ],
@@ -333,6 +332,92 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
             )
         },
     )
+}
+
+fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
+    install_recipe(
+        installer,
+        UvRecipe {
+            gpu_probe: Some(
+                "import torch; assert torch.cuda.is_available(), 'Protenix requires CUDA'",
+            ),
+            ..UvRecipe::simple(Tool::Protenix.slug(), "3.11", &["protenix"], &["protenix"])
+        },
+    )?;
+
+    // Protenix JIT-compiles a fused layer-norm CUDA extension the first time
+    // `protenix.model.layer_norm` is imported -- which happens on every CLI invocation, not just
+    // at install time -- via `torch.utils.cpp_extension.load()`. That build shells out to
+    // whatever `nvcc`/`gcc` it finds, and this machine's system compiler is newer than what
+    // torch==2.7.1's bundled ATen headers compile under, so every later invocation used to fail.
+    // Building it once here with the same scoped, torch-compatible toolchain ESMFold2 uses seeds
+    // torch's on-disk extension cache (keyed by source hash, outside this venv), so ordinary
+    // runtime invocations -- which still use the system compiler -- find a cached build and never
+    // need to invoke a compiler at all.
+    let prefix = installer.ensure_cuda_toolchain(
+        Tool::Protenix.slug(),
+        "12.6",
+        &[
+            "libcusparse-dev",
+            "libcublas-dev",
+            "libcusolver-dev",
+            "libcurand-dev",
+            "libcufft-dev",
+            "gcc_linux-64=13",
+            "gxx_linux-64=13",
+        ],
+    )?;
+    let cuda_home = prefix.to_string_lossy().into_owned();
+    let cc = prefix
+        .join("bin")
+        .join("x86_64-conda-linux-gnu-gcc")
+        .to_string_lossy()
+        .into_owned();
+    let cxx = prefix
+        .join("bin")
+        .join("x86_64-conda-linux-gnu-g++")
+        .to_string_lossy()
+        .into_owned();
+    let library_path = prefix.join("lib").to_string_lossy().into_owned();
+    // conda-forge's `cuda-cudart-dev` follows the NVIDIA redistributable layout and puts
+    // `cuda_runtime_api.h` etc. under `targets/x86_64-linux/include`, not `include` directly, so
+    // torch's own `-I$CUDA_HOME/include` isn't enough for host (non-nvcc) compilation of files
+    // that pull in c10's CUDA headers. `CPATH` is honored by gcc/g++/nvcc alike.
+    let cuda_target_include = prefix
+        .join("targets")
+        .join("x86_64-linux")
+        .join("include")
+        .to_string_lossy()
+        .into_owned();
+    // `ninja` (needed by torch's JIT loader) is a console script installed into the venv itself,
+    // not on the installer process's own PATH, so it has to be added here explicitly -- the same
+    // thing `installer.pip_install`/`tool_command` do for every other in-venv invocation.
+    let venv_scripts = installer.venv_scripts_dir(Tool::Protenix.slug());
+    let path = std::env::join_paths(
+        std::iter::once(venv_scripts).chain(
+            std::env::var_os("PATH")
+                .map(|path| std::env::split_paths(&path).collect::<Vec<_>>())
+                .unwrap_or_default(),
+        ),
+    )
+    .map_err(|error| {
+        InstallError::InvalidConfiguration(format!(
+            "unable to build PATH for Protenix's warm-up build: {error}"
+        ))
+    })?;
+
+    let mut warm_up = Command::new(installer.venv_python(Tool::Protenix.slug()));
+    warm_up
+        .args(["-c", "import protenix.model.layer_norm.layer_norm"])
+        .env("NVCC_APPEND_FLAGS", "-std=c++17")
+        .env("CUDA_HOME", &cuda_home)
+        .env("CC", &cc)
+        .env("CXX", &cxx)
+        .env("LIBRARY_PATH", &library_path)
+        .env("LD_LIBRARY_PATH", &library_path)
+        .env("CPATH", &cuda_target_include)
+        .env("PATH", &path);
+    installer.checked(&mut warm_up)
 }
 
 fn install_proteinmpnn_ddg(installer: &mut Installer) -> Result<(), InstallError> {
