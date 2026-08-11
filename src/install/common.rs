@@ -533,6 +533,45 @@ impl Installer {
         self.checked(&mut command)
     }
 
+    /// A scoped `nvcc` toolchain plus whatever else `extra_packages` names (CUDA library dev
+    /// headers, a version-pinned host `gcc`, ...), for uv-managed recipes that build a CUDA
+    /// extension against a specific PyTorch wheel's compiled CUDA version. The system's own
+    /// `nvcc` (if any) can be a different major version than the wheel -- that mismatch is a hard
+    /// build error, not just a warning -- and both it and the system's default `gcc` drift out
+    /// from under us on image upgrades (nvcc rejects host compilers newer than it supports), so
+    /// recipes that build CUDA extensions provision their own instead of trusting whatever
+    /// happens to be on PATH. Returns the environment's prefix; join `bin/nvcc` or set
+    /// `CUDA_HOME` to it.
+    pub(crate) fn ensure_cuda_toolchain(
+        &mut self,
+        slug: &str,
+        cuda_version: &str,
+        extra_packages: &[&str],
+    ) -> Result<PathBuf, InstallError> {
+        let prefix = self.venv_dir(&format!("{slug}-cuda"));
+        if prefix.join("bin").join("nvcc").is_file() {
+            return Ok(prefix);
+        }
+        fs::create_dir_all(&prefix).map_err(|error| {
+            InstallError::io(format!("unable to create {}", prefix.display()), error)
+        })?;
+        let mut create = self.micromamba_command()?;
+        create
+            .args(["create", "--yes", "--prefix"])
+            .arg(&prefix)
+            .args(["-c", CONDA_FORGE])
+            // conda-forge's individual `libcu*` packages carry their own product version
+            // numbers (e.g. libcusolver-dev 12.2.x), unrelated to the CUDA toolkit release; this
+            // metapackage is what actually pins the whole toolchain to one CUDA release and lets
+            // the solver pick each library's matching build.
+            .arg(format!("cuda-version={cuda_version}"))
+            .arg("cuda-nvcc")
+            .arg("cuda-cudart-dev")
+            .args(extra_packages);
+        self.checked(&mut create)?;
+        Ok(prefix)
+    }
+
     /// Full Conda, needed only by the recipes that delegate to an upstream `install.sh`: those
     /// scripts call `conda info --base`, `conda shell.bash hook`, and `conda activate`, none of
     /// which micromamba provides. Everything we drive ourselves uses [`Self::micromamba_command`].

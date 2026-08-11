@@ -19,6 +19,12 @@ const GENIE3_OPENFOLD_URL: &str =
     "git+https://github.com/aqlaboratory/openfold.git@be2ec1841f16c966c65ae0e7599ebbadc725757d";
 const LEGACY_GENIE3_OPENFOLD_URL: &str = "git+https://github.com/sokrypton/openfold.git";
 
+// zhanggroup.org now sits behind a Cloudflare bot check that 403s wget's default User-Agent
+// (curl with no UA gets the same 403; a browser-like UA passes), so the TMscore/TMalign
+// downloads in Genie 3's own setup.sh need a UA override.
+const BROWSER_USER_AGENT: &str =
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36";
+
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
     match tool {
         Tool::HighFold => install_highfold(installer),
@@ -313,6 +319,7 @@ fn install_genie3(installer: &mut Installer) -> Result<(), InstallError> {
     ]);
     installer.checked(&mut nvcc)?;
     patch_genie3_openfold_source(&target.join("scripts/setup/setup.sh"))?;
+    patch_genie3_zhanggroup_downloads(&target.join("scripts/setup/setup.sh"))?;
     run_bash_with_conda(
         installer,
         &target.join("scripts/setup/setup.sh"),
@@ -356,6 +363,29 @@ fn patch_genie3_openfold_source(script: &Path) -> Result<(), InstallError> {
             script.display()
         )));
     }
+    fs::write(script, updated).map_err(|error| {
+        InstallError::InvalidConfiguration(format!(
+            "unable to update Genie 3 setup script {}: {error}",
+            script.display()
+        ))
+    })
+}
+
+fn patch_genie3_zhanggroup_downloads(script: &Path) -> Result<(), InstallError> {
+    let source = fs::read_to_string(script).map_err(|error| {
+        InstallError::InvalidConfiguration(format!(
+            "unable to read Genie 3 setup script {}: {error}",
+            script.display()
+        ))
+    })?;
+    let needle = "wget https://zhanggroup.org";
+    let replacement = format!(r#"wget --user-agent="{BROWSER_USER_AGENT}" https://zhanggroup.org"#);
+    if !source.contains(needle) {
+        // Already patched, or upstream changed its download command; either way there is
+        // nothing more for this patch to do.
+        return Ok(());
+    }
+    let updated = source.replace(needle, &replacement);
     fs::write(script, updated).map_err(|error| {
         InstallError::InvalidConfiguration(format!(
             "unable to update Genie 3 setup script {}: {error}",

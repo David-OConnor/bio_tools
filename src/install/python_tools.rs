@@ -11,22 +11,29 @@ struct FetchedScript {
     url: &'static str,
 }
 
-struct UvRecipe {
+struct UvRecipe<'a> {
     slug: &'static str,
     python: &'static str,
     requirements: &'static [&'static str],
     scripts: &'static [&'static str],
     torch: &'static [&'static str],
+    // Installed with ordinary build isolation before `requirements`. Needed when
+    // `no_build_isolation` is set and one of `requirements` builds from source against a
+    // package -- e.g. setuptools's legacy `setup.py` backend -- that a bare `uv venv` doesn't
+    // seed, since with build isolation off there is no isolated build env to put it in instead.
+    build_requirements: &'static [&'static str],
     extra_indexes: &'static [&'static str],
     index_strategy: Option<&'static str>,
     no_build_isolation: bool,
-    extra_env: &'static [(&'static str, &'static str)],
+    // Not `'static`: a few recipes (e.g. ESMFold2) need to pass a path computed at install time,
+    // such as a scoped CUDA toolchain's prefix, rather than a string literal.
+    extra_env: &'a [(&'a str, &'a str)],
     fetched_scripts: &'static [FetchedScript],
     gpu_probe: Option<&'static str>,
     verify: Option<(&'static str, &'static [&'static str])>,
 }
 
-impl UvRecipe {
+impl<'a> UvRecipe<'a> {
     const fn simple(
         slug: &'static str,
         python: &'static str,
@@ -39,6 +46,7 @@ impl UvRecipe {
             requirements,
             scripts,
             torch: &[],
+            build_requirements: &[],
             extra_indexes: &[],
             index_strategy: None,
             no_build_isolation: false,
@@ -197,7 +205,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
     }
 }
 
-fn install_recipe(installer: &mut Installer, recipe: UvRecipe) -> Result<(), InstallError> {
+fn install_recipe(installer: &mut Installer, recipe: UvRecipe<'_>) -> Result<(), InstallError> {
     let backend = (!recipe.torch.is_empty())
         .then(|| installer.select_torch_backend())
         .transpose()?;
@@ -205,6 +213,11 @@ fn install_recipe(installer: &mut Installer, recipe: UvRecipe) -> Result<(), Ins
     if let Some(backend) = backend {
         installer.install_torch(recipe.slug, recipe.torch, backend)?;
     }
+    installer.pip_install(
+        recipe.slug,
+        recipe.build_requirements,
+        PipOptions::default(),
+    )?;
     installer.pip_install(
         recipe.slug,
         recipe.requirements,
@@ -248,7 +261,7 @@ fn install_recipe(installer: &mut Installer, recipe: UvRecipe) -> Result<(), Ins
 
 fn install_checkout_recipe(
     installer: &mut Installer,
-    recipe: UvRecipe,
+    recipe: UvRecipe<'_>,
     url: &str,
     directory: &str,
 ) -> Result<(), InstallError> {
@@ -258,12 +271,53 @@ fn install_checkout_recipe(
 }
 
 fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
+    // openfold's setup.py compiles a CUDA extension and torch refuses to load it unless the
+    // `nvcc` used to build it is the same *major* CUDA version as the `torch==2.7.1` wheel above
+    // (cu126). The system's own `nvcc` is whatever the machine image ships and can be a newer
+    // major version, so build against a scoped toolchain that is guaranteed to match instead.
+    // nvcc additionally rejects host compilers newer than itself, and torch's own CUDA headers
+    // pull in cusparse.h/cublas_v2.h/etc, so the toolchain also needs a pinned gcc 13 and the
+    // library dev headers, matching the combination Genie 3's bundled ESMFold build already
+    // proves works (see `install_genie3`'s `install_esmfold` step in its upstream setup.sh).
+    let prefix = installer.ensure_cuda_toolchain(
+        Tool::EsmFold2.slug(),
+        "12.6",
+        &[
+            "libcusparse-dev=12.6",
+            "libcublas-dev=12.6",
+            "libcusolver-dev=12.6",
+            "libcurand-dev=12.6",
+            "libcufft-dev=12.6",
+            "gcc_linux-64=13",
+            "gxx_linux-64=13",
+        ],
+    )?;
+    let cuda_home = prefix.to_string_lossy().into_owned();
+    let cc = prefix
+        .join("bin")
+        .join("x86_64-conda-linux-gnu-gcc")
+        .to_string_lossy()
+        .into_owned();
+    let cxx = prefix
+        .join("bin")
+        .join("x86_64-conda-linux-gnu-g++")
+        .to_string_lossy()
+        .into_owned();
+    let library_path = prefix.join("lib").to_string_lossy().into_owned();
     install_recipe(
         installer,
         UvRecipe {
             torch: &["torch==2.7.1"],
             no_build_isolation: true,
-            extra_env: &[("NVCC_APPEND_FLAGS", "-std=c++17")],
+            build_requirements: &["setuptools"],
+            extra_env: &[
+                ("NVCC_APPEND_FLAGS", "-std=c++17"),
+                ("CUDA_HOME", &cuda_home),
+                ("CC", &cc),
+                ("CXX", &cxx),
+                ("LIBRARY_PATH", &library_path),
+                ("LD_LIBRARY_PATH", &library_path),
+            ],
             fetched_scripts: &[FetchedScript {
                 name: "esm-fold",
                 url: "https://raw.githubusercontent.com/facebookresearch/esm/v2.0.0/scripts/esmfold_inference.py",
