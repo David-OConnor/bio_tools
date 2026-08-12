@@ -12,8 +12,10 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Expensive,
     top_choice: false,
     spec: SpecData {
-        summary: "Design antibody or nanobody backbones against a target structure.",
-        description: "Runs RFantibody's antibody-finetuned RFdiffusion stage with a target, framework, CDR loop ranges, and optional hotspots.",
+        summary: "Design antibody or nanobody binders against a target structure.",
+        description: "Runs the whole RFantibody pipeline against a target and an HLT framework: antibody-finetuned RFdiffusion \
+         docks a backbone and rebuilds the chosen CDR loops, ProteinMPNN designs their sequences, and antibody-finetuned RF2 \
+         predicts the complex for filtering. The Antibody task designs a paired heavy/light framework; Nanobody designs a VHH.",
         availability: "Linux, an NVIDIA GPU, RFantibody weights, and CUDA 11.8+ are required",
         license_details: "MIT (Rosetta Commons). The RFdiffusion-Ab, ProteinMPNN, and RF2-Ab weights setup_system.sh downloads from files.ipd.uw.edu are public.",
         repo_url: Some("https://github.com/RosettaCommons/RFantibody"),
