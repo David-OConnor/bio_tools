@@ -8,7 +8,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::Chai1),
     categories: &[
         ToolCategory::StructurePrediction,
-        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,

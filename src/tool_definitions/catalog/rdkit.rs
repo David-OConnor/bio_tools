@@ -12,8 +12,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Cheap,
     top_choice: false,
     spec: SpecData {
-        summary: "Calculate common molecular descriptors and normalize SMILES.",
-        description: "A lightweight, immediately runnable cheminformatics endpoint.",
+        summary: "Standardize molecules and turn atom-mapped reactions into explicit bond edits.",
+        description: "Deterministic cheminformatics preprocessing for molecule identity, reaction balance, atom-map quality, reaction centers, and bonds formed, broken, or changed before precedent search and enzyme design.",
         availability: "Included Python dependency",
         license_details: "BSD 3-Clause. Commercial use is unrestricted.",
         repo_url: Some("https://github.com/rdkit/rdkit"),

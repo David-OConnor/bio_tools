@@ -8,7 +8,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::OpenDde),
     categories: &[
         ToolCategory::StructurePrediction,
-        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,
@@ -28,4 +27,3 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         license_url: None,
     },
 };
-

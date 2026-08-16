@@ -1,0 +1,56 @@
+{
+  "fields": [
+    {
+      "name": "operation",
+      "label": "Operation",
+      "kind": "select",
+      "default": "lookup_ec",
+      "required": false,
+      "help": "Use the processed database for lookup, or run the package to standardize and atom-map a reaction.",
+      "options": [
+        { "value": "lookup_ec", "label": "Look up EC reactions" },
+        { "value": "atom_map", "label": "Correct and atom-map" }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "ec_number",
+      "label": "EC number",
+      "kind": "text",
+      "default": "1.1.1.1",
+      "required": false,
+      "help": "Complete or partial EC number used to select reaction precedents.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 20,
+      "accept": "",
+      "task": ""
+    },
+    {
+      "name": "reaction_smiles",
+      "label": "Reaction SMILES",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "Reactants and products separated by >> for correction or atom mapping.",
+      "options": [],
+      "rows": 5,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": ""
+    }
+  ],
+  "tasks": []
+}

@@ -15,6 +15,10 @@
         {
           "value": "canonicalize",
           "label": "Canonical SMILES"
+        },
+        {
+          "value": "standardize",
+          "label": "Standardize and parent forms"
         }
       ],
       "rows": null,
@@ -23,7 +27,7 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "molecule"
     },
     {
       "name": "smiles",
@@ -39,7 +43,7 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "molecule"
     },
     {
       "name": "include_inchi",
@@ -55,8 +59,33 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "molecule"
+    },
+    {
+      "name": "reaction_smiles",
+      "label": "Atom-mapped reaction SMILES",
+      "kind": "textarea",
+      "default": "[CH3:1][C:2](=[O:3])[O:4][CH3:5].[OH2:6]>>[CH3:1][C:2](=[O:3])[OH:6].[OH:4][CH3:5]",
+      "required": true,
+      "help": "Reactants>>products (or reactants>agents>products). Atom maps are required for reliable bond-edit extraction; every atom should normally be mapped exactly once per side.",
+      "options": [],
+      "rows": 7,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "reaction"
     }
   ],
-  "tasks": []
+  "tasks": [
+    {
+      "value": "molecule",
+      "label": "Molecule"
+    },
+    {
+      "value": "reaction",
+      "label": "Reaction"
+    }
+  ]
 }

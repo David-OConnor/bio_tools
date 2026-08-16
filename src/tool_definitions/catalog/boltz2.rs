@@ -11,7 +11,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::Boltz2),
     categories: &[
         ToolCategory::StructurePrediction,
-        ToolCategory::ProteinDesign,
         ToolCategory::PropertyPrediction,
     ],
     launch_type: LaunchType::PythonBasedApp,

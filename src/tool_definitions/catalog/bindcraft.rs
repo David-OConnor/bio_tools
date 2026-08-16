@@ -11,7 +11,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::BindCraft),
     categories: &[
         ToolCategory::PeptideBinderDesign,
-        ToolCategory::ProteinDesign,
     ],
     launch_type: LaunchType::CondaBasedApp,
     license_type: LicenseCategory::NonCommercial,

@@ -28,6 +28,7 @@ mod deepimmuno;
 mod deepsp;
 mod deepstabp;
 mod dlkcat;
+mod enzymemap;
 mod esmfold2;
 mod genie3;
 mod germinal;
@@ -47,6 +48,7 @@ mod proteinmpnn;
 mod proteinmpnn_ddg;
 mod protenix;
 mod rdkit;
+mod retrobiocat;
 mod rfantibody;
 mod rfdiffusion;
 mod tap;
@@ -149,6 +151,8 @@ pub const ALL: &[&CatalogEntry] = &[
     &immunebuilder::ENTRY,
     &highfold::ENTRY,
     &pdbbind::ENTRY,
+    &enzymemap::ENTRY,
+    &retrobiocat::ENTRY,
     &boltzgen::ENTRY,
     &bindcraft::ENTRY,
     &gromacs::ENTRY,
