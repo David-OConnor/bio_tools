@@ -1,5 +1,8 @@
-//! Optional standalone CLI application; a thin wrapper around the library API which can be launched
-//! without using it in a rust or python program
+//! This is the entry point for a CLI application; a thin wrapper around the library API which can be launched
+//! without using it in a rust or python program. This provides commands for the most important
+//! functionality (`install`, `run` etc). It might, for example, be used as a replacement for
+//! workflows involving installation scripts, manually reading installation steps from an individual
+//! tool's website, etc.
 
 use std::{
     env,
@@ -45,6 +48,7 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         println!("{USAGE}");
         return Ok(());
     }
+
     let (root, root_source) = take_root(&mut args)?;
     let command = args
         .first()
@@ -52,6 +56,7 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         .ok_or("missing command")?
         .to_owned();
     args.remove(0);
+
     if command == "dir" {
         if !args.is_empty() {
             return Err("dir does not accept arguments".into());
@@ -59,6 +64,7 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         print_dir(&root, &root_source);
         return Ok(());
     }
+
     if matches!(command.as_str(), "list" | "list-full" | "list-quick") {
         if !args.is_empty() {
             return Err(format!("{command} does not accept arguments").into());
@@ -78,6 +84,7 @@ fn real_main() -> Result<(), Box<dyn Error>> {
 
         return Ok(());
     }
+
     if command == "metadata" {
         let slug = args
             .first()
@@ -97,11 +104,13 @@ fn real_main() -> Result<(), Box<dyn Error>> {
         print_metadata(entry);
         return Ok(());
     }
+
     let tool = Tool::from_str(
         args.first()
             .and_then(|value| value.to_str())
             .ok_or("missing tool name")?,
     )?;
+
     args.remove(0);
     let mut installer = Installer::from_environment(root)?.with_reporter(progress);
     match command.as_str() {
@@ -150,6 +159,7 @@ fn print_metadata(entry: &CatalogEntry) {
         .map(ToString::to_string)
         .collect::<Vec<_>>()
         .join(", ");
+
     println!("{} ({})\n{}", entry.name(), entry.slug(), "=".repeat(56));
     println!("Categories: {categories}");
     println!("Launch type: {}", entry.launch_type);
@@ -171,6 +181,7 @@ fn print_metadata(entry: &CatalogEntry) {
     println!("Availability: {}", spec.availability);
     println!("License: {}", spec.license);
     println!("License details: {}", spec.license_details);
+
     for (label, url) in [
         (
             "License URL",
@@ -212,6 +223,7 @@ fn take_root(args: &mut Vec<OsString>) -> Result<(PathBuf, RootSource), Box<dyn 
         args.remove(0);
         return Ok((PathBuf::from(args.remove(0)), RootSource::Flag));
     }
+
     // A root relative to the working directory would put a separate copy of every environment and
     // model file beside each directory bio_tools happens to be launched from, so the fallback is
     // the platform's canonical per-user location rather than `./.bio_tools`.
@@ -224,6 +236,7 @@ fn take_root(args: &mut Vec<OsString>) -> Result<(PathBuf, RootSource), Box<dyn 
 /// Report the resolved installation root, without creating or touching it.
 fn print_dir(root: &Path, source: &RootSource) {
     let layout = &InstallConfig::new(root).layout;
+
     println!(
         "Installation root: {}{}",
         root.display(),
@@ -233,11 +246,13 @@ fn print_dir(root: &Path, source: &RootSource) {
             " (does not exist yet)"
         }
     );
+
     println!("  Tool assets:         {}", layout.tools_root.display());
     println!(
         "  Python environments: {}",
         layout.environment("<tool>").display()
     );
+
     println!("Set by: {}", source.describe());
 }
 
@@ -249,13 +264,16 @@ fn run_tool(
     if args.first().is_some_and(|arg| arg == "--") {
         args.remove(0);
     }
+
     let executable = installer.executable_path(tool);
     if !executable.is_file() {
         return Err(format!("{} has no installed console entry point at {}; install it first, or use the library API for a tool-specific invocation", tool.name(), executable.display()).into());
     }
     let output = run(&installer.tool_command(tool).args(args).timeout(None))?;
+
     print!("{}", output.stdout_lossy());
     eprint!("{}", output.stderr_lossy());
+
     Ok(())
 }
 

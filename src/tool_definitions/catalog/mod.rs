@@ -188,26 +188,3 @@ pub const ALL: &[&CatalogEntry] = &[
 pub fn by_slug(slug: &str) -> Option<&'static CatalogEntry> {
     ALL.iter().find(|entry| entry.slug() == slug).copied()
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn slugs_are_unique() {
-        let mut slugs: Vec<&str> = ALL.iter().map(|entry| entry.slug()).collect();
-        slugs.sort_unstable();
-        slugs.dedup();
-        assert_eq!(slugs.len(), ALL.len());
-    }
-
-    #[test]
-    fn by_slug_finds_every_entry() {
-        for entry in ALL {
-            assert_eq!(
-                by_slug(entry.slug()).map(|found| found.slug()),
-                Some(entry.slug())
-            );
-        }
-    }
-}

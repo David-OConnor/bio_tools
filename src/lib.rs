@@ -17,7 +17,6 @@ use std::{fmt, io, path::Path};
 
 mod input;
 pub mod install;
-mod output;
 pub mod run;
 mod run_log;
 pub mod status;

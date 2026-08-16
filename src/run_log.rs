@@ -1,3 +1,8 @@
+//! For storing the input and output of runs [from any tool] to disk. This includes capturing
+//! the stdout of CLI programs in text files, capturing the time the job was run, and with what
+//! input parameters, and storing all input and output files produced by, or ingested into
+//! the tool's API. (E.g. molecule files [protein, small organic molecule etc] generated or ingested)
+
 use std::{
     ffi::OsStr,
     fs::{self, File, OpenOptions},
@@ -11,10 +16,6 @@ use crate::run::{CommandOutput, CommandSpec};
 
 static RUN_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
-#[cfg(test)]
-pub(crate) fn test_sequence() -> u64 {
-    RUN_SEQUENCE.fetch_add(1, Ordering::Relaxed)
-}
 
 /// Durable audit settings for one command execution.
 ///

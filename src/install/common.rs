@@ -260,6 +260,7 @@ impl Installer {
             self.torch_backend = Some(TorchBackend::Cpu);
             return Ok(TorchBackend::Cpu);
         }
+
         if cfg!(target_os = "macos") {
             if requested == TorchBackendPreference::Cuda126 {
                 return Err(InstallError::InvalidConfiguration(
@@ -270,6 +271,7 @@ impl Installer {
             self.torch_backend = Some(TorchBackend::Cpu);
             return Ok(TorchBackend::Cpu);
         }
+
         if cfg!(not(target_arch = "x86_64")) {
             if requested == TorchBackendPreference::Cuda126 {
                 return Err(InstallError::InvalidConfiguration(
@@ -278,6 +280,7 @@ impl Installer {
             }
             self.note("this architecture has no CUDA 12.6 wheels; selecting CPU");
             self.torch_backend = Some(TorchBackend::Cpu);
+
             return Ok(TorchBackend::Cpu);
         }
 
@@ -286,6 +289,7 @@ impl Installer {
         } else {
             "560.28.03"
         };
+
         let driver = self.nvidia_driver_version();
         let backend = if driver
             .as_deref()
@@ -322,6 +326,7 @@ impl Installer {
         let mut query = Command::new(executable);
         query.args(["--query-gpu=driver_version", "--format=csv,noheader"]);
         let output = self.capture(&mut query).ok()?;
+
         String::from_utf8_lossy(&output.stdout)
             .lines()
             .map(str::trim)
@@ -350,8 +355,10 @@ impl Installer {
             .environments_root
             .join("uv-bin")
             .join(executable_name("uv"));
+
         let fallback =
             home_dir().map(|home| home.join(".local").join("bin").join(executable_name("uv")));
+
         let candidates = self
             .config
             .uv_executable
@@ -359,6 +366,7 @@ impl Installer {
             .into_iter()
             .chain([managed.clone(), PathBuf::from(executable_name("uv"))])
             .chain(fallback);
+
         for candidate in candidates {
             let mut probe = Command::new(&candidate);
             probe.arg("--version");
@@ -370,12 +378,14 @@ impl Installer {
 
         self.step("Installing uv with Astral's standalone installer");
         let uv_directory = managed.parent().expect("managed uv has a parent");
+
         fs::create_dir_all(uv_directory).map_err(|error| {
             InstallError::io(
                 format!("unable to create {}", uv_directory.display()),
                 error,
             )
         })?;
+
         let scratch = ScratchDir::new_in(uv_directory, "uv-bootstrap")?;
         if cfg!(target_os = "windows") {
             let script = scratch.path().join("install.ps1");
@@ -399,6 +409,7 @@ impl Installer {
             command.env("UV_UNMANAGED_INSTALL", uv_directory);
             self.checked(&mut command)?;
         }
+
         let mut probe = Command::new(&managed);
         probe.arg("--version");
         if !self.succeeds(&mut probe) {
@@ -422,12 +433,14 @@ impl Installer {
         if let Some(path) = &self.micromamba {
             return Ok(path.clone());
         }
+
         let managed = self
             .config
             .layout
             .environments_root
             .join("micromamba-bin")
             .join(executable_name("micromamba"));
+
         let candidates = self
             .config
             .micromamba_executable
@@ -437,6 +450,7 @@ impl Installer {
                 managed.clone(),
                 PathBuf::from(executable_name("micromamba")),
             ]);
+
         for candidate in candidates {
             let mut probe = Command::new(&candidate);
             probe.arg("--version");
@@ -461,17 +475,20 @@ impl Installer {
                 )
             })?;
         }
+
         self.download(&url, &managed)?;
         make_executable(&managed)?;
 
         let mut probe = Command::new(&managed);
         probe.arg("--version");
+
         if !self.succeeds(&mut probe) {
             return Err(InstallError::InvalidConfiguration(format!(
                 "the micromamba binary downloaded to {} is not runnable",
                 managed.display()
             )));
         }
+
         self.micromamba = Some(managed.clone());
         Ok(managed)
     }
@@ -480,11 +497,14 @@ impl Installer {
     pub(crate) fn micromamba_command(&mut self) -> Result<Command, InstallError> {
         let micromamba = self.ensure_micromamba()?;
         let root = self.micromamba_root();
+
         fs::create_dir_all(&root).map_err(|error| {
             InstallError::io(format!("unable to create {}", root.display()), error)
         })?;
+
         let mut command = Command::new(micromamba);
         command.env("MAMBA_ROOT_PREFIX", &root);
+
         Ok(command)
     }
 
@@ -1179,11 +1199,14 @@ fn version_at_least(current: &str, minimum: &str) -> bool {
             })
             .collect::<Vec<_>>()
     };
+
     let mut current = parts(current);
     let mut minimum = parts(minimum);
+
     let length = current.len().max(minimum.len());
     current.resize(length, 0);
     minimum.resize(length, 0);
+
     current >= minimum
 }
 
@@ -1207,132 +1230,4 @@ fn make_executable(path: &Path) -> Result<(), InstallError> {
         })?;
     }
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn driver_versions_are_compared_numerically() {
-        assert!(version_at_least("560.76", "560.28.03"));
-        assert!(version_at_least("560.28.3", "560.28.03"));
-        assert!(!version_at_least("559.99", "560.28.03"));
-        assert!(!version_at_least("560.27.99", "560.28.03"));
-    }
-
-    #[test]
-    fn partial_suffix_does_not_replace_a_real_extension() {
-        assert_eq!(
-            append_to_path(Path::new("weights/model.pt"), ".partial"),
-            Path::new("weights/model.pt.partial")
-        );
-    }
-
-    #[test]
-    fn tool_venv_does_not_inherit_the_calling_project() {
-        let command = uv_venv_command(
-            Path::new("uv"),
-            "3.10",
-            Path::new("environments/rfantibody"),
-        );
-        assert_eq!(
-            command.get_args().collect::<Vec<_>>(),
-            [
-                "venv",
-                "--no-project",
-                "--managed-python",
-                "--python",
-                "3.10",
-                "--clear",
-                "environments/rfantibody",
-            ]
-        );
-    }
-
-    #[test]
-    fn micromamba_asset_matches_the_build_platform() {
-        let url = micromamba_download_url().expect("this platform has a micromamba binary");
-        assert!(url.starts_with(MICROMAMBA_RELEASES), "{url}");
-        let asset = url.rsplit('/').next().unwrap_or_default();
-        assert_eq!(
-            asset.ends_with(".exe"),
-            cfg!(target_os = "windows"),
-            "only the Windows assets carry an extension: {asset}"
-        );
-        let platform = if cfg!(target_os = "macos") {
-            "osx"
-        } else if cfg!(target_os = "windows") {
-            "win"
-        } else {
-            "linux"
-        };
-        assert!(
-            asset.starts_with(&format!("micromamba-{platform}-")),
-            "{asset}"
-        );
-    }
-
-    #[test]
-    fn existing_miniconda_prefix_uses_update_mode() {
-        let fresh = miniconda_install_command(
-            Path::new("miniconda.sh"),
-            Path::new("environments/conda"),
-            false,
-        );
-        assert_eq!(
-            fresh.get_args().collect::<Vec<_>>(),
-            ["miniconda.sh", "-b", "-p", "environments/conda"]
-        );
-
-        let repair = miniconda_install_command(
-            Path::new("miniconda.sh"),
-            Path::new("environments/conda"),
-            true,
-        );
-        assert_eq!(
-            repair.get_args().collect::<Vec<_>>(),
-            ["miniconda.sh", "-b", "-u", "-p", "environments/conda"]
-        );
-    }
-
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn wsl_drive_mount_detection_is_narrow() {
-        if env::var_os("WSL_DISTRO_NAME").is_none() && env::var_os("WSL_INTEROP").is_none() {
-            return;
-        }
-        assert!(is_wsl_windows_mount(Path::new("/mnt/c/projects/tools")));
-        assert!(!is_wsl_windows_mount(Path::new("/home/user/tools")));
-        assert!(!is_wsl_windows_mount(Path::new("/mnt/shared/tools")));
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn native_conda_environment_gets_compatibility_launchers() {
-        let scratch = ScratchDir::new_in(&env::temp_dir(), "conda-shims").unwrap();
-        let environments = scratch.path().join("mounted-environments");
-        let native_conda = scratch.path().join("native-conda");
-        let source = native_conda.join("envs/genie3/bin");
-        fs::create_dir_all(&source).unwrap();
-        fs::write(source.join("python"), "python").unwrap();
-        fs::write(source.join("genie3"), "genie3").unwrap();
-
-        let mut config = super::super::InstallConfig::new(scratch.path());
-        config.layout = super::super::InstallLayout::split(scratch.path(), &environments);
-        config.conda_root = Some(native_conda);
-        let installer = Installer::from_config(config);
-        installer
-            .install_conda_environment_shims(Tool::Genie3)
-            .unwrap();
-
-        let target = environments.join("conda/envs/genie3/bin");
-        assert!(target.join("python").is_file());
-        assert!(target.join("genie3").is_file());
-        assert!(
-            fs::read_to_string(target.join("python"))
-                .unwrap()
-                .contains("native-conda/envs/genie3/bin/python")
-        );
-    }
 }

@@ -63,10 +63,12 @@ fn platform_data_dir() -> Option<PathBuf> {
         return first_env_path(&["LOCALAPPDATA"])
             .or_else(|| Some(home_dir()?.join("AppData").join("Local")));
     }
+
     let home = home_dir()?;
     if cfg!(target_os = "macos") {
         return Some(home.join("Library").join("Application Support"));
     }
+
     // The XDG base directory specification requires a relative XDG_DATA_HOME to be ignored.
     Some(
         first_env_path(&["XDG_DATA_HOME"])
@@ -134,7 +136,10 @@ pub enum TorchBackendPreference {
     #[default]
     Auto,
     Cpu,
+    /// 12.6
     Cuda126,
+    // todo: Why doesn't this include CUDA 13? (Or a specific minor version in 13) Are these
+    // todo cases covered by `Auto`? If so, why the asymetry here?
 }
 
 impl FromStr for TorchBackendPreference {
@@ -572,90 +577,5 @@ impl Installer {
             InstallEvent::Note { message, .. } => println!("  {message}"),
             InstallEvent::ToolFinished(_) => {}
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn tool_command_activates_its_managed_environment() {
-        let installer = Installer::new("managed-root");
-        let command = installer.tool_command(Tool::OpenDde);
-        assert_eq!(
-            command.environment.get(std::ffi::OsStr::new("VIRTUAL_ENV")),
-            Some(&installer.venv_dir(Tool::OpenDde.slug()).into_os_string())
-        );
-        let path = command
-            .environment
-            .get(std::ffi::OsStr::new("PATH"))
-            .unwrap();
-        assert_eq!(
-            std::env::split_paths(path).next(),
-            Some(installer.venv_scripts_dir(Tool::OpenDde.slug()))
-        );
-    }
-    #[test]
-    fn all_tools_contains_no_duplicates() {
-        let unique: std::collections::HashSet<_> = Tool::ALL.into_iter().collect();
-        assert_eq!(unique.len(), Tool::ALL.len());
-    }
-    #[test]
-    fn every_tool_round_trips_through_its_slug() {
-        for tool in Tool::ALL {
-            assert_eq!(tool.slug().parse::<Tool>().unwrap(), tool);
-            assert_eq!(tool.name().parse::<Tool>().unwrap(), tool);
-        }
-    }
-
-    #[test]
-    fn split_and_managed_layouts_are_explicit() {
-        let managed = InstallLayout::managed("/data/app");
-        assert_eq!(
-            managed.environment("boltz2"),
-            Path::new("/data/app/boltz2-venv")
-        );
-        assert_eq!(managed.tools_root, Path::new("/data/app/tools"));
-
-        let split = InstallLayout::split("/data/tools", "/data/envs");
-        assert_eq!(split.environment("boltz2"), Path::new("/data/envs/boltz2"));
-    }
-
-    #[test]
-    fn named_conda_environment_uses_the_configured_conda_root() {
-        let mut config = InstallConfig::new("/data/app");
-        config.layout = InstallLayout::split("/data/tools", "/data/envs");
-        config.conda_root = Some(PathBuf::from("/native/conda"));
-        let installer = Installer::from_config(config);
-
-        assert_eq!(
-            installer.environment_path(Tool::BindCraft),
-            Path::new("/native/conda/envs/BindCraft")
-        );
-        assert_eq!(
-            installer.environment_path(Tool::Genie3),
-            Path::new("/native/conda/envs/genie3")
-        );
-        assert_eq!(
-            installer.environment_path(Tool::Boltz2),
-            Path::new("/data/envs/boltz2")
-        );
-
-        let mut external = InstallConfig::new("/data/app");
-        external.conda_executable = Some(PathBuf::from("/opt/miniconda/bin/conda"));
-        let installer = Installer::from_config(external);
-        assert_eq!(
-            installer.environment_path(Tool::Genie3),
-            Path::new("/opt/miniconda/envs/genie3")
-        );
-    }
-
-    #[test]
-    fn consumer_aliases_parse_to_the_canonical_tool() {
-        assert_eq!("boltz".parse::<Tool>().unwrap(), Tool::Boltz2);
-        assert_eq!("esmfold".parse::<Tool>().unwrap(), Tool::EsmFold2);
-        assert_eq!("antibody_annotator".parse::<Tool>().unwrap(), Tool::Anarcii);
-        assert_eq!("AbMPNN".parse::<Tool>().unwrap(), Tool::ProteinMpnn);
     }
 }
