@@ -55,11 +55,18 @@ impl PyCommandOutput {
 }
 
 /// A shell-free invocation executed by bio_tools' Rust command runner.
+///
+/// `timeout` is None by default, as in `subprocess.run`: the tools this
+/// library exists to launch are folding, docking and design runs that take
+/// hours, so a library-imposed limit is only ever a wrong guess about someone
+/// else's workload. An application that needs a run to be cut off -- because a
+/// wedged tool would hold a queue -- passes its own budget.
 #[pyclass(name = "Command", module = "bio_tools", frozen, skip_from_py_object)]
 pub(crate) struct PyCommand {
     command: Vec<String>,
     cwd: Option<PathBuf>,
-    timeout: Duration,
+    /// None means the run is not time limited; see the constructor.
+    timeout: Option<Duration>,
     stdin: Option<String>,
     env: HashMap<String, String>,
     check: bool,
@@ -76,7 +83,7 @@ impl PyCommand {
         command,
         *,
         cwd=None,
-        timeout=120.0,
+        timeout=None,
         stdin=None,
         env=None,
         check=true,
@@ -88,7 +95,7 @@ impl PyCommand {
     fn new(
         command: Vec<String>,
         cwd: Option<PathBuf>,
-        timeout: f64,
+        timeout: Option<f64>,
         stdin: Option<String>,
         env: Option<HashMap<String, String>>,
         check: bool,
@@ -102,7 +109,7 @@ impl PyCommand {
                 "command must begin with an executable",
             ));
         }
-        if !timeout.is_finite() || timeout < 0.0 {
+        if timeout.is_some_and(|seconds| !seconds.is_finite() || seconds < 0.0) {
             return Err(pyo3::exceptions::PyValueError::new_err(
                 "timeout must be a finite, non-negative number of seconds",
             ));
@@ -110,7 +117,7 @@ impl PyCommand {
         Ok(Self {
             command,
             cwd,
-            timeout: Duration::from_secs_f64(timeout),
+            timeout: timeout.map(Duration::from_secs_f64),
             stdin,
             env: env.unwrap_or_default(),
             check,

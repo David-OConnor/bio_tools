@@ -175,7 +175,7 @@ print(f"Removed {len(report.removed)} paths")
 `run::CommandSpec` describes a shell-free invocation independently of any one
 tool. `CommandRunner` builds a `std::process::Command`, overlays environment
 variables, writes optional stdin (or closes it when absent), drains bounded
-stdout and stderr concurrently, enforces a timeout, and either returns or
+stdout and stderr concurrently, enforces the timeout if one was set, and either returns or
 rejects non-zero exits according to `ExitPolicy`.
 
 **Rust:**
