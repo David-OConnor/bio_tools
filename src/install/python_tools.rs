@@ -94,7 +94,16 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                 "3.11",
                 &[
                     "biophi @ git+https://github.com/Merck/BioPhi@main",
+                    // BioPhi's setup.py reads install_requires from the `pip:` half of
+                    // environment.yml, so its conda-side dependencies are absent from a pip
+                    // install and have to be named here. abnumber 0.4 can number with ANARCII
+                    // and no HMMER, but only when the caller passes use_anarcii=True; BioPhi
+                    // calls plain `Chain(...)`, so ANARCI 1.0 and HMMER are what actually run.
+                    // Both are on PyPI: `anarci` ships the pressed HMM databases and `hmmer`
+                    // ships HMMER 3.4's binaries, so neither needs conda.
                     "abnumber",
+                    "anarci",
+                    "hmmer",
                 ],
                 &["biophi"],
             ),
