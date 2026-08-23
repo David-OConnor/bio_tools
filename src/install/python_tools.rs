@@ -1,4 +1,8 @@
-use std::{fs, path::Path, process::Command};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use super::{
     InstallError, Installer,
@@ -25,6 +29,12 @@ struct UvRecipe<'a> {
     extra_indexes: &'static [&'static str],
     index_strategy: Option<&'static str>,
     no_build_isolation: bool,
+    // Whether `requirements` is installed with `--upgrade`. On by default, so that reinstalling a
+    // tool moves it to the newest versions its constraints allow. Turn it off where an earlier
+    // step of the same recipe installed something the later one must not move -- an exact torch a
+    // compiled extension is built against, say, whose version floor in some other requirement
+    // would otherwise be met by upgrading it.
+    upgrade: bool,
     // Not `'static`: a few recipes (e.g. ESMFold2) need to pass a path computed at install time,
     // such as a scoped CUDA toolchain's prefix, rather than a string literal.
     extra_env: &'a [(&'a str, &'a str)],
@@ -50,6 +60,7 @@ impl<'a> UvRecipe<'a> {
             extra_indexes: &[],
             index_strategy: None,
             no_build_isolation: false,
+            upgrade: true,
             extra_env: &[],
             fetched_scripts: &[],
             gpu_probe: None,
@@ -230,6 +241,7 @@ fn install_recipe(installer: &mut Installer, recipe: UvRecipe<'_>) -> Result<(),
             index_strategy: recipe.index_strategy,
             no_build_isolation: recipe.no_build_isolation,
             extra_env: recipe.extra_env,
+            upgrade: recipe.upgrade,
             ..PipOptions::default()
         },
     )?;
@@ -314,20 +326,49 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
         .join("x86_64-conda-linux-gnu-g++")
         .to_string_lossy()
         .into_owned();
+    // openfold's setup.py picks its -gencode flags from the compute capability of the GPU it can
+    // see, and falls back to a hardcoded set that still contains sm_37 when it sees none -- an
+    // architecture CUDA 12 dropped, so that fallback ends the build at "Unsupported gpu
+    // architecture 'compute_37'". It looks for the driver with ctypes.CDLL("libcuda.so"), the
+    // development symlink rather than the versioned soname, and only the soname is in the loader
+    // cache; on WSL the file does not sit in a default search directory either. So the directory
+    // holding it goes on LD_LIBRARY_PATH, ahead of anything the caller already had there, which
+    // is kept rather than replaced for the same reason.
     let library_path = prefix.join("lib").to_string_lossy().into_owned();
+    let mut search_path = vec![library_path.clone()];
+    if let Some(driver) = cuda_driver_library_dir() {
+        search_path.push(driver.to_string_lossy().into_owned());
+    }
+    if let Ok(inherited) = std::env::var("LD_LIBRARY_PATH") {
+        if !inherited.is_empty() {
+            search_path.push(inherited);
+        }
+    }
+    let ld_library_path = search_path.join(":");
     install_recipe(
         installer,
         UvRecipe {
             torch: &["torch==2.7.1"],
+            // Without this, `--upgrade` reads pytorch-lightning's `torch>=1.10` floor as licence
+            // to replace the torch pinned above with the newest release on PyPI -- while
+            // openfold's extension is compiling against the headers of the one being replaced,
+            // since uv installs ready wheels and builds source distributions at the same time.
+            // That surfaced as `fatal error: ATen/NamedTensorUtils.h: No such file or directory`
+            // mid-build, and when the build happened to win the race instead, as an environment
+            // whose compiled kernel and installed torch were different versions.
+            upgrade: false,
             no_build_isolation: true,
-            build_requirements: &["setuptools"],
+            // Held below 81, which dropped `pkg_resources`: lightning_fabric (a
+            // pytorch-lightning dependency) still imports it, and uv's minimal venvs carry no
+            // setuptools of their own for it to find.
+            build_requirements: &["setuptools<81"],
             extra_env: &[
                 ("NVCC_APPEND_FLAGS", "-std=c++17"),
                 ("CUDA_HOME", &cuda_home),
                 ("CC", &cc),
                 ("CXX", &cxx),
                 ("LIBRARY_PATH", &library_path),
-                ("LD_LIBRARY_PATH", &library_path),
+                ("LD_LIBRARY_PATH", &ld_library_path),
             ],
             fetched_scripts: &[FetchedScript {
                 name: "esm-fold",
@@ -335,15 +376,65 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
             }],
             ..UvRecipe::simple(
                 Tool::EsmFold2.slug(),
-                "3.11",
+                // 3.10, not 3.11: esm/esmfold/v1/trunk.py gives its `structure_module` field a
+                // `StructureModuleConfig()` default, and 3.11 rejects any dataclass default whose
+                // class is unhashable rather than only list/dict/set as 3.10 did. On 3.11 that is
+                // a ValueError raised while importing the module, so ESMFold cannot load at all.
+                "3.10",
                 &[
-                    "fair-esm[esmfold]~=2.0.0",
+                    // fair-esm's `esmfold` extra, expanded here so that one member of it --
+                    // `deepspeed==0.5.9` -- can be left out. That release imports `torch._six`,
+                    // which torch 2.0 deleted, so it cannot be imported alongside any torch this
+                    // environment can install; openfold imports deepspeed unconditionally once it
+                    // is present on the path, and the failure lands on the first fold. Nothing
+                    // here needs it: openfold looks it up with importlib.util.find_spec and uses
+                    // it only when it is also initialized, which inference never does.
+                    "fair-esm~=2.0.0",
+                    "biopython",
+                    "dm-tree",
+                    "einops",
+                    "ml-collections",
+                    "omegaconf",
+                    "scipy",
+                    // Held below 2, which moved `seed_everything` out of
+                    // pytorch_lightning.utilities.seed -- where openfold/utils/seed.py imports it
+                    // from. openfold/utils/__init__.py imports every module beside it eagerly, so
+                    // that one import decides whether `import openfold` works at all.
+                    "pytorch-lightning<2",
+                    // openfold/utils/logger.py imports dllogger, which openfold's setup.py never
+                    // declares (upstream installs it from git in environment.yml instead). It is
+                    // on the same eager-import path, so it is as required as the rest.
+                    "dllogger @ git+https://github.com/NVIDIA/dllogger.git@0540a43971f4a8a16693a9de9de73c1072020769",
                     "openfold @ git+https://github.com/aqlaboratory/openfold.git@4b41059694619831a7db195b7e0988fc4ff3a307",
                 ],
                 &["esm-fold"],
             )
         },
     )
+}
+
+/// The directory holding the NVIDIA driver's `libcuda.so`, when one can be found.
+///
+/// `ldconfig` indexes the library under its soname (`libcuda.so.1`), so it locates the driver
+/// itself; the plain `.so` beside it is the development symlink a `dlopen("libcuda.so")` needs,
+/// and it is only reported here when it is actually there.
+fn cuda_driver_library_dir() -> Option<PathBuf> {
+    let output = Command::new("ldconfig").arg("-p").output().ok()?;
+    for line in String::from_utf8_lossy(&output.stdout).lines() {
+        let Some((name, path)) = line.split_once("=>") else {
+            continue;
+        };
+        if name.split_whitespace().next() != Some("libcuda.so.1") {
+            continue;
+        }
+        let Some(directory) = Path::new(path.trim()).parent() else {
+            continue;
+        };
+        if directory.join("libcuda.so").is_file() {
+            return Some(directory.to_path_buf());
+        }
+    }
+    None
 }
 
 fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
