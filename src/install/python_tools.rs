@@ -94,6 +94,9 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                 "3.11",
                 &[
                     "biophi @ git+https://github.com/Merck/BioPhi@main",
+                    // Sapiens uses the Transformers 4-era Roberta API. Avoid a new major
+                    // with different model-loading behavior.
+                    "transformers<5",
                     // BioPhi's setup.py reads install_requires from the `pip:` half of
                     // environment.yml, so its conda-side dependencies are absent from a pip
                     // install and have to be named here. abnumber 0.4 can number with ANARCII
