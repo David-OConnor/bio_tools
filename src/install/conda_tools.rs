@@ -4,7 +4,11 @@
 //! `install.sh` that calls `conda info --base`, `conda shell.bash hook`, and `conda activate`, so
 //! those two still bootstrap a full Miniconda via [`Installer::ensure_conda`].
 
-use std::{env, fs, path::Path, process::Command};
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use super::{
     InstallError, Installer,
@@ -22,8 +26,25 @@ const LEGACY_GENIE3_OPENFOLD_URL: &str = "git+https://github.com/sokrypton/openf
 // zhanggroup.org now sits behind a Cloudflare bot check that 403s wget's default User-Agent
 // (curl with no UA gets the same 403; a browser-like UA passes), so the TMscore/TMalign
 // downloads in Genie 3's own setup.sh need a UA override.
-const BROWSER_USER_AGENT: &str =
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36";
+const BROWSER_USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36";
+
+// The ColabFold release HighFold's sources were forked from. Its pins -- AlphaFold 2.3.6,
+// NumPy 1, TensorFlow for the feature pipeline -- are the stack that 2023 code expects, and it
+// is the last release that still supports Python 3.10. The `-minus-jax` extra leaves JAX to the
+// pin below, so the CUDA build is chosen rather than the CPU wheel.
+const HIGHFOLD_COLABFOLD: &str = "colabfold[alphafold-minus-jax]==1.5.5";
+// `jax.tree_map`, which HighFold's AlphaFold copy calls throughout, was removed in JAX 0.6, and
+// 0.4 is the series the rest of these pins were resolved against. The CUDA compiler wheel needs
+// its own ceiling: NVIDIA's 12.9 release dropped the `__init__.py` from `nvidia/cuda_nvcc`,
+// making it an implicit namespace package whose `__file__` is None, and JAX 0.4.35 hands that
+// straight to `pathlib.Path` while probing for a CUDA install. `import jax` then raises a
+// TypeError. JAX's own floor here is 12.6.85, so this ceiling still satisfies it.
+const HIGHFOLD_JAX: [&str; 2] = ["jax[cuda12]==0.4.35", "nvidia-cuda-nvcc-cu12==12.8.93"];
+// Two of ColabFold 1.5.5's own pins no longer import: dm-haiku 0.0.10 reaches for
+// `jax.linear_util`, which JAX 0.4.24 removed, and Biopython 1.82 dropped `Bio.Data.SCOPData`,
+// which HighFold's AlphaFold copy imports. These go in afterwards, in their own pip run, because
+// resolving them alongside ColabFold's metadata is a conflict rather than an override.
+const HIGHFOLD_PIN_OVERRIDES: [&str; 2] = ["dm-haiku==0.0.13", "biopython==1.81"];
 
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
     match tool {
@@ -46,17 +67,124 @@ fn install_highfold(installer: &mut Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("HighFold");
     installer.clone_or_update("https://github.com/hongliangduan/HighFold", &target)?;
     let prefix = installer.reset_mamba_environment(Tool::HighFold.slug(), "3.10")?;
+    // ColabFold 1.5.5 caps NumPy below 2, so the Conda side has to resolve NumPy 1 builds up
+    // front; left to itself it picks an OpenMM compiled against NumPy 2, which pip then breaks
+    // when it downgrades NumPy underneath it.
     mamba_install(
         installer,
         &prefix,
         &["-c", CONDA_FORGE, "-c", "bioconda"],
-        &["openmm", "pdbfixer", "kalign2", "hhsuite"],
+        &["numpy<2", "openmm", "pdbfixer", "kalign2", "hhsuite"],
     )?;
     installer.mamba_run(
         &prefix,
-        &["python", "-m", "pip", "install", "--upgrade", "jax[cuda12]"],
+        &["python", "-m", "pip", "install", HIGHFOLD_COLABFOLD],
     )?;
-    mamba_pip_install_path(installer, &prefix, &target, &[])
+    installer.mamba_run(
+        &prefix,
+        &[&["python", "-m", "pip", "install"][..], &HIGHFOLD_JAX[..]].concat(),
+    )?;
+    for requirement in HIGHFOLD_PIN_OVERRIDES {
+        installer.mamba_run(&prefix, &["python", "-m", "pip", "install", requirement])?;
+    }
+    overlay_highfold_sources(installer, &prefix, &target)?;
+
+    let runner = installer.venv_script(Tool::HighFold.slug(), "colabfold_batch");
+    if !runner.is_file() {
+        return Err(InstallError::InvalidConfiguration(format!(
+            "ColabFold installed without leaving a launcher at {}",
+            runner.display()
+        )));
+    }
+    Ok(())
+}
+
+/// Drop HighFold's sources over the installed ColabFold, which is upstream's own instruction:
+/// the repository is a set of edited AlphaFold and ColabFold trees rather than a package, so
+/// there is nothing here for pip to install. `utils/` stays behind -- it holds the paper's
+/// evaluation scripts, and `batch.py` carries its own copy of the CycPOEM code they share.
+fn overlay_highfold_sources(
+    installer: &mut Installer,
+    prefix: &Path,
+    checkout: &Path,
+) -> Result<(), InstallError> {
+    let site_packages = environment_site_packages(installer, prefix)?;
+    for package in ["alphafold", "colabfold"] {
+        let source = checkout.join(package);
+        if !source.is_dir() {
+            return Err(InstallError::InvalidConfiguration(format!(
+                "the HighFold checkout has no {package} directory at {}",
+                source.display()
+            )));
+        }
+        installer.step(format!("Overlaying HighFold's {package} sources"));
+        overlay_directory(&source, &site_packages.join(package))?;
+    }
+    Ok(())
+}
+
+fn environment_site_packages(
+    installer: &mut Installer,
+    prefix: &Path,
+) -> Result<PathBuf, InstallError> {
+    let mut command = installer.micromamba_command()?;
+    command.args(["run", "--prefix"]).arg(prefix).args([
+        "python",
+        "-c",
+        "import sysconfig; print(sysconfig.get_paths()['purelib'])",
+    ]);
+    let output = installer.capture(&mut command)?;
+    let path = PathBuf::from(String::from_utf8_lossy(&output.stdout).trim());
+    if !path.is_dir() {
+        return Err(InstallError::InvalidConfiguration(format!(
+            "{} has no site-packages directory",
+            prefix.display()
+        )));
+    }
+    Ok(path)
+}
+
+/// Copy `source` over `destination`, replacing files that exist in both and leaving the rest of
+/// `destination` alone. Byte-compiled caches are skipped in both directions: the ones in the
+/// checkout are whatever machine last ran it, and the ones already installed would shadow the
+/// modules being replaced here.
+fn overlay_directory(source: &Path, destination: &Path) -> Result<(), InstallError> {
+    if destination
+        .file_name()
+        .is_some_and(|name| name == "__pycache__")
+    {
+        return Ok(());
+    }
+    fs::create_dir_all(destination).map_err(|error| {
+        InstallError::io(format!("unable to create {}", destination.display()), error)
+    })?;
+    let stale = destination.join("__pycache__");
+    if stale.is_dir() {
+        fs::remove_dir_all(&stale).map_err(|error| {
+            InstallError::io(format!("unable to clear {}", stale.display()), error)
+        })?;
+    }
+    let entries = fs::read_dir(source)
+        .map_err(|error| InstallError::io(format!("unable to read {}", source.display()), error))?;
+    for entry in entries {
+        let entry = entry.map_err(|error| {
+            InstallError::io(format!("unable to read {}", source.display()), error)
+        })?;
+        let name = entry.file_name();
+        if name == "__pycache__" {
+            continue;
+        }
+        let from = entry.path();
+        let to = destination.join(&name);
+        if from.is_dir() {
+            overlay_directory(&from, &to)?;
+        } else {
+            fs::copy(&from, &to).map_err(|error| {
+                InstallError::io(format!("unable to write {}", to.display()), error)
+            })?;
+        }
+    }
+    Ok(())
 }
 
 fn install_antifold(installer: &mut Installer) -> Result<(), InstallError> {
@@ -186,25 +314,73 @@ fn mamba_pip_install_path(
     installer.checked(&mut command)
 }
 
+/// The public AlphaFold 2 weights, laid out the way every consumer of them expects: AlphaFold
+/// itself joins `params` onto whatever directory it is handed, so the weights sit one level
+/// below the directory the adapters point at.
 fn install_alphafold2_parameters(installer: &Installer) -> Result<(), InstallError> {
     let target = installer.tools_root().join("alphafold_params");
-    if target.join("params_model_1_multimer_v3.npz").is_file() {
+    let params = target.join("params");
+    let marker = params.join("params_model_1_multimer_v3.npz");
+    if marker.is_file() {
         installer.note("AlphaFold 2 parameters are already installed");
-        return Ok(());
+    } else if target.join("params_model_1_multimer_v3.npz").is_file() {
+        // Earlier releases unpacked the archive flat into `alphafold_params`, where neither
+        // ColabFold nor ColabDesign finds it. These are several GB, so move rather than refetch.
+        installer.step("Moving the AlphaFold 2 parameters into their params/ subdirectory");
+        move_directory_contents(&target, &params)?;
+    } else {
+        installer.step("Installing the public AlphaFold 2 parameters (several GB)");
+        let scratch = ScratchDir::new_in(installer.tools_root(), "alphafold2-params")?;
+        let archive = scratch.path().join("params.tar");
+        installer.download(
+            "https://storage.googleapis.com/alphafold/alphafold_params_2022-12-06.tar",
+            &archive,
+        )?;
+        installer.extract_archive(&archive, &params)?;
     }
-    installer.step("Installing the public AlphaFold 2 parameters (several GB)");
-    let scratch = ScratchDir::new_in(installer.tools_root(), "alphafold2-params")?;
-    let archive = scratch.path().join("params.tar");
-    installer.download(
-        "https://storage.googleapis.com/alphafold/alphafold_params_2022-12-06.tar",
-        &archive,
-    )?;
-    installer.extract_archive(&archive, &target)?;
-    if !target.join("params_model_1_multimer_v3.npz").is_file() {
+    if !marker.is_file() {
         return Err(InstallError::InvalidConfiguration(format!(
             "the AlphaFold 2 parameters did not unpack into {}",
-            target.display()
+            params.display()
         )));
+    }
+    // ColabFold checks for these before deciding whether to fetch its own copy of the same
+    // weights, which is another several-GB download over a directory that already has them.
+    for name in [
+        "download_finished.txt",
+        "download_complexes_multimer_v3_finished.txt",
+    ] {
+        let flag = params.join(name);
+        if !flag.exists() {
+            fs::write(&flag, "").map_err(|error| {
+                InstallError::io(format!("unable to write {}", flag.display()), error)
+            })?;
+        }
+    }
+    Ok(())
+}
+
+fn move_directory_contents(source: &Path, destination: &Path) -> Result<(), InstallError> {
+    fs::create_dir_all(destination).map_err(|error| {
+        InstallError::io(format!("unable to create {}", destination.display()), error)
+    })?;
+    let entries = fs::read_dir(source)
+        .map_err(|error| InstallError::io(format!("unable to read {}", source.display()), error))?;
+    for entry in entries {
+        let entry = entry.map_err(|error| {
+            InstallError::io(format!("unable to read {}", source.display()), error)
+        })?;
+        let from = entry.path();
+        if from == destination {
+            continue;
+        }
+        let to = destination.join(entry.file_name());
+        fs::rename(&from, &to).map_err(|error| {
+            InstallError::io(
+                format!("unable to move {} to {}", from.display(), to.display()),
+                error,
+            )
+        })?;
     }
     Ok(())
 }

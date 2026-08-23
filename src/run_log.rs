@@ -16,7 +16,6 @@ use crate::run::{CommandOutput, CommandSpec};
 
 static RUN_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
-
 /// Durable audit settings for one command execution.
 ///
 /// Each execution gets a unique directory below `root/label`. The directory

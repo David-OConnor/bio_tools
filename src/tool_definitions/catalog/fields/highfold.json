@@ -33,45 +33,12 @@
       "task": ""
     },
     {
-      "name": "cyclic_constraint",
-      "label": "Cyclic constraint",
-      "kind": "select",
-      "default": "head_to_tail",
-      "required": false,
-      "help": "Which constraints the cyclic offset matrix is built from.",
-      "options": [
-        {
-          "value": "head_to_tail",
-          "label": "Head-to-tail backbone cyclization"
-        },
-        {
-          "value": "disulfide",
-          "label": "Disulfide bridge"
-        },
-        {
-          "value": "both",
-          "label": "Head-to-tail and disulfide"
-        },
-        {
-          "value": "none",
-          "label": "None (linear, for comparison)"
-        }
-      ],
-      "rows": null,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": ""
-    },
-    {
       "name": "disulfide_pairs",
-      "label": "Disulfide pairs (optional)",
+      "label": "Disulfide bridges (optional)",
       "kind": "text",
       "default": "",
       "required": false,
-      "help": "Comma-separated 1-indexed cysteine pairs, for example 3-11,5-17. Inferred from the sequence when left empty.",
+      "help": "Comma-separated 1-indexed residue pairs in the cyclic chain, for example 3-11,5-17. HighFold always closes the backbone head-to-tail; these add disulfide bridges on top of it.",
       "options": [],
       "rows": null,
       "minimum": null,

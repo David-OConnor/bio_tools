@@ -9,9 +9,7 @@ use crate::{
 /// design" category, which is what a campaign against a named target is.
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::BindCraft),
-    categories: &[
-        ToolCategory::PeptideBinderDesign,
-    ],
+    categories: &[ToolCategory::PeptideBinderDesign],
     launch_type: LaunchType::CondaBasedApp,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,

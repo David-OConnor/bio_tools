@@ -26,7 +26,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         license_details: "A BSD-style licence from the University of Washington, which upstream states is free for both non-profit and for-profit use. The public checkpoints setup_system.sh fetches are under the same terms.",
         repo_url: Some("https://github.com/RosettaCommons/RFdiffusion"),
         home_url: Some("https://sites.google.com/omsf.io/rfdiffusion"),
-        docs_url: Some("https://sites.google.com/omsf.io/rfdiffusion/reference-docs/configuration-options"),
+        docs_url: Some(
+            "https://sites.google.com/omsf.io/rfdiffusion/reference-docs/configuration-options",
+        ),
         paper_url: Some("https://doi.org/10.1038/s41586-023-06415-8"),
         license: License::Other,
         license_url: Some("https://github.com/RosettaCommons/RFdiffusion/blob/main/LICENSE"),

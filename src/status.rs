@@ -407,7 +407,10 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
         )],
         Tool::CatPred => &[("CatPred/predict.py", "CatPred runner")],
         Tool::Placer => &[("PLACER/run_PLACER.py", "PLACER runner")],
-        Tool::HighFold => &[("HighFold", "HighFold checkout")],
+        Tool::HighFold => &[
+            ("HighFold", "HighFold checkout"),
+            ("alphafold_params/params", "AlphaFold 2 parameters"),
+        ],
         Tool::AntiFold => &[("AntiFold", "AntiFold checkout")],
         _ => &[],
     };

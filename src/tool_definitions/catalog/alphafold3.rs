@@ -6,9 +6,7 @@ use crate::{
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::AlphaFold3),
-    categories: &[
-        ToolCategory::StructurePrediction,
-    ],
+    categories: &[ToolCategory::StructurePrediction],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
