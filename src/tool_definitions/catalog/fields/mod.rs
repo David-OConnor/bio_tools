@@ -42,6 +42,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "rfantibody" => Some(include_str!("rfantibody.json")),
         "rfd3" => Some(include_str!("rfd3.json")),
         "rfdiffusion" => Some(include_str!("rfdiffusion.json")),
+        "rfdiffusion2" => Some(include_str!("rfdiffusion2.json")),
         "retrobiocat" => Some(include_str!("retrobiocat.json")),
         "tap" => Some(include_str!("tap.json")),
         "thermompnn" => Some(include_str!("thermompnn.json")),

@@ -124,6 +124,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         ),
         Tool::ProteinMpnnDdg => install_proteinmpnn_ddg(installer),
         Tool::RfDiffusion => install_rfdiffusion(installer),
+        Tool::RfDiffusion2 => install_rfdiffusion2(installer),
         Tool::Rfd3 => install_rfd3(installer),
         Tool::RfAntibody => install_rfantibody(installer),
         Tool::IgDesign => install_igdesign(installer),
@@ -600,6 +601,93 @@ fn install_rfdiffusion(installer: &mut Installer) -> Result<(), InstallError> {
     ] {
         installer.download(
             &format!("https://files.ipd.uw.edu/pub/RFdiffusion/{directory}/{filename}"),
+            &weights.join(filename),
+        )?;
+    }
+    Ok(())
+}
+
+fn install_rfdiffusion2(installer: &mut Installer) -> Result<(), InstallError> {
+    install_recipe(
+        installer,
+        UvRecipe {
+            // Upstream ships an Apptainer image and, as its documented alternative, a Conda
+            // environment pinned to torch 2.4 on CUDA 12.4. The image needs a system-wide
+            // `apt install apptainer` and root, which no recipe here has, so this builds the
+            // alternative instead -- which means the CUDA minor version is not the usual
+            // `torch:` backend choice but whatever DGL publishes a matching wheel for.
+            extra_indexes: &["https://download.pytorch.org/whl/cu124"],
+            index_strategy: Some("unsafe-best-match"),
+            gpu_probe: Some(
+                "import torch; assert torch.cuda.is_available(), 'RFdiffusion2 requires CUDA'",
+            ),
+            ..UvRecipe::simple(
+                // Upstream's environment files are for 3.11, and the pandas pin below has no
+                // wheel above it.
+                Tool::RfDiffusion2.slug(),
+                "3.11",
+                &[
+                    "torch==2.4.0",
+                    "dgl @ https://data.dgl.ai/wheels/torch-2.4/cu124/dgl-2.4.0%2Bcu124-cp311-cp311-manylinux1_x86_64.whl",
+                    "torchdata==0.9.0",
+                    "numpy<2",
+                    // `rf2aa.util` imports `openbabel` at module scope, so it is on the inference
+                    // path rather than optional. Upstream takes it from conda-forge; this is the
+                    // same 3.1.1 library as a wheel.
+                    "openbabel-wheel",
+                    "e3nn==0.5.1",
+                    "hydra-core==1.3.1",
+                    "omegaconf==2.3.0",
+                    "ml-collections==0.1.1",
+                    "addict==2.4.0",
+                    "assertpy==1.1.0",
+                    "biopython==1.83",
+                    "biotite",
+                    "colorlog",
+                    "compact-json",
+                    "cytoolz==0.12.3",
+                    "deepdiff==6.3.0",
+                    "dm-tree==0.1.8",
+                    "einops==0.7.0",
+                    "executing==2.0.0",
+                    "fire==0.6.0",
+                    "GPUtil==1.4.0",
+                    "icecream==2.1.3",
+                    "jinja2",
+                    "matplotlib",
+                    "networkx",
+                    "numba",
+                    "opt_einsum==3.3.0",
+                    "pandas==1.5.0",
+                    "pyarrow==17.0.0",
+                    "pydantic",
+                    "pyrsistent==0.19.3",
+                    "rdkit==2024.3.5",
+                    "RestrictedPython",
+                    "rich",
+                    "scipy==1.13.1",
+                    "seaborn==0.13.2",
+                    "sympy==1.13.2",
+                    "tqdm==4.65.0",
+                    "typer==0.12.5",
+                    "xarray",
+                ],
+                &[],
+            )
+        },
+    )?;
+    // The repository is the distribution: there is no package to install, and `run_inference.py`
+    // resolves its Hydra config directory relative to its own location, so a consumer runs the
+    // script out of the checkout with the checkout on PYTHONPATH.
+    let target = installer.tools_root().join("RFdiffusion2");
+    installer.clone_or_update("https://github.com/RosettaCommons/RFdiffusion2", &target)?;
+    // `setup.py` fetches these two alongside three Apptainer images and the LigandMPNN weights
+    // used by the benchmark pipeline; inference needs only the checkpoints. RFD_173 is the one
+    // upstream's own demos override `aa.yaml` with, RFD_140 that config's default.
+    let weights = target.join("rf_diffusion").join("model_weights");
+    for filename in ["RFD_173.pt", "RFD_140.pt"] {
+        installer.download(
+            &format!("https://files.ipd.uw.edu/pub/rfdiffusion2/model_weights/{filename}"),
             &weights.join(filename),
         )?;
     }

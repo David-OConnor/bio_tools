@@ -15,7 +15,7 @@ Includes the most popular tools for structure prediction, sequence prediction, a
 - [AlphaFold 3](https://deepmind.google/science/alphafold/)
 - [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) and [LigandMPNN](https://github.com/dauparas/LigandMPNN)
 - [Boltz-2](https://boltz.bio/) / [BoltzGen](https://boltz.bio/boltzgen)
-- [RFdiffusion](https://sites.google.com/omsf.io/rfdiffusion), [RFdiffusion3](https://rosettacommons.github.io/foundry/models/rfd3/index.html), and [RFantibody](https://github.com/RosettaCommons/RFantibody)
+- [RFdiffusion](https://sites.google.com/omsf.io/rfdiffusion), [RFdiffusion2](https://rosettacommons.github.io/RFdiffusion2/), [RFdiffusion3](https://rosettacommons.github.io/foundry/models/rfd3/index.html), and [RFantibody](https://github.com/RosettaCommons/RFantibody)
 - [Chai-1](https://www.chaidiscovery.com/)
 - [Protenix](https://protenix-server.com/)
 - [BindCraft](https://github.com/martinpacesa/BindCraft)
