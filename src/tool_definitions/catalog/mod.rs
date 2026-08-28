@@ -50,6 +50,7 @@ mod protenix;
 mod rdkit;
 mod retrobiocat;
 mod rfantibody;
+mod rfd3;
 mod rfdiffusion;
 mod tap;
 mod thermompnn;
@@ -165,6 +166,7 @@ pub const ALL: &[&CatalogEntry] = &[
     &ligandmpnn::ENTRY,
     &proteinmpnn_ddg::ENTRY,
     &rfdiffusion::ENTRY,
+    &rfd3::ENTRY,
     &rfantibody::ENTRY,
     &germinal::ENTRY,
     &mber::ENTRY,

@@ -387,6 +387,7 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
             ("RFdiffusion/scripts/run_inference.py", "RFdiffusion runner"),
             ("RFdiffusion/models/Base_ckpt.pt", "RFdiffusion weights"),
         ],
+        Tool::Rfd3 => &[("rfd3/checkpoints/rfd3_latest.ckpt", "RFdiffusion3 weights")],
         Tool::RfAntibody => &[("RFantibody/weights/RFdiffusion_Ab.pt", "RFantibody weights")],
         Tool::Germinal => &[("germinal/run_germinal.py", "Germinal runner")],
         Tool::Mber => &[("mber-open", "mBER checkout")],
@@ -438,6 +439,7 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
             | Tool::ProteinMpnn
             | Tool::LigandMpnn
             | Tool::RfDiffusion
+            | Tool::Rfd3
             | Tool::RfAntibody
             | Tool::IgDesign
             | Tool::ThermoMpnn

@@ -40,6 +40,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "protenix" => Some(include_str!("protenix.json")),
         "rdkit" => Some(include_str!("rdkit.json")),
         "rfantibody" => Some(include_str!("rfantibody.json")),
+        "rfd3" => Some(include_str!("rfd3.json")),
         "rfdiffusion" => Some(include_str!("rfdiffusion.json")),
         "retrobiocat" => Some(include_str!("retrobiocat.json")),
         "tap" => Some(include_str!("tap.json")),

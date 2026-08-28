@@ -124,6 +124,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         ),
         Tool::ProteinMpnnDdg => install_proteinmpnn_ddg(installer),
         Tool::RfDiffusion => install_rfdiffusion(installer),
+        Tool::Rfd3 => install_rfd3(installer),
         Tool::RfAntibody => install_rfantibody(installer),
         Tool::IgDesign => install_igdesign(installer),
         Tool::ThermoMpnn => install_checkout_recipe(
@@ -603,6 +604,40 @@ fn install_rfdiffusion(installer: &mut Installer) -> Result<(), InstallError> {
         )?;
     }
     Ok(())
+}
+
+fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
+    install_recipe(
+        installer,
+        UvRecipe {
+            torch: &["torch==2.7.1"],
+            // rc-foundry floors torch at 2.2 and nothing above that, so `--upgrade` would read
+            // that floor as licence to replace the backend-specific wheel installed above with
+            // whatever PyPI serves by default -- a CUDA build on a host that may have no GPU.
+            upgrade: false,
+            gpu_probe: Some(
+                "import torch; assert torch.cuda.is_available(), 'RFdiffusion3 requires CUDA'",
+            ),
+            ..UvRecipe::simple(
+                Tool::Rfd3.slug(),
+                // rc-foundry publishes for 3.12 alone: `requires-python = ">=3.12,<3.13"`.
+                "3.12",
+                // The extra adds pydantic, which the input specification is built out of; the
+                // model code itself is in the base distribution alongside RF3 and MPNN.
+                &["rc-foundry[rfd3]"],
+                &["rfd3", "foundry"],
+            )
+        },
+    )?;
+    // `foundry install rfd3` fetches exactly this file, but also rewrites the installed package's
+    // own .env to record where it went. Download it directly instead, under the name foundry's
+    // checkpoint registry knows it by, so nothing inside the environment is edited after the fact
+    // and a consumer can point `ckpt_path` straight at it.
+    let checkpoints = installer.tools_root().join("rfd3").join("checkpoints");
+    installer.download(
+        "https://files.ipd.uw.edu/pub/rfd3/rfd3_foundry_2025_12_01_remapped.ckpt",
+        &checkpoints.join("rfd3_latest.ckpt"),
+    )
 }
 
 fn install_rfantibody(installer: &mut Installer) -> Result<(), InstallError> {
