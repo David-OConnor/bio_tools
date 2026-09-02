@@ -7,15 +7,18 @@ use crate::{
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::LigandMpnn),
     categories: &[
-        ToolCategory::SequencePrediction,
         ToolCategory::ProteinDesign,
+        ToolCategory::SequencePrediction,
     ],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: false,
     spec: SpecData {
-        summary: "Atomic context-conditioned protein sequence design",
+        summary: "Protein sequence prediction, to conform with backbone coordinates. Takes external \
+        molecules into account; to some degree a superset of ProteinMPNN, but is a different model. \
+        A useful step after RFDiffusion in a protein design pipeline, and before validation \
+        with structure prediction.",
         description: "A deep learning-based protein sequence design method that explicitly \
         models all non-protein components of biomolecular systems. \
         LigandMPNN generates not only sequences but also sidechain conformations to allow detailed \

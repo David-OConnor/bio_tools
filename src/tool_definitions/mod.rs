@@ -25,9 +25,7 @@ pub enum Tool {
     ProteinMpnn,
     LigandMpnn,
     ProteinMpnnDdg,
-    RfDiffusion,
-    RfDiffusion2,
-    Rfd3,
+    RfDiffusion3,
     RfAntibody,
     Germinal,
     Mber,
@@ -50,7 +48,7 @@ pub enum Tool {
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 37] = [
+    pub const ALL: [Self; 35] = [
         Self::AlphaFold3,
         Self::OpenDde,
         Self::Boltz2,
@@ -64,9 +62,7 @@ impl Tool {
         Self::LigandMpnn,
         Self::ProteinMpnn,
         Self::ProteinMpnnDdg,
-        Self::RfDiffusion,
-        Self::RfDiffusion2,
-        Self::Rfd3,
+        Self::RfDiffusion3,
         Self::RfAntibody,
         Self::Germinal,
         Self::Mber,
@@ -109,9 +105,7 @@ impl Tool {
             Self::ProteinMpnn => "proteinmpnn",
             Self::LigandMpnn => "ligandmpnn",
             Self::ProteinMpnnDdg => "proteinmpnn-ddg",
-            Self::RfDiffusion => "rfdiffusion",
-            Self::RfDiffusion2 => "rfdiffusion2",
-            Self::Rfd3 => "rfd3",
+            Self::RfDiffusion3 => "rfd3",
             Self::RfAntibody => "rfantibody",
             Self::Germinal => "germinal",
             Self::Mber => "mber",
@@ -169,9 +163,7 @@ impl Tool {
             Self::ProteinMpnn => "ProteinMPNN",
             Self::LigandMpnn => "LigandMPNN",
             Self::ProteinMpnnDdg => "ProteinMPNN-ddG",
-            Self::RfDiffusion => "RFdiffusion",
-            Self::RfDiffusion2 => "RFdiffusion2",
-            Self::Rfd3 => "RFdiffusion3",
+            Self::RfDiffusion3 => "RFdiffusion3",
             Self::RfAntibody => "RFantibody",
             Self::Germinal => "Germinal",
             Self::Mber => "mBER",
@@ -206,9 +198,7 @@ impl Tool {
             Self::AntiFold => &["AntiFold"],
             Self::ProteinMpnn => &["ProteinMPNN"],
             Self::LigandMpnn => &["LigandMPNN"],
-            Self::RfDiffusion => &["RFdiffusion"],
-            Self::RfDiffusion2 => &["RFdiffusion2"],
-            Self::Rfd3 => &["rfd3"],
+            Self::RfDiffusion3 => &["rfd3"],
             Self::RfAntibody => &["RFantibody"],
             Self::Germinal => &["germinal"],
             Self::Mber => &["mber-open"],
@@ -278,8 +268,6 @@ impl Tool {
                     | Self::BindCraft
                     | Self::AntiFold
                     | Self::ProteinMpnnDdg
-                    | Self::RfDiffusion
-                    | Self::RfDiffusion2
                     | Self::RfAntibody
                     | Self::Germinal
                     | Self::Mber
@@ -333,9 +321,7 @@ impl FromStr for Tool {
             "proteinmpnn" | "abmpnn" => Self::ProteinMpnn,
             "ligandmpnn" => Self::LigandMpnn,
             "proteinmpnnddg" => Self::ProteinMpnnDdg,
-            "rfdiffusion" => Self::RfDiffusion,
-            "rfdiffusion2" | "rfd2" => Self::RfDiffusion2,
-            "rfd3" | "rfdiffusion3" => Self::Rfd3,
+            "rfd3" | "rfdiffusion3" => Self::RfDiffusion3,
             "rfantibody" => Self::RfAntibody,
             "germinal" => Self::Germinal,
             "mber" => Self::Mber,

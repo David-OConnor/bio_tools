@@ -1,5 +1,5 @@
 //! Install, run, and inspect third-party computational biology and chemistry tools, e.g.
-//! AlphaFold, Boltz, RFdiffusion, and ProteinMPNN.
+//! AlphaFold, Boltz, RFdiffusion3, and ProteinMPNN.
 //!
 //! The crate has three parts, usable independently:
 //!
@@ -48,6 +48,7 @@ pub enum ToolCategory {
     StructurePrediction,
     ProteinDesign,
     PeptideBinderDesign,
+    BackboneGeneration,
     MoleculeDynamics,
     QuantumChemistry,
     AntibodyDesign,
@@ -65,6 +66,7 @@ impl fmt::Display for ToolCategory {
             Self::StructurePrediction => "Structure prediction",
             Self::ProteinDesign => "Protein Design",
             Self::PeptideBinderDesign => "Binder design",
+            Self::BackboneGeneration => "Backbone design",
             Self::MoleculeDynamics => "Molecular simulation",
             Self::QuantumChemistry => "Quantum chemistry",
             Self::AntibodyDesign => "Antibody design",

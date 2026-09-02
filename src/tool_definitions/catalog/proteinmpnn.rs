@@ -7,21 +7,21 @@ use crate::{
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Installed(Tool::ProteinMpnn),
     categories: &[
-        ToolCategory::SequencePrediction,
         ToolCategory::ProteinDesign,
+        ToolCategory::SequencePrediction,
     ],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
     top_choice: true,
     spec: SpecData {
-        summary: "Deep learning–based protein sequence design",
+        summary: "Protein sequence prediction, to conform with backbone coordinates. Does not take external \
+        molecules into account. A useful step after RFDiffusion in a protein design pipeline, and before validation \
+        with structure prediction.",
         description: "A graph neural network designed for protein inverse folding, meaning it predicts \
         the amino acid sequences most likely to fold into a specific 3D protein backbone structure. By \
         interpreting the spatial coordinates and geometric features of a target structure, the model \
-        rapidly generates diverse and experimentally viable sequence candidates. It has become a standard \
-        tool in computational protein engineering because it is significantly faster and more accurate \
-        than older physics-based methods. Researchers widely use ProteinMPNN for applications such as \
+        sequence candidates. Researchers use ProteinMPNN for applications such as \
         optimizing enzymes, designing novel therapeutics, and improving the stability or solubility of \
         synthetic proteins.",
         availability: "Installed by setup_system.sh with CUDA-enabled PyTorch for Linux/WSL and an NVIDIA GPU",

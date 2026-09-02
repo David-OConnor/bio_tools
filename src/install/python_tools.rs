@@ -123,9 +123,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             ),
         ),
         Tool::ProteinMpnnDdg => install_proteinmpnn_ddg(installer),
-        Tool::RfDiffusion => install_rfdiffusion(installer),
-        Tool::RfDiffusion2 => install_rfdiffusion2(installer),
-        Tool::Rfd3 => install_rfd3(installer),
+        Tool::RfDiffusion3 => install_rfd3(installer),
         Tool::RfAntibody => install_rfantibody(installer),
         Tool::IgDesign => install_igdesign(installer),
         Tool::ThermoMpnn => install_checkout_recipe(
@@ -550,150 +548,6 @@ fn install_proteinmpnn_ddg(installer: &mut Installer) -> Result<(), InstallError
     )
 }
 
-fn install_rfdiffusion(installer: &mut Installer) -> Result<(), InstallError> {
-    install_recipe(
-        installer,
-        UvRecipe {
-            extra_indexes: &["https://download.pytorch.org/whl/cu118"],
-            index_strategy: Some("unsafe-best-match"),
-            gpu_probe: Some(
-                "import torch; assert torch.cuda.is_available(), 'RFdiffusion requires CUDA'",
-            ),
-            ..UvRecipe::simple(
-                Tool::RfDiffusion.slug(),
-                "3.10",
-                &[
-                    "dgl @ https://data.dgl.ai/wheels/torch-2.3/cu118/dgl-2.4.0%2Bcu118-cp310-cp310-manylinux1_x86_64.whl",
-                    "numpy<2",
-                    "e3nn==0.3.3",
-                    "hydra-core",
-                    "icecream",
-                    "opt_einsum",
-                    "scipy",
-                    "pandas",
-                    "decorator",
-                    "pyrsistent",
-                    "dllogger @ git+https://github.com/NVIDIA/dllogger.git@master",
-                    "se3-transformer @ git+https://github.com/RosettaCommons/RFdiffusion.git@main#subdirectory=env/SE3Transformer",
-                    "rfdiffusion @ git+https://github.com/RosettaCommons/RFdiffusion.git@main",
-                ],
-                &[],
-            )
-        },
-    )?;
-    let target = installer.tools_root().join("RFdiffusion");
-    installer.clone_or_update("https://github.com/RosettaCommons/RFdiffusion", &target)?;
-    let weights = target.join("models");
-    for (directory, filename) in [
-        ("6f5902ac237024bdd0c176cb93063dc4", "Base_ckpt.pt"),
-        ("e29311f6f1bf1af907f9ef9f44b8328b", "Complex_base_ckpt.pt"),
-        (
-            "60f09a193fb5e5ccdc4980417708dbab",
-            "Complex_Fold_base_ckpt.pt",
-        ),
-        ("74f51cfb8b440f50d70878e05361d8f0", "InpaintSeq_ckpt.pt"),
-        (
-            "76d00716416567174cdb7ca96e208296",
-            "InpaintSeq_Fold_ckpt.pt",
-        ),
-        ("5532d2e1f3a4738decd58b19d633b3c3", "ActiveSite_ckpt.pt"),
-        ("12fc204edeae5b57713c5ad7dcb97d39", "Base_epoch8_ckpt.pt"),
-    ] {
-        installer.download(
-            &format!("https://files.ipd.uw.edu/pub/RFdiffusion/{directory}/{filename}"),
-            &weights.join(filename),
-        )?;
-    }
-    Ok(())
-}
-
-fn install_rfdiffusion2(installer: &mut Installer) -> Result<(), InstallError> {
-    install_recipe(
-        installer,
-        UvRecipe {
-            // Upstream ships an Apptainer image and, as its documented alternative, a Conda
-            // environment pinned to torch 2.4 on CUDA 12.4. The image needs a system-wide
-            // `apt install apptainer` and root, which no recipe here has, so this builds the
-            // alternative instead -- which means the CUDA minor version is not the usual
-            // `torch:` backend choice but whatever DGL publishes a matching wheel for.
-            extra_indexes: &["https://download.pytorch.org/whl/cu124"],
-            index_strategy: Some("unsafe-best-match"),
-            gpu_probe: Some(
-                "import torch; assert torch.cuda.is_available(), 'RFdiffusion2 requires CUDA'",
-            ),
-            ..UvRecipe::simple(
-                // Upstream's environment files are for 3.11, and the pandas pin below has no
-                // wheel above it.
-                Tool::RfDiffusion2.slug(),
-                "3.11",
-                &[
-                    "torch==2.4.0",
-                    "dgl @ https://data.dgl.ai/wheels/torch-2.4/cu124/dgl-2.4.0%2Bcu124-cp311-cp311-manylinux1_x86_64.whl",
-                    "torchdata==0.9.0",
-                    "numpy<2",
-                    // `rf2aa.util` imports `openbabel` at module scope, so it is on the inference
-                    // path rather than optional. Upstream takes it from conda-forge; this is the
-                    // same 3.1.1 library as a wheel.
-                    "openbabel-wheel",
-                    "e3nn==0.5.1",
-                    "hydra-core==1.3.1",
-                    "omegaconf==2.3.0",
-                    "ml-collections==0.1.1",
-                    "addict==2.4.0",
-                    "assertpy==1.1.0",
-                    "biopython==1.83",
-                    "biotite",
-                    "colorlog",
-                    "compact-json",
-                    "cytoolz==0.12.3",
-                    "deepdiff==6.3.0",
-                    "dm-tree==0.1.8",
-                    "einops==0.7.0",
-                    "executing==2.0.0",
-                    "fire==0.6.0",
-                    "GPUtil==1.4.0",
-                    "icecream==2.1.3",
-                    "jinja2",
-                    "matplotlib",
-                    "networkx",
-                    "numba",
-                    "opt_einsum==3.3.0",
-                    "pandas==1.5.0",
-                    "pyarrow==17.0.0",
-                    "pydantic",
-                    "pyrsistent==0.19.3",
-                    "rdkit==2024.3.5",
-                    "RestrictedPython",
-                    "rich",
-                    "scipy==1.13.1",
-                    "seaborn==0.13.2",
-                    "sympy==1.13.2",
-                    "tqdm==4.65.0",
-                    "typer==0.12.5",
-                    "xarray",
-                ],
-                &[],
-            )
-        },
-    )?;
-    // The repository is the distribution: there is no package to install, and `run_inference.py`
-    // resolves its Hydra config directory relative to its own location, so a consumer runs the
-    // script out of the checkout with the checkout on PYTHONPATH.
-    let target = installer.tools_root().join("RFdiffusion2");
-    installer.clone_or_update("https://github.com/RosettaCommons/RFdiffusion2", &target)?;
-    // `setup.py` fetches these two alongside three Apptainer images and the LigandMPNN weights
-    // used by the benchmark pipeline; inference needs only the checkpoints. RFD_173 is the one
-    // upstream's own demos override `aa.yaml` with, RFD_140 that config's default.
-    let weights = target.join("rf_diffusion").join("model_weights");
-    for filename in ["RFD_173.pt", "RFD_140.pt"] {
-        installer.download(
-            &format!("https://files.ipd.uw.edu/pub/rfdiffusion2/model_weights/{filename}"),
-            &weights.join(filename),
-        )?;
-    }
-    Ok(())
-}
-
 fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
     install_recipe(
         installer,
@@ -707,7 +561,7 @@ fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
                 "import torch; assert torch.cuda.is_available(), 'RFdiffusion3 requires CUDA'",
             ),
             ..UvRecipe::simple(
-                Tool::Rfd3.slug(),
+                Tool::RfDiffusion3.slug(),
                 // rc-foundry publishes for 3.12 alone: `requires-python = ">=3.12,<3.13"`.
                 "3.12",
                 // The extra adds pydantic, which the input specification is built out of; the

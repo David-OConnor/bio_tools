@@ -383,21 +383,7 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
                 "LigandMPNN weights",
             ),
         ],
-        Tool::RfDiffusion => &[
-            ("RFdiffusion/scripts/run_inference.py", "RFdiffusion runner"),
-            ("RFdiffusion/models/Base_ckpt.pt", "RFdiffusion weights"),
-        ],
-        Tool::RfDiffusion2 => &[
-            (
-                "RFdiffusion2/rf_diffusion/run_inference.py",
-                "RFdiffusion2 runner",
-            ),
-            (
-                "RFdiffusion2/rf_diffusion/model_weights/RFD_173.pt",
-                "RFdiffusion2 weights",
-            ),
-        ],
-        Tool::Rfd3 => &[("rfd3/checkpoints/rfd3_latest.ckpt", "RFdiffusion3 weights")],
+        Tool::RfDiffusion3 => &[("rfd3/checkpoints/rfd3_latest.ckpt", "RFdiffusion3 weights")],
         Tool::RfAntibody => &[("RFantibody/weights/RFdiffusion_Ab.pt", "RFantibody weights")],
         Tool::Germinal => &[("germinal/run_germinal.py", "Germinal runner")],
         Tool::Mber => &[("mber-open", "mBER checkout")],
@@ -448,9 +434,7 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
             | Tool::BoltzGen
             | Tool::ProteinMpnn
             | Tool::LigandMpnn
-            | Tool::RfDiffusion
-            | Tool::RfDiffusion2
-            | Tool::Rfd3
+            | Tool::RfDiffusion3
             | Tool::RfAntibody
             | Tool::IgDesign
             | Tool::ThermoMpnn

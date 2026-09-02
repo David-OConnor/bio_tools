@@ -109,6 +109,7 @@ python_enum!(
         PropertyPrediction = 10,
         BindingData = 11,
         Placeholder = 12,
+        BackboneGeneration = 13,
     }
 );
 

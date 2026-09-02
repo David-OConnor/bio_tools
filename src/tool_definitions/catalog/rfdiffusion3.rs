@@ -5,25 +5,21 @@ use crate::{
 };
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    identity: Identity::Installed(Tool::Rfd3),
+    identity: Identity::Installed(Tool::RfDiffusion3),
     categories: &[
         ToolCategory::ProteinDesign,
-        ToolCategory::PeptideBinderDesign,
+        ToolCategory::BackboneGeneration,
     ],
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     top_choice: true,
     spec: SpecData {
-        summary: "Generates all-atom protein backbones around proteins, small molecules, nucleic acids, and metals.",
-        description: "RFdiffusion3 is the successor to RFdiffusion, rebuilt on the AtomWorks/RF3 stack \
-        rather than on RoseTTAFold2's SE(3) trunk. It diffuses every atom instead of a residue frame, so \
-        one model covers cases the original needed separate checkpoints or no support at all for: enzyme \
-        active sites with their cofactors, small-molecule and nucleic-acid binders, and metal sites. \
-        Constraints are given as a JSON or YAML specification rather than as command-line contigs, and a \
-        single unified selection language decides, per atom, what is held fixed -- coordinates, sequence, \
-        both, or neither. Fixing sequence but not structure turns it into a predictor, fixing backbone but \
-        not sequence into an inverse-folding model, and unfixing only side chains into a packer.",
+        summary: "Generates all-atom protein backbone coordinates around proteins, small molecules, \
+         nucleic acids, and metals. A useful first step in a protein design pipeline.",
+        description: "RFdiffusion3 is a practical first step in protein design workflows: It generates coordinates \
+        of the backbone atoms for a protein based on contraints (For example, to spacially deconflict with specific \
+        molecules). Its output can be fed into ProteinMPNN or LigandMPNN to generate an amino acid sequence.",
         availability: "Installed by setup_system.sh, which fetches the public model checkpoint; an NVIDIA GPU is required",
         license_details: "BSD 3-Clause from the Institute for Protein Design, University of Washington, covering the inference code, the training code, and the public checkpoint alike: unrestricted academic and commercial use.",
         repo_url: Some("https://github.com/RosettaCommons/foundry"),

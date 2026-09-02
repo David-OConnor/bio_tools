@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "athanor_bio_tools"
-description = "Install, run, and inspect computational biology and chemistry tools, e.g. AlphaFold, Boltz, RFdiffusion, and ProteinMPNN"
+description = "Install, run, and inspect computational biology and chemistry tools, e.g. AlphaFold, Boltz, RFdiffusion3, and ProteinMPNN"
 requires-python = ">=3.10"
 authors = [{ name = "David O'Connor", email = "the_alchemist@fastmail.com" }]
 readme = "PYPI_README.md"
