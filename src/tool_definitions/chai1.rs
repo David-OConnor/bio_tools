@@ -21,6 +21,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/chaidiscovery/chai-lab"),
         home_url: Some("https://www.chaidiscovery.com/"),
         docs_url: None,
+        input_params_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2024.10.10.615955"),
         license: License::ApacheV2,
         license_url: None,

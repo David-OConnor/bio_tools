@@ -5,6 +5,7 @@ use std::{fmt, str::FromStr};
 use crate::install::InstallError;
 
 pub mod fields;
+pub mod presets;
 pub mod catalog;
 
 mod abmpnn;

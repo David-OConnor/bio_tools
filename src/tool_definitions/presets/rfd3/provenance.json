@@ -1,0 +1,29 @@
+{
+  "source_url": "https://github.com/RosettaCommons/foundry/tree/production/models/rfd3/docs/examples",
+  "input_documentation": "https://rosettacommons.github.io/foundry/models/rfd3/input.html",
+  "revision": "b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c",
+  "compatibility": {
+    "allow_ligand_on_existing_chain": [
+      "enzyme_design/M0255_1mg5_unfixed",
+      "symmetry/unindexed_C2_1j79",
+      "symmetry/unindexed_C2_1e3v",
+      "symmetry/indexed_unsym_C2_1bfr"
+    ]
+  },
+  "sha256": {
+    "LICENSE.md": "34ab4f089ed0332b059b3783839e997d44adbe0cdbab9b0ebd142feff75d64eb",
+    "input_pdbs/1bna.pdb": "a129ee7e3576c8bf82ad0718776665b65c6a11164f5705014a16f7dcbdc391ae",
+    "input_pdbs/1q75.pdb": "4255a102d66e5adaafdafd31531e5514a2b0dee037b030579cf6caffd2453e0c",
+    "input_pdbs/2r5z.pdb": "453214d5bec6c6e5e144d422cd1175a8b8c5bdb7be6d21b76b86c66501a451e5",
+    "input_pdbs/4zxb_cropped.pdb": "3ba6db1c57240427525ff378471dde1b941cbc4c43e99b9313ad4be660435c34",
+    "input_pdbs/5o45_cropped.pdb": "ba8b75816d8180d8c9ddf7388834d7cbf72163e77ecb612b22449b4375e633a0",
+    "input_pdbs/5o4d.pdb": "179d1fbd684e60c6e6a0941fb2a577664a16e094ccdd925f52125d1122221d1b",
+    "input_pdbs/7v11.pdb": "ba1e3014bd83f044d7c0d82bfd3d2218427a11e337dab41d00b724db50294cb7",
+    "input_pdbs/IAI.pdb": "7b9ac256d92f19ad6d5306b1a8c6c06668abf89db402f66f637a009ad0106280",
+    "input_pdbs/M0255_1mg5.pdb": "ed18df252342d09eecce650fac19bd39f7475adc96ac5173c544e36bf8dffe5c",
+    "input_pdbs/symmetry_examples/1bfr_C2.pdb": "1efdbd10d369c48b706f4ea9b2783ab6152b1fea3473a4290887c0364415710f",
+    "input_pdbs/symmetry_examples/1e3v_C2.pdb": "3ab6be1798766b5a602d1eb750483c5acaa90f146f9af03c92bfbad8424b1088",
+    "input_pdbs/symmetry_examples/1j79_C2.pdb": "d3970c873828ed5a7528ea349217a11e3c748513d6b0276b7edb64a6f4c2703e",
+    "input_pdbs/symmetry_examples/6t8h_C3.pdb": "7a238e1ca5536d345093af5b795467858b9f2c633bed47a4fd9b4191cb4b6a10"
+  }
+}

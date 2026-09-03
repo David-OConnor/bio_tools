@@ -26,6 +26,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/Kuhlman-Lab/ThermoMPNN"),
         home_url: None,
         docs_url: Some("https://www.pnas.org/doi/10.1073/pnas.2314853121"),
+        input_params_url: None,
         paper_url: Some("https://www.pnas.org/doi/10.1073/pnas.2314853121"),
         license: License::Mit,
         license_url: None,

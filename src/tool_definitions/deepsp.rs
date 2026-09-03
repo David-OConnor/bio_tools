@@ -24,6 +24,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/Lailabcode/DeepSP"),
         home_url: None,
         docs_url: Some("https://www.csbj.org/article/S2001-0370(24)00173-9/fulltext"),
+        input_params_url: None,
         paper_url: Some("https://www.csbj.org/article/S2001-0370(24)00173-9/fulltext"),
         license: License::Mit,
         license_url: None,

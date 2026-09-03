@@ -25,6 +25,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/manifoldbio/mber-open"),
         home_url: None,
         docs_url: Some("https://github.com/manifoldbio/mber-open/blob/main/protocols/README.md"),
+        input_params_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.09.26.678877v1"),
         license: License::Mit,
         license_url: None,

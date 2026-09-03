@@ -26,6 +26,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/RosettaCommons/foundry"),
         home_url: Some("https://github.com/RosettaCommons/foundry/blob/production/models/rfd3/README.md"),
         docs_url: Some("https://rosettacommons.github.io/foundry/models/rfd3/index.html"),
+        input_params_url: Some("https://rosettacommons.github.io/foundry/models/rfd3/input.html#inputspecification-fields"),
         paper_url: Some("https://doi.org/10.1101/2025.09.18.676967"),
         license: License::Bsd3Clause,
         license_url: None,

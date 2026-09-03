@@ -24,6 +24,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/maranasgroup/CatPred"),
         home_url: Some("https://www.catpred.com/"),
         docs_url: Some("https://www.nature.com/articles/s41467-025-57215-9"),
+        input_params_url: None,
         paper_url: Some("https://www.nature.com/articles/s41467-025-57215-9"),
         license: License::Mit,
         license_url: None,

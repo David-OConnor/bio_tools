@@ -22,6 +22,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: None,
         home_url: Some("https://www.pdbbind-plus.org.cn/"),
         docs_url: None,
+        input_params_url: None,
         paper_url: Some("https://doi.org/10.1021/jm030580l"),
         license: License::Other,
         license_url: None,

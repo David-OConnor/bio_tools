@@ -20,6 +20,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/bytedance/Protenix"),
         home_url: Some("https://protenix-server.com/"),
         docs_url: None,
+        input_params_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.01.08.631967"),
         license: License::ApacheV2,
         license_url: None,

@@ -208,6 +208,8 @@ pub struct SpecData<S> {
     pub repo_url: Option<S>,
     pub home_url: Option<S>,
     pub docs_url: Option<S>,
+    /// Documentation for the tool's input parameters.
+    pub input_params_url: Option<S>,
     pub paper_url: Option<S>,
     pub license: License,
     /// A tool-specific license page, used when `license` is
@@ -227,6 +229,7 @@ impl SpecData<&'static str> {
             repo_url: self.repo_url.map(str::to_owned),
             home_url: self.home_url.map(str::to_owned),
             docs_url: self.docs_url.map(str::to_owned),
+            input_params_url: self.input_params_url.map(str::to_owned),
             paper_url: self.paper_url.map(str::to_owned),
             license: self.license,
             license_url: self.license_url.map(str::to_owned),
@@ -266,6 +269,7 @@ impl Spec {
                 repo_url,
                 home_url,
                 docs_url,
+                input_params_url: None,
                 paper_url,
                 license,
                 license_url,
@@ -277,6 +281,7 @@ impl Spec {
     pub fn links(&self) -> Vec<(&'static str, &str)> {
         [
             ("Documentation", self.data.docs_url.as_deref()),
+            ("Input parameters", self.data.input_params_url.as_deref()),
             ("Home page", self.data.home_url.as_deref()),
             ("Paper", self.data.paper_url.as_deref()),
             ("Source code", self.data.repo_url.as_deref()),

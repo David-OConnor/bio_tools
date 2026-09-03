@@ -24,6 +24,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/tvinet/NetSolP-1.0"),
         home_url: Some("https://services.healthtech.dtu.dk/services/NetSolP-1.0/"),
         docs_url: Some("https://academic.oup.com/bioinformatics/article/38/4/941/6444984"),
+        input_params_url: None,
         paper_url: Some("https://academic.oup.com/bioinformatics/article/38/4/941/6444984"),
         license: License::Other,
         license_url: None,

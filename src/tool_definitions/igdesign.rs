@@ -23,6 +23,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/AbSciBio/igdesign"),
         home_url: Some("https://www.absci.com/antibody-inverse-folding/"),
         docs_url: Some("https://www.biorxiv.org/content/10.1101/2023.12.08.570889v2"),
+        input_params_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2023.12.08.570889v2"),
         license: License::Other,
         license_url: None,

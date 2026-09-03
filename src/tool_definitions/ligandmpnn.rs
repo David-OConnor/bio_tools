@@ -30,6 +30,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/dauparas/LigandMPNN"),
         home_url: None,
         docs_url: None,
+        input_params_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2023.12.22.573103v1"),
         license: License::Mit,
         license_url: None,

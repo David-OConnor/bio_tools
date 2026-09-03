@@ -21,6 +21,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/ncbi/igblast"),
         home_url: Some("https://www.ncbi.nlm.nih.gov/igblast/"),
         docs_url: Some("https://ncbi.github.io/igblast/"),
+        input_params_url: None,
         paper_url: Some("https://doi.org/10.1093/nar/gkt382"),
         license: License::PublicDomain,
         license_url: None,

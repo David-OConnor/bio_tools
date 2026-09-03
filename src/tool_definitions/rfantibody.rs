@@ -21,6 +21,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/RosettaCommons/RFantibody"),
         home_url: None,
         docs_url: None,
+        input_params_url: None,
         paper_url: Some("https://doi.org/10.1038/s41586-025-09721-5"),
         license: License::Mit,
         license_url: None,

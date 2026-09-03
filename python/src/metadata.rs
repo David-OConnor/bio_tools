@@ -173,6 +173,7 @@ impl PySpec {
         repo_url=None,
         home_url=None,
         docs_url=None,
+        input_params_url=None,
         paper_url=None,
         license=None,
         license_url=None,
@@ -191,6 +192,7 @@ impl PySpec {
         repo_url: Option<String>,
         home_url: Option<String>,
         docs_url: Option<String>,
+        input_params_url: Option<String>,
         paper_url: Option<String>,
         license: Option<Py<PyLicense>>,
         license_url: Option<String>,
@@ -200,20 +202,22 @@ impl PySpec {
         let license = license
             .map(|license| license.borrow(py).inner)
             .unwrap_or(RustLicense::Other);
+        let mut inner = RustSpec::new(
+            slug,
+            summary,
+            description,
+            availability,
+            license_details,
+            repo_url,
+            home_url,
+            docs_url,
+            paper_url,
+            license,
+            license_url,
+        );
+        inner.data.input_params_url = input_params_url;
         Self {
-            inner: RustSpec::new(
-                slug,
-                summary,
-                description,
-                availability,
-                license_details,
-                repo_url,
-                home_url,
-                docs_url,
-                paper_url,
-                license,
-                license_url,
-            ),
+            inner,
             fields,
             refresh_fields,
             tasks: tasks.unwrap_or_else(|| PyList::empty(py).into_any().unbind()),
@@ -258,6 +262,11 @@ impl PySpec {
     #[getter]
     fn docs_url(&self) -> Option<&str> {
         self.inner.data.docs_url.as_deref()
+    }
+
+    #[getter]
+    fn input_params_url(&self) -> Option<&str> {
+        self.inner.data.input_params_url.as_deref()
     }
 
     #[getter]
@@ -332,12 +341,20 @@ impl PySpec {
         data.set_item("repo_url", &self.inner.data.repo_url)?;
         data.set_item("home_url", &self.inner.data.home_url)?;
         data.set_item("docs_url", &self.inner.data.docs_url)?;
+        data.set_item("input_params_url", &self.inner.data.input_params_url)?;
         data.set_item("paper_url", &self.inner.data.paper_url)?;
         data.set_item("license", self.inner.data.license.to_string())?;
         data.set_item("license_url", &self.inner.data.license_url)?;
         let fields = self.active_fields(py)?;
         data.set_item("fields", serialize_dataclasses(py, &fields)?)?;
         data.set_item("tasks", serialize_dataclasses(py, &self.tasks)?)?;
+        data.set_item("presets", catalog_presets(py, &self.inner.slug)?)?;
+        if let Some(source) = bio_tools_rs::tool_definitions::fields::by_slug(&self.inner.slug) {
+            let contract = py.import("json")?.call_method1("loads", (source,))?;
+            data.set_item("input_modes", contract.call_method1("get", ("input_modes",))?)?;
+            data.set_item("task_group", contract.call_method1("get", ("task_group", ""))?)?;
+            data.set_item("field_groups", contract.call_method1("get", ("field_groups", PyList::empty(py)))?)?;
+        }
         data.set_item("links", self.links())?;
         Ok(data.unbind())
     }
@@ -463,11 +480,54 @@ impl PyProcess {
 }
 
 fn form_catalog_entry<'py>(py: Python<'py>, slug: &str) -> PyResult<Bound<'py, PyDict>> {
-    let source = catalog::fields::by_slug(slug).ok_or_else(|| {
+    let source = bio_tools_rs::tool_definitions::fields::by_slug(slug).ok_or_else(|| {
         PyValueError::new_err(format!("no bio_tools field catalog for slug {slug:?}"))
     })?;
     let entry = py.import("json")?.call_method1("loads", (source,))?;
     Ok(entry.cast::<PyDict>().map_err(PyErr::from)?.clone())
+}
+
+/// List named example inputs. Each descriptor includes editable `values` and
+/// its source URL. Bundled file values use `bio-tools://<slug>/<asset name>`.
+#[pyfunction]
+fn catalog_presets(py: Python<'_>, slug: &str) -> PyResult<Py<PyAny>> {
+    let source = bio_tools_rs::tool_definitions::presets::by_slug(slug).unwrap_or("[]");
+    Ok(py.import("json")?.call_method1("loads", (source,))?.unbind())
+}
+
+/// Return a complete preset payload, including the tool's ordinary defaults.
+/// Callers may override individual values before submitting a job.
+#[pyfunction]
+fn catalog_preset(py: Python<'_>, slug: &str, preset_id: &str) -> PyResult<Py<PyDict>> {
+    let presets = catalog_presets(py, slug)?;
+    for preset in presets.bind(py).try_iter()? {
+        let preset = preset?;
+        if preset.get_item("id")?.extract::<String>()? != preset_id {
+            continue;
+        }
+        let payload = PyDict::new(py);
+        let contract = form_catalog_entry(py, slug)?;
+        if let Some(modes) = contract.get_item("input_modes")? {
+            payload.set_item(modes.get_item("name")?, modes.get_item("default")?)?;
+        }
+        for field in contract.get_item("fields")?.unwrap().try_iter()? {
+            let field = field?;
+            payload.set_item(field.get_item("name")?, field.get_item("default")?)?;
+        }
+        for item in preset.get_item("values")?.cast::<PyDict>()?.iter() {
+            payload.set_item(item.0, item.1)?;
+        }
+        return Ok(payload.unbind());
+    }
+    Err(PyValueError::new_err(format!("unknown preset {preset_id:?} for {slug:?}")))
+}
+
+/// Read an embedded example asset without downloading it or exposing local paths.
+#[pyfunction]
+fn catalog_asset(slug: &str, name: &str) -> PyResult<&'static str> {
+    bio_tools_rs::tool_definitions::presets::asset(slug, name).ok_or_else(|| {
+        PyValueError::new_err(format!("unknown bundled asset {name:?} for {slug:?}"))
+    })
 }
 /// Materialize catalog-owned form descriptors using a consumer's Field and
 /// Option classes. Dynamic select options are supplied by the consumer because
@@ -516,6 +576,11 @@ fn catalog_fields(
             "task",
         ] {
             kwargs.set_item(key, get(key)?)?;
+        }
+        for key in ["group", "input_modes", "help_note"] {
+            if let Some(value) = descriptor.get_item(key)? {
+                kwargs.set_item(key, value)?;
+            }
         }
         let options = PyList::empty(py);
         if let Some(items) = dynamic_options.as_ref().and_then(|items| items.get(&name)) {
@@ -646,6 +711,9 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<PyProcess>()?;
     module.add_function(wrap_pyfunction!(catalog_fields, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_tasks, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_presets, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_preset, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_asset, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_spec, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_process, module)?)?;
     Ok(())

@@ -28,6 +28,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/jwohlwend/boltz"),
         home_url: Some("https://boltz.bio/"),
         docs_url: Some("https://api.boltz.bio/docs/"),
+        input_params_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.06.14.659707"),
         license: License::Mit,
         license_url: None,

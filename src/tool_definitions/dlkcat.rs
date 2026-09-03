@@ -22,6 +22,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/SysBioChalmers/DLKcat"),
         home_url: None,
         docs_url: Some("https://www.nature.com/articles/s41929-022-00798-z"),
+        input_params_url: None,
         paper_url: Some("https://www.nature.com/articles/s41929-022-00798-z"),
         license: License::Mit,
         license_url: None,

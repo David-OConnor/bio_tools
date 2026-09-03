@@ -26,6 +26,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/XSLiuLab/TLimmuno2"),
         home_url: Some("https://xsliulab.github.io/TLimmuno2/"),
         docs_url: Some("https://academic.oup.com/bib/article/24/3/bbad116/7084794"),
+        input_params_url: None,
         paper_url: Some("https://academic.oup.com/bib/article/24/3/bbad116/7084794"),
         license: License::Other,
         license_url: None,

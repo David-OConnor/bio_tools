@@ -22,6 +22,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/martinpacesa/BindCraft"),
         home_url: None,
         docs_url: Some("https://github.com/martinpacesa/BindCraft/wiki"),
+        input_params_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2024.09.30.615802"),
         license: License::Mit,
         license_url: None,

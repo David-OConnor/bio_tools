@@ -24,6 +24,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/oxpig/AntiFold"),
         home_url: Some("https://opig.stats.ox.ac.uk/webapps/antifold/"),
         docs_url: None,
+        input_params_url: None,
         paper_url: Some(
             "https://academic.oup.com/bioinformaticsadvances/article/5/1/vbae202/8090019",
         ),

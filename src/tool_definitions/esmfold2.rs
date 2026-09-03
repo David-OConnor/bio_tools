@@ -20,6 +20,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/facebookresearch/esm"),
         home_url: Some("https://esmatlas.com/"),
         docs_url: Some("https://github.com/facebookresearch/esm#esmfold"),
+        input_params_url: None,
         paper_url: Some("https://www.science.org/doi/10.1126/science.ade2574"),
         license: License::Mit,
         license_url: None,

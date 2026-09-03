@@ -19,6 +19,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/CSBiology/deepStabP"),
         home_url: Some("https://csb-deepstabp.bio.rptu.de/"),
         docs_url: None,
+        input_params_url: None,
         paper_url: Some("https://doi.org/10.1002/pro.4757"),
         license: License::Mit,
         license_url: None,

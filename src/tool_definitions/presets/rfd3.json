@@ -1,0 +1,543 @@
+[
+  {
+    "id": "unconditional_monomer",
+    "label": "Unconditional monomer",
+    "description": "Official example. One design per run.",
+    "source_url": "https://rosettacommons.github.io/foundry/models/rfd3/input.html",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "monomer",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": 150,
+      "is_non_loopy": true
+    }
+  },
+  {
+    "id": "demo",
+    "label": "demo (3 examples)",
+    "description": "Runs every named configuration in demo.json, with one design per configuration.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/demo.json",
+    "values": {
+      "job_name": "demo",
+      "inputs": "{\n  \"M0255_1mg5_unfixed\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/M0255_1mg5.pdb\",\n    \"ligand\": \"NAI,ACT\",\n    \"unindex\": \"A108,A139,A152,A156\",\n    \"length\": \"180-200\",\n    \"select_fixed_atoms\": {\n      \"A108\": \"ND2,CG\",\n      \"A139\": \"OG,CB,CA\",\n      \"A152\": \"OH,CZ\",\n      \"A156\": \"NZ,CE,CD\",\n      \"ACT\": \"OXT\",\n      \"NAI\": \"\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"partial_diffusion\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/7v11.pdb\",\n    \"ligand\": \"OQO\",\n    \"partial_t\": 15.0,\n    \"contig\": \"A431\",\n    \"unindex\": \"A572-573\",\n    \"select_fixed_atoms\": {\n      \"A431\": \"TIP\",\n      \"A572\": \"BKBN\",\n      \"A573\": \"BKBN\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"dsDNA_basic\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/1bna.pdb\",\n    \"contig\": \"A1-10,/0,B15-24,/0,120-130\",\n    \"length\": \"140-150\",\n    \"ori_token\": [\n      24,\n      20,\n      10\n    ],\n    \"is_non_loopy\": true\n  }\n}",
+      "n_batches": 1,
+      "diffusion_batch_size": 1,
+      "input_mode": "text"
+    }
+  },
+  {
+    "id": "demo/M0255_1mg5_unfixed",
+    "label": "demo / M0255_1mg5_unfixed",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/demo.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "M0255_1mg5_unfixed",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "180-200",
+      "is_non_loopy": "",
+      "input": "bio-tools://rfd3/input_pdbs/M0255_1mg5.pdb",
+      "ligand": "NAI,ACT",
+      "unindex": "A108,A139,A152,A156",
+      "select_fixed_atoms": {
+        "A108": "ND2,CG",
+        "A139": "OG,CB,CA",
+        "A152": "OH,CZ",
+        "A156": "NZ,CE,CD",
+        "ACT": "OXT",
+        "NAI": ""
+      },
+      "allow_ligand_on_existing_chain": true
+    }
+  },
+  {
+    "id": "demo/partial_diffusion",
+    "label": "demo / partial_diffusion",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/demo.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "partial_diffusion",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "",
+      "is_non_loopy": "",
+      "input": "bio-tools://rfd3/input_pdbs/7v11.pdb",
+      "ligand": "OQO",
+      "partial_t": 15.0,
+      "contig": "A431",
+      "unindex": "A572-573",
+      "select_fixed_atoms": {
+        "A431": "TIP",
+        "A572": "BKBN",
+        "A573": "BKBN"
+      },
+      "allow_ligand_on_existing_chain": true
+    }
+  },
+  {
+    "id": "demo/dsDNA_basic",
+    "label": "demo / dsDNA_basic",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/demo.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "dsDNA_basic",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "140-150",
+      "is_non_loopy": true,
+      "input": "bio-tools://rfd3/input_pdbs/1bna.pdb",
+      "contig": "A1-10,/0,B15-24,/0,120-130",
+      "ori_token": [
+        24,
+        20,
+        10
+      ]
+    }
+  },
+  {
+    "id": "enzyme_design",
+    "label": "enzyme_design (1 example)",
+    "description": "Runs every named configuration in enzyme_design.json, with one design per configuration.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/enzyme_design.json",
+    "values": {
+      "job_name": "enzyme_design",
+      "inputs": "{\n  \"M0255_1mg5_unfixed\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/M0255_1mg5.pdb\",\n    \"ligand\": \"NAI,ACT\",\n    \"unindex\": \"A108,A139,A152,A156\",\n    \"length\": \"180-200\",\n    \"select_fixed_atoms\": {\n      \"A108\": \"ND2,CG\",\n      \"A139\": \"OG,CB,CA\",\n      \"A152\": \"OH,CZ\",\n      \"A156\": \"NZ,CE,CD\",\n      \"ACT\": \"OXT\",\n      \"NAI\": \"\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  }\n}",
+      "n_batches": 1,
+      "diffusion_batch_size": 1,
+      "input_mode": "text"
+    }
+  },
+  {
+    "id": "enzyme_design/M0255_1mg5_unfixed",
+    "label": "enzyme_design / M0255_1mg5_unfixed",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/enzyme_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "M0255_1mg5_unfixed",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "180-200",
+      "is_non_loopy": "",
+      "input": "bio-tools://rfd3/input_pdbs/M0255_1mg5.pdb",
+      "ligand": "NAI,ACT",
+      "unindex": "A108,A139,A152,A156",
+      "select_fixed_atoms": {
+        "A108": "ND2,CG",
+        "A139": "OG,CB,CA",
+        "A152": "OH,CZ",
+        "A156": "NZ,CE,CD",
+        "ACT": "OXT",
+        "NAI": ""
+      },
+      "allow_ligand_on_existing_chain": true
+    }
+  },
+  {
+    "id": "na_binder_design",
+    "label": "na_binder_design (5 examples)",
+    "description": "Runs every named configuration in na_binder_design.json, with one design per configuration.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/na_binder_design.json",
+    "values": {
+      "job_name": "na_binder_design",
+      "inputs": "{\n  \"dsDNA_basic\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/1bna.pdb\",\n    \"contig\": \"A1-10,/0,B15-24,/0,120-130\",\n    \"length\": \"140-150\",\n    \"ori_token\": [\n      24,\n      20,\n      10\n    ],\n    \"is_non_loopy\": true\n  },\n  \"ssDNA_basic\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/5o4d.pdb\",\n    \"contig\": \"A1-23,/0,120-130\",\n    \"length\": \"143-153\",\n    \"ori_token\": [\n      -5,\n      -10,\n      8\n    ],\n    \"is_non_loopy\": true\n  },\n  \"ssDNA_diffused_from_dsDNA_pdb\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/1bna.pdb\",\n    \"contig\": \"A1-10,/0,120-130\",\n    \"length\": \"130-140\",\n    \"select_fixed_atoms\": {\n      \"A1-10\": \"\"\n    },\n    \"is_non_loopy\": true\n  },\n  \"RNA_basic\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/1q75.pdb\",\n    \"contig\": \"A1-15,/0,120-130\",\n    \"length\": \"135-145\",\n    \"ori_token\": [\n      15,\n      2,\n      -4\n    ],\n    \"is_non_loopy\": true\n  },\n  \"dsDNA_complex\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/2r5z.pdb\",\n    \"contig\": \"C5-18,/0,D24-37,/0,40-50,A146-154,80-90\",\n    \"length\": \"157-177\",\n    \"unindex\": \"/0,/0,B251-255\",\n    \"select_fixed_atoms\": {\n      \"C9-14\": \"ALL\",\n      \"D28-33\": \"ALL\",\n      \"C5-8,C15-18\": \"\",\n      \"D24-27,D34-37\": \"\"\n    },\n    \"ori_token\": [\n      25,\n      35,\n      20\n    ],\n    \"select_hbond_acceptor\": {\n      \"C16\": \"N7,O6\",\n      \"D31-32\": \"N7\",\n      \"D28-30\": \"OP1,OP2,O3',O5'\"\n    },\n    \"select_hbond_donor\": {\n      \"D31-32\": \"N6\"\n    },\n    \"is_non_loopy\": true\n  }\n}",
+      "n_batches": 1,
+      "diffusion_batch_size": 1,
+      "input_mode": "text"
+    }
+  },
+  {
+    "id": "na_binder_design/dsDNA_basic",
+    "label": "na_binder_design / dsDNA_basic",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/na_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "dsDNA_basic",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "140-150",
+      "is_non_loopy": true,
+      "input": "bio-tools://rfd3/input_pdbs/1bna.pdb",
+      "contig": "A1-10,/0,B15-24,/0,120-130",
+      "ori_token": [
+        24,
+        20,
+        10
+      ]
+    }
+  },
+  {
+    "id": "na_binder_design/ssDNA_basic",
+    "label": "na_binder_design / ssDNA_basic",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/na_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "ssDNA_basic",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "143-153",
+      "is_non_loopy": true,
+      "input": "bio-tools://rfd3/input_pdbs/5o4d.pdb",
+      "contig": "A1-23,/0,120-130",
+      "ori_token": [
+        -5,
+        -10,
+        8
+      ]
+    }
+  },
+  {
+    "id": "na_binder_design/ssDNA_diffused_from_dsDNA_pdb",
+    "label": "na_binder_design / ssDNA_diffused_from_dsDNA_pdb",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/na_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "ssDNA_diffused_from_dsDNA_pdb",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "130-140",
+      "is_non_loopy": true,
+      "input": "bio-tools://rfd3/input_pdbs/1bna.pdb",
+      "contig": "A1-10,/0,120-130",
+      "select_fixed_atoms": {
+        "A1-10": ""
+      }
+    }
+  },
+  {
+    "id": "na_binder_design/RNA_basic",
+    "label": "na_binder_design / RNA_basic",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/na_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "RNA_basic",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "135-145",
+      "is_non_loopy": true,
+      "input": "bio-tools://rfd3/input_pdbs/1q75.pdb",
+      "contig": "A1-15,/0,120-130",
+      "ori_token": [
+        15,
+        2,
+        -4
+      ]
+    }
+  },
+  {
+    "id": "na_binder_design/dsDNA_complex",
+    "label": "na_binder_design / dsDNA_complex",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/na_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "dsDNA_complex",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "157-177",
+      "is_non_loopy": true,
+      "input": "bio-tools://rfd3/input_pdbs/2r5z.pdb",
+      "contig": "C5-18,/0,D24-37,/0,40-50,A146-154,80-90",
+      "unindex": "/0,/0,B251-255",
+      "select_fixed_atoms": {
+        "C9-14": "ALL",
+        "D28-33": "ALL",
+        "C5-8,C15-18": "",
+        "D24-27,D34-37": ""
+      },
+      "ori_token": [
+        25,
+        35,
+        20
+      ],
+      "select_hbond_acceptor": {
+        "C16": "N7,O6",
+        "D31-32": "N7",
+        "D28-30": "OP1,OP2,O3',O5'"
+      },
+      "select_hbond_donor": {
+        "D31-32": "N6"
+      }
+    }
+  },
+  {
+    "id": "protein_binder_design",
+    "label": "protein_binder_design (2 examples)",
+    "description": "Runs every named configuration in protein_binder_design.json, with one design per configuration.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/protein_binder_design.json",
+    "values": {
+      "job_name": "protein_binder_design",
+      "inputs": "{\n  \"insulinr\": {\n    \"dialect\": 2,\n    \"infer_ori_strategy\": \"hotspots\",\n    \"input\": \"bio-tools://rfd3/input_pdbs/4zxb_cropped.pdb\",\n    \"contig\": \"40-120,/0,E6-155\",\n    \"select_hotspots\": {\n      \"E64\": \"CD2,CZ\",\n      \"E88\": \"CG,CZ\",\n      \"E96\": \"CD1,CZ\"\n    },\n    \"is_non_loopy\": true\n  },\n  \"pdl1\": {\n    \"dialect\": 2,\n    \"infer_ori_strategy\": \"hotspots\",\n    \"input\": \"bio-tools://rfd3/input_pdbs/5o45_cropped.pdb\",\n    \"contig\": \"50-120,/0,A17-131\",\n    \"select_hotspots\": {\n      \"A56\": \"CG,OH\",\n      \"A115\": \"CG,SD\",\n      \"A123\": \"CD2,OH\"\n    },\n    \"is_non_loopy\": true\n  }\n}",
+      "n_batches": 1,
+      "diffusion_batch_size": 1,
+      "inference_sampler.step_scale": 3,
+      "inference_sampler.gamma_0": 0.2,
+      "input_mode": "text"
+    }
+  },
+  {
+    "id": "protein_binder_design/insulinr",
+    "label": "protein_binder_design / insulinr",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/protein_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "insulinr",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "",
+      "is_non_loopy": true,
+      "dialect": 2,
+      "infer_ori_strategy": "hotspots",
+      "input": "bio-tools://rfd3/input_pdbs/4zxb_cropped.pdb",
+      "contig": "40-120,/0,E6-155",
+      "select_hotspots": {
+        "E64": "CD2,CZ",
+        "E88": "CG,CZ",
+        "E96": "CD1,CZ"
+      },
+      "inference_sampler.step_scale": 3,
+      "inference_sampler.gamma_0": 0.2
+    }
+  },
+  {
+    "id": "protein_binder_design/pdl1",
+    "label": "protein_binder_design / pdl1",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/protein_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "pdl1",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "",
+      "is_non_loopy": true,
+      "dialect": 2,
+      "infer_ori_strategy": "hotspots",
+      "input": "bio-tools://rfd3/input_pdbs/5o45_cropped.pdb",
+      "contig": "50-120,/0,A17-131",
+      "select_hotspots": {
+        "A56": "CG,OH",
+        "A115": "CG,SD",
+        "A123": "CD2,OH"
+      },
+      "inference_sampler.step_scale": 3,
+      "inference_sampler.gamma_0": 0.2
+    }
+  },
+  {
+    "id": "sm_binder_design",
+    "label": "sm_binder_design (2 examples)",
+    "description": "Runs every named configuration in sm_binder_design.json, with one design per configuration.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/sm_binder_design.json",
+    "values": {
+      "job_name": "sm_binder_design",
+      "inputs": "{\n  \"buried\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/IAI.pdb\",\n    \"length\": \"180-180\",\n    \"ligand\": \"IAI\",\n    \"select_fixed_atoms\": {\n      \"IAI\": \"\"\n    },\n    \"select_buried\": {\n      \"IAI\": \"C22,C23,C25,C24,C21,C20,N13,C15,C16,N14,C19,C11,N12,C18,C17,N9,O8,C4,C1,N3,C10,N5,C7,C2,C6,N27,O26,C33,C29,C32,O31,C30,N28\"\n    }\n  },\n  \"partial\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/IAI.pdb\",\n    \"ligand\": \"IAI\",\n    \"length\": \"180-180\",\n    \"select_fixed_atoms\": {\n      \"IAI\": \"\"\n    },\n    \"select_exposed\": {\n      \"IAI\": \"C22,C23,C25,C24,C21,C20,N13,C15,C16,N14,C19,C11,N12,C18,C17\"\n    },\n    \"select_buried\": {\n      \"IAI\": \"N9,O8,C4,C1,N3,C10,N5,C7,C2,C6,N27,O26,C33,C29,C32,O31,C30,N28\"\n    }\n  }\n}",
+      "n_batches": 1,
+      "diffusion_batch_size": 1,
+      "input_mode": "text"
+    }
+  },
+  {
+    "id": "sm_binder_design/buried",
+    "label": "sm_binder_design / buried",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/sm_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "buried",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "180-180",
+      "is_non_loopy": "",
+      "input": "bio-tools://rfd3/input_pdbs/IAI.pdb",
+      "ligand": "IAI",
+      "select_fixed_atoms": {
+        "IAI": ""
+      },
+      "select_buried": {
+        "IAI": "C22,C23,C25,C24,C21,C20,N13,C15,C16,N14,C19,C11,N12,C18,C17,N9,O8,C4,C1,N3,C10,N5,C7,C2,C6,N27,O26,C33,C29,C32,O31,C30,N28"
+      }
+    }
+  },
+  {
+    "id": "sm_binder_design/partial",
+    "label": "sm_binder_design / partial",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/sm_binder_design.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "partial",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "180-180",
+      "is_non_loopy": "",
+      "input": "bio-tools://rfd3/input_pdbs/IAI.pdb",
+      "ligand": "IAI",
+      "select_fixed_atoms": {
+        "IAI": ""
+      },
+      "select_exposed": {
+        "IAI": "C22,C23,C25,C24,C21,C20,N13,C15,C16,N14,C19,C11,N12,C18,C17"
+      },
+      "select_buried": {
+        "IAI": "N9,O8,C4,C1,N3,C10,N5,C7,C2,C6,N27,O26,C33,C29,C32,O31,C30,N28"
+      }
+    }
+  },
+  {
+    "id": "symmetry",
+    "label": "symmetry (6 examples)",
+    "description": "Runs every named configuration in symmetry.json, with one design per configuration.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
+    "values": {
+      "job_name": "symmetry",
+      "inputs": "{\n  \"uncond_C5\": {\n    \"length\": 100,\n    \"is_non_loopy\": true,\n    \"symmetry\": {\n      \"id\": \"C5\"\n    }\n  },\n  \"uncond_D4\": {\n    \"length\": 50,\n    \"is_non_loopy\": true,\n    \"symmetry\": {\n      \"id\": \"D4\"\n    }\n  },\n  \"unindexed_C2_1j79\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1j79_C2.pdb\",\n    \"ligand\": \"ORO,ZN\",\n    \"unindex\": \"A250\",\n    \"length\": 130,\n    \"select_fixed_atoms\": {\n      \"A250\": \"OD1,CG\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"unindexed_C2_1e3v\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1e3v_C2.pdb\",\n    \"ligand\": \"DXC\",\n    \"unindex\": \"A16,A40,A100,A103\",\n    \"length\": 80,\n    \"select_fixed_atoms\": {\n      \"A16\": \"OH,CZ,CE1,CE2\",\n      \"A40\": \"OD2,CG\",\n      \"A100\": \"N,CA,C,CB\",\n      \"A103\": \"OD2,CG\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"indexed_unsym_C2_1bfr\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true,\n      \"is_unsym_motif\": \"HEM\"\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1bfr_C2.pdb\",\n    \"ligand\": \"HEM\",\n    \"contig\": \"51,M52,80\",\n    \"length\": null,\n    \"select_fixed_atoms\": {\n      \"M52\": \"CG,SD,CE\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"unsym_C3_6t8h\": {\n    \"symmetry\": {\n      \"id\": \"C3\",\n      \"is_symmetric_motif\": true,\n      \"is_unsym_motif\": \"Y1-11,Z16-25\"\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/6t8h_C3.pdb\",\n    \"contig\": \"100-100,/0,Y1-11,/0,Z16-25\",\n    \"length\": null,\n    \"is_non_loopy\": true\n  }\n}",
+      "n_batches": 1,
+      "diffusion_batch_size": 1,
+      "input_mode": "text"
+    }
+  },
+  {
+    "id": "symmetry/uncond_C5",
+    "label": "symmetry / uncond_C5",
+    "description": "Official example. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "uncond_C5",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": 100,
+      "is_non_loopy": true,
+      "symmetry": {
+        "id": "C5"
+      }
+    }
+  },
+  {
+    "id": "symmetry/uncond_D4",
+    "label": "symmetry / uncond_D4",
+    "description": "Official example. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "uncond_D4",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": 50,
+      "is_non_loopy": true,
+      "symmetry": {
+        "id": "D4"
+      }
+    }
+  },
+  {
+    "id": "symmetry/unindexed_C2_1j79",
+    "label": "symmetry / unindexed_C2_1j79",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "unindexed_C2_1j79",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": 130,
+      "is_non_loopy": "",
+      "symmetry": {
+        "id": "C2",
+        "is_symmetric_motif": true
+      },
+      "input": "bio-tools://rfd3/input_pdbs/symmetry_examples/1j79_C2.pdb",
+      "ligand": "ORO,ZN",
+      "unindex": "A250",
+      "select_fixed_atoms": {
+        "A250": "OD1,CG"
+      },
+      "allow_ligand_on_existing_chain": true
+    }
+  },
+  {
+    "id": "symmetry/unindexed_C2_1e3v",
+    "label": "symmetry / unindexed_C2_1e3v",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "unindexed_C2_1e3v",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": 80,
+      "is_non_loopy": "",
+      "symmetry": {
+        "id": "C2",
+        "is_symmetric_motif": true
+      },
+      "input": "bio-tools://rfd3/input_pdbs/symmetry_examples/1e3v_C2.pdb",
+      "ligand": "DXC",
+      "unindex": "A16,A40,A100,A103",
+      "select_fixed_atoms": {
+        "A16": "OH,CZ,CE1,CE2",
+        "A40": "OD2,CG",
+        "A100": "N,CA,C,CB",
+        "A103": "OD2,CG"
+      },
+      "allow_ligand_on_existing_chain": true
+    }
+  },
+  {
+    "id": "symmetry/indexed_unsym_C2_1bfr",
+    "label": "symmetry / indexed_unsym_C2_1bfr",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "indexed_unsym_C2_1bfr",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "",
+      "is_non_loopy": "",
+      "symmetry": {
+        "id": "C2",
+        "is_symmetric_motif": true,
+        "is_unsym_motif": "HEM"
+      },
+      "input": "bio-tools://rfd3/input_pdbs/symmetry_examples/1bfr_C2.pdb",
+      "ligand": "HEM",
+      "contig": "51,M52,80",
+      "select_fixed_atoms": {
+        "M52": "CG,SD,CE"
+      },
+      "allow_ligand_on_existing_chain": true
+    }
+  },
+  {
+    "id": "symmetry/unsym_C3_6t8h",
+    "label": "symmetry / unsym_C3_6t8h",
+    "description": "Official example with its bundled input structure. One design per run.",
+    "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
+    "values": {
+      "input_mode": "parameters",
+      "job_name": "unsym_C3_6t8h",
+      "diffusion_batch_size": 1,
+      "n_batches": 1,
+      "length": "",
+      "is_non_loopy": true,
+      "symmetry": {
+        "id": "C3",
+        "is_symmetric_motif": true,
+        "is_unsym_motif": "Y1-11,Z16-25"
+      },
+      "input": "bio-tools://rfd3/input_pdbs/symmetry_examples/6t8h_C3.pdb",
+      "contig": "100-100,/0,Y1-11,/0,Z16-25"
+    }
+  }
+]
