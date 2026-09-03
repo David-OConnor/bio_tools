@@ -1172,7 +1172,7 @@
   "tasks": [],
   "references": {
     "cli_arguments": "https://rosettacommons.github.io/foundry/models/rfd3/input.html#cli-arguments",
-    "input_specification": "https://rosettacommons.github.io/foundry/models/rfd3/input.html#inputspecification-fields",
+    "input_specification": "https://rosettacommons.github.io/foundry/models/rfd3/input.html",
     "official_examples": "https://github.com/RosettaCommons/foundry/tree/production/models/rfd3/docs/examples"
   },
   "input_modes": {
