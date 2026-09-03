@@ -1,0 +1,29 @@
+use crate::tool_definitions::catalog::{CatalogEntry, Identity};
+use crate::{
+    LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
+    tool_definitions::Tool,
+};
+
+pub const ENTRY: CatalogEntry = CatalogEntry {
+    identity: Identity::Installed(Tool::DlkCat),
+    categories: &[
+        ToolCategory::PropertyPrediction,
+        ToolCategory::Cheminformatics,
+    ],
+    launch_type: LaunchType::PythonBasedApp,
+    license_type: LicenseCategory::Permissive,
+    expense: ProcessExpense::Moderate,
+    top_choice: false,
+    spec: SpecData {
+        summary: "Predict an enzyme turnover number from its sequence and a substrate structure.",
+        description: "Runs the deep-learning half of the DLKcat toolbox, which pairs a graph neural network over the substrate with a convolutional network over the enzyme sequence to predict kcat. It is trained on wild-type and mutant enzymes across many organisms, and is meant for parameterising models rather than for ranking closely related variants.",
+        availability: "Installed by setup_system.sh into its own uv environment; the trained model ships with the checkout",
+        license_details: "MIT (SysBioChalmers), weights included. Commercial use is unrestricted.",
+        repo_url: Some("https://github.com/SysBioChalmers/DLKcat"),
+        home_url: None,
+        docs_url: Some("https://www.nature.com/articles/s41929-022-00798-z"),
+        paper_url: Some("https://www.nature.com/articles/s41929-022-00798-z"),
+        license: License::Mit,
+        license_url: None,
+    },
+};

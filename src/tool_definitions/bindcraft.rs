@@ -1,0 +1,29 @@
+use crate::tool_definitions::catalog::{CatalogEntry, Identity};
+use crate::{
+    LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
+    tool_definitions::Tool,
+};
+
+/// Both: the binders are mini-proteins of 65-120 residues rather than
+/// peptides, but PeptideBinderDesign is the registry's general "binder
+/// design" category, which is what a campaign against a named target is.
+pub const ENTRY: CatalogEntry = CatalogEntry {
+    identity: Identity::Installed(Tool::BindCraft),
+    categories: &[ToolCategory::PeptideBinderDesign],
+    launch_type: LaunchType::CondaBasedApp,
+    license_type: LicenseCategory::NonCommercial,
+    expense: ProcessExpense::Expensive,
+    top_choice: true,
+    spec: SpecData {
+        summary: "Design de novo protein or peptide binders against a target structure.",
+        description: "Builds a BindCraft target/advanced/filter settings trio and runs the official pipeline end to end (hallucination, ProteinMPNN redesign, AlphaFold2 validation, and filtering).",
+        availability: "Linux, Conda/Mamba, AlphaFold weights, and a large GPU are required",
+        license_details: "BindCraft itself is MIT, but it cannot run without PyRosetta, which is free only for non-commercial and academic use and needs a paid licence from the University of Washington otherwise. The AlphaFold2 weights it uses are CC BY 4.0.",
+        repo_url: Some("https://github.com/martinpacesa/BindCraft"),
+        home_url: None,
+        docs_url: Some("https://github.com/martinpacesa/BindCraft/wiki"),
+        paper_url: Some("https://www.biorxiv.org/content/10.1101/2024.09.30.615802"),
+        license: License::Mit,
+        license_url: None,
+    },
+};

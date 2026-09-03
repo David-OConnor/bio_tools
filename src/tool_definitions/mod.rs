@@ -4,7 +4,51 @@ use std::{fmt, str::FromStr};
 
 use crate::install::InstallError;
 
+pub mod fields;
 pub mod catalog;
+
+mod abmpnn;
+mod aggrescan3d;
+mod alphafold3;
+mod antibody_annotator;
+mod antifold;
+mod bindcraft;
+mod biophi;
+mod boltz2;
+mod boltz_adme;
+mod boltzgen;
+mod catpred;
+mod chai1;
+mod deepimmuno;
+mod deepsp;
+mod deepstabp;
+mod dlkcat;
+mod enzymemap;
+mod esmfold2;
+mod genie3;
+mod germinal;
+mod gromacs;
+mod highfold;
+mod igblast;
+mod igdesign;
+mod immunebuilder;
+mod ligandmpnn;
+mod mber;
+mod netsolp;
+mod opendde;
+mod orca;
+mod pdbbind;
+mod placer;
+mod proteinmpnn;
+mod proteinmpnn_ddg;
+mod protenix;
+mod rdkit;
+mod retrobiocat;
+mod rfantibody;
+mod rfdiffusion3;
+mod tap;
+mod thermompnn;
+mod tlimmuno;
 
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
