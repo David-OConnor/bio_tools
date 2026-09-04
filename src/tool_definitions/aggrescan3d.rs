@@ -22,6 +22,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://biocomp.chem.uw.edu.pl/A3D2/"),
         docs_url: Some("https://academic.oup.com/nar/article/47/W1/W300/5485072"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://academic.oup.com/nar/article/47/W1/W300/5485072"),
         license: License::Other,
         license_url: None,

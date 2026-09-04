@@ -25,6 +25,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://www.gromacs.org/"),
         docs_url: Some("https://manual.gromacs.org/current/user-guide/flow.html"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://doi.org/10.1016/j.softx.2015.06.001"),
         license: License::Lgpl21OrLater,
         license_url: None,

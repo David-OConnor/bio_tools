@@ -30,6 +30,7 @@ Explicitly focuses our experimental validation on targets that are highly dissim
         home_url: Some("https://boltz.bio/boltzgen"),
         docs_url: None,
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.11.20.689494"),
         license: License::Mit,
         license_url: None,

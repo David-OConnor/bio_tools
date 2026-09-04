@@ -28,6 +28,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabpred/abodybuilder2/"),
         docs_url: None,
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://doi.org/10.1038/s42003-023-04927-7"),
         license: License::Bsd3Clause,
         license_url: None,

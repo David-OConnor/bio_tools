@@ -174,6 +174,7 @@ impl PySpec {
         home_url=None,
         docs_url=None,
         input_params_url=None,
+        examples_url=None,
         paper_url=None,
         license=None,
         license_url=None,
@@ -193,6 +194,7 @@ impl PySpec {
         home_url: Option<String>,
         docs_url: Option<String>,
         input_params_url: Option<String>,
+        examples_url: Option<String>,
         paper_url: Option<String>,
         license: Option<Py<PyLicense>>,
         license_url: Option<String>,
@@ -202,7 +204,7 @@ impl PySpec {
         let license = license
             .map(|license| license.borrow(py).inner)
             .unwrap_or(RustLicense::Other);
-        let mut inner = RustSpec::new(
+        let inner = RustSpec::new(
             slug,
             summary,
             description,
@@ -211,11 +213,12 @@ impl PySpec {
             repo_url,
             home_url,
             docs_url,
+            input_params_url,
+            examples_url,
             paper_url,
             license,
             license_url,
         );
-        inner.data.input_params_url = input_params_url;
         Self {
             inner,
             fields,
@@ -267,6 +270,11 @@ impl PySpec {
     #[getter]
     fn input_params_url(&self) -> Option<&str> {
         self.inner.data.input_params_url.as_deref()
+    }
+
+    #[getter]
+    fn examples_url(&self) -> Option<&str> {
+        self.inner.data.examples_url.as_deref()
     }
 
     #[getter]
@@ -342,6 +350,7 @@ impl PySpec {
         data.set_item("home_url", &self.inner.data.home_url)?;
         data.set_item("docs_url", &self.inner.data.docs_url)?;
         data.set_item("input_params_url", &self.inner.data.input_params_url)?;
+        data.set_item("examples_url", &self.inner.data.examples_url)?;
         data.set_item("paper_url", &self.inner.data.paper_url)?;
         data.set_item("license", self.inner.data.license.to_string())?;
         data.set_item("license_url", &self.inner.data.license_url)?;

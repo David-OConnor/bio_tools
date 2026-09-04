@@ -21,6 +21,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://aurekaresearch.github.io/OpenDDE-Website/"),
         docs_url: Some("https://github.com/aurekaresearch/OpenDDE/blob/main/docs/tutorial.md"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://arxiv.org/abs/2607.03787"),
         license: License::ApacheV2,
         license_url: None,

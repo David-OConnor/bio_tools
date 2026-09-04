@@ -191,6 +191,7 @@ fn print_metadata(entry: &CatalogEntry) {
         ("Home URL", spec.home_url),
         ("Docs URL", spec.docs_url),
         ("Input parameters URL", spec.input_params_url),
+        ("Examples URL", spec.examples_url),
         ("Paper URL", spec.paper_url),
     ] {
         if let Some(url) = url {

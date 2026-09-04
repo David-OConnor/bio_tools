@@ -23,6 +23,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://retrobiocat.com/"),
         docs_url: Some("https://retrobiocat-2.readthedocs.io/en/latest/"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://doi.org/10.1021/acscatal.3c01418"),
         license: License::Other,
         license_url: Some("https://github.com/willfinnigan/RetroBioCat-2/blob/main/LICENSE.md"),

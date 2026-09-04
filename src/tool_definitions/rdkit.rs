@@ -20,6 +20,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://www.rdkit.org/"),
         docs_url: Some("https://www.rdkit.org/docs/GettingStartedInPython.html"),
         input_params_url: None,
+        examples_url: None,
         paper_url: None,
         license: License::Bsd3Clause,
         license_url: None,

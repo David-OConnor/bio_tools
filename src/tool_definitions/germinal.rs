@@ -27,6 +27,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: None,
         docs_url: Some("https://www.biorxiv.org/content/10.1101/2025.09.19.677421v1"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.09.19.677421v1"),
         license: License::Mit,
         license_url: None,

@@ -20,6 +20,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://biophi.dichlab.org/"),
         docs_url: None,
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://doi.org/10.1080/19420862.2021.2020203"),
         license: License::Mit,
         license_url: None,

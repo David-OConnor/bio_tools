@@ -33,6 +33,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://boltz.bio/"),
         docs_url: Some("https://api.boltz.bio/docs/guides/small-molecule-adme/"),
         input_params_url: None,
+        examples_url: None,
         paper_url: None,
         license: License::Other,
         license_url: None,

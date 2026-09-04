@@ -23,6 +23,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: None,
         docs_url: Some("https://academic.oup.com/bib/article/25/3/bbae215/7665139"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://academic.oup.com/bib/article/25/3/bbae215/7665139"),
         license: License::Mit,
         license_url: None,

@@ -1,0 +1,71 @@
+{
+  "repository": "https://github.com/dauparas/ProteinMPNN",
+  "commit": "8907e6671bfbfc92303b5f79c4b5e6ce47cdef57",
+  "input_reference": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/README.md",
+  "implementation_reference": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/protein_mpnn_run.py",
+  "assets": [
+    {
+      "path": "inputs/PDB_complexes/pdbs/3HTN.pdb",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PDB_complexes/pdbs/3HTN.pdb",
+      "sha256": "1c206fecb1646ead026d44f06715890cb9c844dc088164afc723c4f3314af3e9"
+    },
+    {
+      "path": "inputs/PDB_complexes/pdbs/4YOW.pdb",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PDB_complexes/pdbs/4YOW.pdb",
+      "sha256": "af10a75ea2a2c223ddfc605d29cba18dd588dd93e6a2a66c7e27e20d0ec2807e"
+    },
+    {
+      "path": "inputs/PDB_homooligomers/pdbs/4GYT.pdb",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PDB_homooligomers/pdbs/4GYT.pdb",
+      "sha256": "4a5e02d9235d13af82854d7f0e4ca72e00c58351a30645575a104064dc1ff1a2"
+    },
+    {
+      "path": "inputs/PDB_homooligomers/pdbs/6EHB.pdb",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PDB_homooligomers/pdbs/6EHB.pdb",
+      "sha256": "b429806793f2cae863eb608f2c1de2f85289f6bc6d3c50bfc103b2042e4a8df1"
+    },
+    {
+      "path": "inputs/PDB_monomers/pdbs/5L33.pdb",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PDB_monomers/pdbs/5L33.pdb",
+      "sha256": "21eb06c843410732e0b60528b1a99934435ac66822b2a1a3f1d402f363b9e218"
+    },
+    {
+      "path": "inputs/PDB_monomers/pdbs/6MRR.pdb",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PDB_monomers/pdbs/6MRR.pdb",
+      "sha256": "310906dfdf1c0e5ada9ea8dad600a992bd83a8d53233fd5b034a556702aff9a2"
+    },
+    {
+      "path": "LICENSE",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/LICENSE",
+      "sha256": "82009d25ce585631f452b2b24589bdb29c559ccfefa2f200ef312ed5b501a586"
+    },
+    {
+      "path": "outputs/example_3_outputs/seqs/3HTN.fa",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/outputs/example_3_outputs/seqs/3HTN.fa",
+      "sha256": "32be7f7b15736faeea140b473e2eb99d6b92cdfc3554ac526bcd2750cc55d23a"
+    },
+    {
+      "path": "inputs/PSSM_inputs/3HTN.json",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PSSM_inputs/3HTN.npz",
+      "source_sha256": "0f93dfdf6da0336cbe6a0d09fb6c7d31670f73afb3157a7d43b76c032c89f4c6",
+      "sha256": "1e5de41e6bb8a9d80463fca2f7ebc7978fcbd4a1de12d05290e6ee29412df486",
+      "conversion": "NumPy arrays converted to the chain dictionary used by helper_scripts/make_pssm_input_dict.py; numeric values preserved."
+    },
+    {
+      "path": "inputs/PSSM_inputs/4YOW.json",
+      "source_url": "https://github.com/dauparas/ProteinMPNN/blob/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/inputs/PSSM_inputs/4YOW.npz",
+      "source_sha256": "8b26254422205d1751ccae4ee02f120a6320f756185637685160f061739039d5",
+      "sha256": "b3c83e64a29630484a4389e625e8037daaddc824dcdef8c4d839582f278e5bad",
+      "conversion": "NumPy arrays converted to the chain dictionary used by helper_scripts/make_pssm_input_dict.py; numeric values preserved."
+    }
+  ],
+  "adaptations": [
+    "Folder-based examples are split into one preset per PDB. The service supplies the PDB directly and creates target-keyed constraint files in each job directory.",
+    "The FASTA scoring example\u2019s author-specific absolute path is replaced with the bundled outputs/example_3_outputs/seqs/3HTN.fa from the same upstream commit.",
+    "The non-fixed example is represented by the fixed-position complement generated from each parsed chain length.",
+    "PSSM NPZ arrays are bundled as text JSON with the same numeric values and chain keys as the official helper output.",
+    "The task selector maps to score_only, conditional_probs_only and unconditional_probs_only; design leaves these flags disabled.",
+    "pdb_path, path_to_fasta and JSON/JSONL fields accept uploaded contents or catalog assets, not server filesystem paths. Output directories, model paths, jsonl_path and chain_id_jsonl are managed by the single-structure adapter.",
+    "The installed soluble_model_weights directory contains 002, 010, 020 and 030 despite the README\u2019s shorter list. CA-only supports 002, 010 and 020; CA-soluble weights are unavailable."
+  ]
+}

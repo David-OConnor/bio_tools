@@ -20,6 +20,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://deepmind.google/science/alphafold/"),
         docs_url: Some("https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://doi.org/10.1038/s41586-024-07487-w"),
         license: License::Other,
         license_url: Some(

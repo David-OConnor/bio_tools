@@ -21,7 +21,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         description: "A graph neural network designed for protein inverse folding, meaning it predicts \
         the amino acid sequences most likely to fold into a specific 3D protein backbone structure. By \
         interpreting the spatial coordinates and geometric features of a target structure, the model \
-        sequence candidates. Researchers use ProteinMPNN for applications such as \
+        generates sequence candidates. Researchers use ProteinMPNN for applications such as \
         optimizing enzymes, designing novel therapeutics, and improving the stability or solubility of \
         synthetic proteins.",
         availability: "Installed by setup_system.sh with CUDA-enabled PyTorch for Linux/WSL and an NVIDIA GPU",
@@ -29,7 +29,9 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         repo_url: Some("https://github.com/dauparas/ProteinMPNN"),
         home_url: None,
         docs_url: None,
-        input_params_url: None,
+        // "Input flags" section.
+        input_params_url: Some("https://github.com/dauparas/ProteinMPNN/blob/main/README.md"),
+        examples_url: Some("https://github.com/dauparas/ProteinMPNN/tree/main/examples"),
         // todo: or www.biorxiv.org/content/10.1101/2022.06.03.494563v1
         paper_url: Some("https://doi.org/10.1126/science.add2187"),
         license: License::Mit,

@@ -23,6 +23,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://deepimmuno.research.cchmc.org/"),
         docs_url: None,
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://academic.oup.com/bib/article/22/6/bbab160/6261914"),
         license: License::Mit,
         license_url: None,

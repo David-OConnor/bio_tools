@@ -5,6 +5,7 @@
 /// Serialized preset descriptors: id, label, description, source_url and form values.
 pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
+        "proteinmpnn" => Some(include_str!("proteinmpnn.json")),
         "rfd3" => Some(include_str!("rfd3.json")),
         _ => None,
     }
@@ -14,6 +15,17 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
 /// Consumers can write these contents into their own job directory before inference.
 pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
     match (slug, name) {
+        ("proteinmpnn", "inputs/PDB_complexes/pdbs/3HTN.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_complexes/pdbs/3HTN.pdb")),
+        ("proteinmpnn", "inputs/PDB_complexes/pdbs/4YOW.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_complexes/pdbs/4YOW.pdb")),
+        ("proteinmpnn", "inputs/PDB_homooligomers/pdbs/4GYT.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_homooligomers/pdbs/4GYT.pdb")),
+        ("proteinmpnn", "inputs/PDB_homooligomers/pdbs/6EHB.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_homooligomers/pdbs/6EHB.pdb")),
+        ("proteinmpnn", "inputs/PDB_monomers/pdbs/5L33.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_monomers/pdbs/5L33.pdb")),
+        ("proteinmpnn", "inputs/PDB_monomers/pdbs/6MRR.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_monomers/pdbs/6MRR.pdb")),
+        ("proteinmpnn", "LICENSE") => Some(include_str!("proteinmpnn/LICENSE")),
+        ("proteinmpnn", "outputs/example_3_outputs/seqs/3HTN.fa") => Some(include_str!("proteinmpnn/outputs/example_3_outputs/seqs/3HTN.fa")),
+        ("proteinmpnn", "inputs/PSSM_inputs/3HTN.json") => Some(include_str!("proteinmpnn/inputs/PSSM_inputs/3HTN.json")),
+        ("proteinmpnn", "inputs/PSSM_inputs/4YOW.json") => Some(include_str!("proteinmpnn/inputs/PSSM_inputs/4YOW.json")),
+        ("proteinmpnn", "provenance.json") => Some(include_str!("proteinmpnn/provenance.json")),
         ("rfd3", "LICENSE.md") => Some(include_str!("rfd3/LICENSE.md")),
         ("rfd3", "input_pdbs/1bna.pdb") => Some(include_str!("rfd3/input_pdbs/1bna.pdb")),
         ("rfd3", "input_pdbs/1q75.pdb") => Some(include_str!("rfd3/input_pdbs/1q75.pdb")),

@@ -25,6 +25,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://www.faccts.de/orca/"),
         docs_url: Some("https://www.faccts.de/docs/orca/6.1/manual/"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://doi.org/10.1002/wcms.81"),
         license: License::Other,
         license_url: None,

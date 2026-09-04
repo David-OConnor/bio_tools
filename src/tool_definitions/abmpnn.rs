@@ -27,6 +27,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://zenodo.org/records/8164693"),
         docs_url: None,
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://icml-compbio.github.io/2023/papers/WCBICML2023_paper61.pdf"),
         license: License::Mit,
         license_url: None,

@@ -24,6 +24,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://zenodo.org/doi/10.5281/zenodo.7841848"),
         docs_url: Some("https://github.com/hesther/enzymemap#readme"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://doi.org/10.1038/s41467-022-33339-0"),
         license: License::Mit,
         license_url: None,

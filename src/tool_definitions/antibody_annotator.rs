@@ -27,6 +27,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabpred/anarci/"),
         docs_url: None,
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.04.16.648720"),
         license: License::Bsd3Clause,
         license_url: None,

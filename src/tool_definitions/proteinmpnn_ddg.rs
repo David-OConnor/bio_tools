@@ -27,6 +27,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://peptone.io/"),
         docs_url: None,
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2024.06.15.599145"),
         license: License::Mit,
         license_url: None,

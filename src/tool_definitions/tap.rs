@@ -26,6 +26,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         home_url: Some("https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabpred/tap"),
         docs_url: Some("https://www.pnas.org/doi/10.1073/pnas.1810576116"),
         input_params_url: None,
+        examples_url: None,
         paper_url: Some("https://www.pnas.org/doi/10.1073/pnas.1810576116"),
         license: License::Other,
         license_url: None,
