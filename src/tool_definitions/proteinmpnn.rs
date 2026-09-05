@@ -24,11 +24,11 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         generates sequence candidates. Researchers use ProteinMPNN for applications such as \
         optimizing enzymes, designing novel therapeutics, and improving the stability or solubility of \
         synthetic proteins.",
-        availability: "Installed by setup_system.sh with CUDA-enabled PyTorch for Linux/WSL and an NVIDIA GPU",
+        availability: "Installed by bio_tools with PyTorch and the official vanilla, soluble and CA-only checkpoints; CPU or CUDA",
         license_details: "MIT, weights included. Commercial use is unrestricted.",
         repo_url: Some("https://github.com/dauparas/ProteinMPNN"),
         home_url: None,
-        docs_url: None,
+        docs_url: Some("https://github.com/dauparas/ProteinMPNN#readme"),
         // "Input flags" section.
         input_params_url: Some("https://github.com/dauparas/ProteinMPNN/blob/main/README.md"),
         examples_url: Some("https://github.com/dauparas/ProteinMPNN/tree/main/examples"),

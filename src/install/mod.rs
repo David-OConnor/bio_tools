@@ -26,7 +26,7 @@ mod common;
 mod conda_tools;
 mod igblast;
 mod opendde;
-mod protein_mpnn;
+pub(crate) mod protein_mpnn;
 mod python_tools;
 mod uninstall;
 

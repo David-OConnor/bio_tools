@@ -378,10 +378,7 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
         ],
         Tool::LigandMpnn => &[
             ("LigandMPNN/run.py", "LigandMPNN runner"),
-            (
-                "LigandMPNN/model_params/ligandmpnn_v_32_010_25.pt",
-                "LigandMPNN weights",
-            ),
+            ("LigandMPNN/score.py", "LigandMPNN scoring runner"),
         ],
         Tool::RfDiffusion3 => &[("rfd3/checkpoints/rfd3_latest.ckpt", "RFdiffusion3 weights")],
         Tool::RfAntibody => &[("RFantibody/weights/RFdiffusion_Ab.pt", "RFantibody weights")],
@@ -411,10 +408,23 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
         Tool::AntiFold => &[("AntiFold", "AntiFold checkout")],
         _ => &[],
     };
-    relative
+    let mut paths: Vec<_> = relative
         .iter()
         .map(|(path, description)| (root.join(path), *description))
-        .collect()
+        .collect();
+    if tool == Tool::LigandMpnn {
+        paths.extend(
+            crate::install::protein_mpnn::LIGAND_CHECKPOINTS
+                .iter()
+                .map(|filename| {
+                    (
+                        root.join("LigandMPNN/model_params").join(filename),
+                        "LigandMPNN model weights",
+                    )
+                }),
+        );
+    }
+    paths
 }
 
 fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {

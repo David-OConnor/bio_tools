@@ -33,7 +33,7 @@
       "accept": ".pdb,.ent,.cif,.mmcif",
       "task": "",
       "group": "Inputs",
-      "help_note": "Upload a PDB or mmCIF, or choose a preset with an included structure. mmCIF is converted to PDB and requires single-character chain IDs."
+      "help_note": "Upload a PDB or mmCIF, or choose a preset with an included structure. The first model is used for multi-model structures. mmCIF is converted to PDB and requires single-character chain IDs."
     },
     {
       "name": "pdb_path_chains",

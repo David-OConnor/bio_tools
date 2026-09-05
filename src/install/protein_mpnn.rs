@@ -9,26 +9,72 @@ use crate::tool_definitions::Tool;
 const LIGAND_WEIGHTS_ROOT: &str = "https://files.ipd.uw.edu/pub/ligandmpnn";
 const ABMPNN_WEIGHTS: &str = "https://zenodo.org/records/8164693/files/abmpnn.pt?download=1";
 
+// The public variants listed by LigandMPNN's get_model_params.sh. Keep the
+// catalog checkpoint selectors and installation/status checks in agreement.
+pub(crate) const LIGAND_CHECKPOINTS: &[&str] = &[
+    "proteinmpnn_v_48_002.pt",
+    "proteinmpnn_v_48_010.pt",
+    "proteinmpnn_v_48_020.pt",
+    "proteinmpnn_v_48_030.pt",
+    "ligandmpnn_v_32_005_25.pt",
+    "ligandmpnn_v_32_010_25.pt",
+    "ligandmpnn_v_32_020_25.pt",
+    "ligandmpnn_v_32_030_25.pt",
+    "solublempnn_v_48_002.pt",
+    "solublempnn_v_48_010.pt",
+    "solublempnn_v_48_020.pt",
+    "solublempnn_v_48_030.pt",
+    "per_residue_label_membrane_mpnn_v_48_020.pt",
+    "global_label_membrane_mpnn_v_48_020.pt",
+    "ligandmpnn_sc_v_32_002_16.pt",
+];
+
 pub(super) fn install_ligand(installer: &mut Installer) -> Result<(), InstallError> {
     const SLUG: &str = Tool::LigandMpnn.slug();
     install_runtime(installer, SLUG)?;
     let target = installer.tools_root().join("LigandMPNN");
     installer.clone_or_update("https://github.com/dauparas/LigandMPNN", &target)?;
 
-    for filename in [
-        "ligandmpnn_v_32_010_25.pt",
-        "proteinmpnn_v_48_020.pt",
-        "solublempnn_v_48_020.pt",
-    ] {
+    // run.py imports ProDy and the bundled OpenFold packing helpers even
+    // when side-chain packing is disabled. Do not replace the selected Torch
+    // backend with the upstream requirements file's older CUDA-only pins.
+    installer.pip_install(
+        SLUG,
+        &[
+            "numpy==1.26.4",
+            "ProDy==2.6.1",
+            "scipy==1.12.0",
+            "biopython==1.83",
+            "ml-collections==0.1.1",
+            "dm-tree==0.1.8",
+        ],
+        PipOptions::default(),
+    )?;
+    // Bundled OpenFold uses the removed np.int alias in three dtype
+    // declarations. Use explicit 64-bit indices, as required by Torch's
+    // one_hot, allowing Python 3.12 / NumPy 1.26 without changing calculations.
+    let constants = target.join("openfold/np/residue_constants.py");
+    let source = std::fs::read_to_string(&constants)
+        .map_err(|error| InstallError::io("reading LigandMPNN's OpenFold constants", error))?;
+    let compatible = source.replace("dtype=np.int)", "dtype=np.int64)");
+    if source != compatible {
+        std::fs::write(&constants, compatible).map_err(|error| {
+            InstallError::io("updating LigandMPNN's OpenFold integer dtypes", error)
+        })?;
+    }
+    for filename in LIGAND_CHECKPOINTS {
         installer.download(
             &format!("{LIGAND_WEIGHTS_ROOT}/{filename}"),
             &target.join("model_params").join(filename),
         )?;
+        require_nonempty(
+            &target.join("model_params").join(filename),
+            "LigandMPNN model weights did not download",
+        )?;
     }
-    require_nonempty(
-        &target.join("model_params/ligandmpnn_v_32_010_25.pt"),
-        "the LigandMPNN weights did not download",
-    )?;
+    let mut probe = Command::new(installer.venv_python(SLUG));
+    probe.arg(target.join("run.py")).arg("--help");
+    installer.checked(&mut probe)?;
     installer.note(format!("LigandMPNN installed at {}", target.display()));
     Ok(())
 }

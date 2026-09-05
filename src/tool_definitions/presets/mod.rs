@@ -137,6 +137,7 @@ pub fn materialize(slug: &str, values: &Value, directory: &Path) -> io::Result<V
 /// Serialized preset descriptors: id, label, description, source_url and form values.
 pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
+        "ligandmpnn" => Some(include_str!("ligandmpnn.json")),
         "proteinmpnn" => Some(include_str!("proteinmpnn.json")),
         "rfd3" => Some(include_str!("rfd3.json")),
         _ => None,
@@ -147,6 +148,20 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
 /// Consumers can write these contents into their own job directory before inference.
 pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
     match (slug, name) {
+        ("ligandmpnn", "inputs/1BC8.pdb") => Some(include_str!("ligandmpnn/inputs/1BC8.pdb")),
+        ("ligandmpnn", "inputs/2GFB.pdb") => Some(include_str!("ligandmpnn/inputs/2GFB.pdb")),
+        ("ligandmpnn", "inputs/4GYT.pdb") => Some(include_str!("ligandmpnn/inputs/4GYT.pdb")),
+        ("ligandmpnn", "inputs/bias_AA_per_residue.json") => Some(include_str!("ligandmpnn/inputs/bias_AA_per_residue.json")),
+        ("ligandmpnn", "inputs/bias_AA_per_residue_multi.json") => Some(include_str!("ligandmpnn/inputs/bias_AA_per_residue_multi.json")),
+        ("ligandmpnn", "inputs/fix_residues_multi.json") => Some(include_str!("ligandmpnn/inputs/fix_residues_multi.json")),
+        ("ligandmpnn", "inputs/omit_AA_per_residue.json") => Some(include_str!("ligandmpnn/inputs/omit_AA_per_residue.json")),
+        ("ligandmpnn", "inputs/omit_AA_per_residue_multi.json") => Some(include_str!("ligandmpnn/inputs/omit_AA_per_residue_multi.json")),
+        ("ligandmpnn", "inputs/pdb_ids.json") => Some(include_str!("ligandmpnn/inputs/pdb_ids.json")),
+        ("ligandmpnn", "inputs/redesigned_residues_multi.json") => Some(include_str!("ligandmpnn/inputs/redesigned_residues_multi.json")),
+        ("ligandmpnn", "LICENSE") => Some(include_str!("ligandmpnn/LICENSE")),
+        ("ligandmpnn", "outputs/ligandmpnn_default/backbones/1BC8_1.pdb") => Some(include_str!("ligandmpnn/outputs/ligandmpnn_default/backbones/1BC8_1.pdb")),
+        ("ligandmpnn", "provenance.json") => Some(include_str!("ligandmpnn/provenance.json")),
+
         ("proteinmpnn", "inputs/PDB_complexes/pdbs/3HTN.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_complexes/pdbs/3HTN.pdb")),
         ("proteinmpnn", "inputs/PDB_complexes/pdbs/4YOW.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_complexes/pdbs/4YOW.pdb")),
         ("proteinmpnn", "inputs/PDB_homooligomers/pdbs/4GYT.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_homooligomers/pdbs/4GYT.pdb")),

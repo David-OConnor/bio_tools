@@ -67,5 +67,19 @@
     "The task selector maps to score_only, conditional_probs_only and unconditional_probs_only; design leaves these flags disabled.",
     "pdb_path, path_to_fasta and JSON/JSONL fields accept uploaded contents or catalog assets, not server filesystem paths. Output directories, model paths, jsonl_path and chain_id_jsonl are managed by the single-structure adapter.",
     "The installed soluble_model_weights directory contains 002, 010, 020 and 030 despite the README\u2019s shorter list. CA-only supports 002, 010 and 020; CA-soluble weights are unavailable."
-  ]
+  ],
+  "validation": {
+    "date": "2026-09-05",
+    "runtime": "Python 3.12, PyTorch 2.7.1 CPU, NumPy 1.26.4",
+    "official_examples": 21,
+    "checks": [
+      "All 21 bundled presets completed actual CPU inference, including FASTA scoring, fixed/tied positions, homooligomers, unconditional probabilities and PSSM guidance.",
+      "Verified output sequence counts and finite numeric score/probability outputs.",
+      "Also exercised conditional backbone-only probabilities.",
+      "All presets passed browser form submission and official argument-parser checks.",
+      "Verified wrapped mmCIF rows and first-model selection.",
+      "Representative adapter calls passed the actual bio_tools subprocess runner and durable result archiving."
+    ],
+    "limits": "CUDA and Ubuntu deployment were not exercised on this Windows host."
+  }
 }

@@ -1,0 +1,90 @@
+{
+  "repository": "https://github.com/dauparas/LigandMPNN",
+  "commit": "26ec57ac976ade5379920dbd43c7f97a91cf82de",
+  "implementation_reference": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/run.py",
+  "scoring_reference": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/score.py",
+  "assets": [
+    {
+      "path": "inputs/1BC8.pdb",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/1BC8.pdb",
+      "sha256": "d3e844d818f24e8a1b6a39f7d97816306f0b69433ec8b9ea2cb6af6ba08e1284"
+    },
+    {
+      "path": "inputs/2GFB.pdb",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/2GFB.pdb",
+      "sha256": "137fa4c5f11b93736ae16069038309bb33c414532c50a691c1093e3d84d0e060"
+    },
+    {
+      "path": "inputs/4GYT.pdb",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/4GYT.pdb",
+      "sha256": "4a5e02d9235d13af82854d7f0e4ca72e00c58351a30645575a104064dc1ff1a2"
+    },
+    {
+      "path": "inputs/bias_AA_per_residue.json",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/bias_AA_per_residue.json",
+      "sha256": "d18eaf5789c0fdf8513ab207a2186d5a60e6cb0d178b838f59e313e85db9cdea"
+    },
+    {
+      "path": "inputs/bias_AA_per_residue_multi.json",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/bias_AA_per_residue_multi.json",
+      "sha256": "274b0488df7d72e4b5748797f3694045ae55df65eba6aed18c509be353ca1681"
+    },
+    {
+      "path": "inputs/fix_residues_multi.json",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/fix_residues_multi.json",
+      "sha256": "1104748a5febffa0716bcacf01371bbd50c6036a69749f7ab6b9f6070f05a412"
+    },
+    {
+      "path": "inputs/omit_AA_per_residue.json",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/omit_AA_per_residue.json",
+      "sha256": "e9e40415c3a00cfe2fc4f53654e8d5996f3cd976364fca4beb55f83bd85079df"
+    },
+    {
+      "path": "inputs/omit_AA_per_residue_multi.json",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/omit_AA_per_residue_multi.json",
+      "sha256": "48a95a198d3f1b72b37584cb2121de4d53ff1b86a8b11c85f1047993339dab85"
+    },
+    {
+      "path": "inputs/pdb_ids.json",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/pdb_ids.json",
+      "sha256": "099563c046338b68dd0a0506711fdb355652d22b7065e51f9b47a7ea3ac3fc75"
+    },
+    {
+      "path": "inputs/redesigned_residues_multi.json",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/inputs/redesigned_residues_multi.json",
+      "sha256": "c8f0b01f7ed54bd3ed2d37067ccb80804a750a05b1c769b443d46b6ead2f5541"
+    },
+    {
+      "path": "LICENSE",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/LICENSE",
+      "sha256": "8af7ba31868e08e8949e20ce2ef3c0b1d0ef78c9358c91563a60a9fe3b36c9ea"
+    },
+    {
+      "path": "outputs/ligandmpnn_default/backbones/1BC8_1.pdb",
+      "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/outputs/ligandmpnn_default/backbones/1BC8_1.pdb",
+      "sha256": "724c2cc16fb2816014b2678c50e4f79f014dcb3986318f186c419290a8839cb3"
+    }
+  ],
+  "adaptations": [
+    "Tasks select run.py design or the two score.py modes; model_type independently selects the five official model families. Legacy model-valued task and renamed field aliases remain accepted.",
+    "PDB and JSON file options accept uploaded contents or bundled references. Multi-input JSON maps caller names to contents or references; the adapter creates job-local native paths and rekeys constraint dictionaries.",
+    "Checkpoint selectors accept only installed official filenames; checkpoint_path_sc and output directories are managed by the service.",
+    "The README fast packing example requests zero packs. Current run.py loops range(number_of_packs_per_design), so the runnable preset requests one pack.",
+    "Scoring presets bundle the official previously generated backbone used by the README.",
+    "score.py expects parse_these_chains_only as concatenated single-character IDs, unlike the comma-separated run.py flag. The adapter translates it. score.py multi-residue constraints receive arrays because that entry point does not split the README string format.",
+    "The installer replaces removed np.int dtype aliases in bundled OpenFold with explicit np.int64 indices for Python 3.12 and NumPy 1.26.4."
+  ],
+  "validation": {
+    "date": "2026-09-05",
+    "runtime": "Python 3.12, PyTorch 2.7.1 CPU, NumPy 1.26.4, ProDy 2.6.1",
+    "official_examples": 43,
+    "checks": [
+      "All 34 design, 4 scoring and 5 packing examples completed actual CPU inference through the adapter.",
+      "Verified output sequence counts, finite normalized scoring probabilities, and packed structure counts.",
+      "Bundled PDB residue selections matched the official ProDy parser.",
+      "All presets passed browser form submission and official argument-parser checks.",
+      "Representative adapter calls passed the actual bio_tools subprocess runner and durable result archiving."
+    ],
+    "limits": "CUDA and Ubuntu deployment were not exercised on this Windows host."
+  }
+}

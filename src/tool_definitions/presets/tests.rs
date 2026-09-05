@@ -58,7 +58,7 @@ fn verify_files(original: &Value, prepared: &Value) -> usize {
 
 #[test]
 fn every_preset_materializes_all_bundled_inputs() {
-    for slug in ["rfd3", "proteinmpnn"] {
+    for slug in ["rfd3", "proteinmpnn", "ligandmpnn"] {
         let presets: Value = serde_json::from_str(by_slug(slug).unwrap()).unwrap();
         let mut files = 0;
         for preset in presets.as_array().unwrap() {

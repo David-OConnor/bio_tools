@@ -1,0 +1,702 @@
+[
+  {
+    "id": "default",
+    "label": "Design examples 1: default",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "default",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb"
+    }
+  },
+  {
+    "id": "temperature",
+    "label": "Design examples 2: temperature",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "temperature",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "temperature": 0.05
+    }
+  },
+  {
+    "id": "random_seed",
+    "label": "Design examples 3: random seed",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "random-seed",
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb"
+    }
+  },
+  {
+    "id": "verbose",
+    "label": "Design examples 4: verbose",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "verbose",
+      "seed": 111,
+      "verbose": false,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb"
+    }
+  },
+  {
+    "id": "save_stats",
+    "label": "Design examples 5: save stats",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "save-stats",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "save_stats": true
+    }
+  },
+  {
+    "id": "fix_residues",
+    "label": "Design examples 6: fix residues",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "fix-residues",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "fixed_residues": "C1 C2 C3 C4 C5 C6 C7 C8 C9 C10",
+      "bias_AA": "A:10.0"
+    }
+  },
+  {
+    "id": "redesign_residues",
+    "label": "Design examples 7: redesign residues",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "redesign-residues",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "redesigned_residues": "C1 C2 C3 C4 C5 C6 C7 C8 C9 C10",
+      "bias_AA": "A:10.0"
+    }
+  },
+  {
+    "id": "batch_size",
+    "label": "Design examples 8: batch size",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "batch-size",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "batch_size": 3,
+      "number_of_batches": 5
+    }
+  },
+  {
+    "id": "global_bias",
+    "label": "Design examples 9: global bias",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "global-bias",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "bias_AA": "W:3.0,P:3.0,C:3.0,A:-3.0"
+    }
+  },
+  {
+    "id": "per_residue_bias",
+    "label": "Design examples 10: per residue bias",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "per-residue-bias",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "bias_AA_per_residue": {
+        "C1": {
+          "G": -0.3,
+          "C": -2.0,
+          "P": 10.8
+        },
+        "C3": {
+          "P": 10.0
+        },
+        "C5": {
+          "G": -1.3,
+          "P": 10.0
+        },
+        "C7": {
+          "G": -1.3,
+          "P": 10.0
+        }
+      }
+    }
+  },
+  {
+    "id": "global_omit",
+    "label": "Design examples 11: global omit",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "global-omit",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "omit_AA": "CDFGHILMNPQRSTVWY"
+    }
+  },
+  {
+    "id": "per_residue_omit",
+    "label": "Design examples 12: per residue omit",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "per-residue-omit",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "omit_AA_per_residue": {
+        "C1": "ACDEFGHIKLMNPQRSTVW",
+        "C3": "ACDEFGHIKLMNPQRSTVW",
+        "C5": "ACDEFGHIKLMNPQRSTVW",
+        "C7": "ACDEFGHIKLMNPQRSTVW"
+      }
+    }
+  },
+  {
+    "id": "symmetry",
+    "label": "Design examples 13: symmetry",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "symmetry",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "symmetry_residues": "C1,C2,C3|C4,C5|C6,C7",
+      "symmetry_weights": "0.33,0.33,0.33|0.5,0.5|0.5,0.5"
+    }
+  },
+  {
+    "id": "homooligomer",
+    "label": "Design examples 14: homooligomer",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "homooligomer",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/4GYT.pdb",
+      "homo_oligomer": true,
+      "number_of_batches": 2
+    }
+  },
+  {
+    "id": "file_ending",
+    "label": "Design examples 15: file ending",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "file-ending",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "file_ending": "_xyz"
+    }
+  },
+  {
+    "id": "zero_indexed",
+    "label": "Design examples 16: zero indexed",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "zero-indexed",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "zero_indexed": true,
+      "number_of_batches": 2
+    }
+  },
+  {
+    "id": "chains_to_design",
+    "label": "Design examples 17: chains to design",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "chains-to-design",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/4GYT.pdb",
+      "chains_to_design": "A,B"
+    }
+  },
+  {
+    "id": "parse_these_chains_only",
+    "label": "Design examples 18: parse these chains only",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "parse-these-chains-only",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/4GYT.pdb",
+      "parse_these_chains_only": "A,B"
+    }
+  },
+  {
+    "id": "ligandmpnn_default",
+    "label": "Design examples 19: ligandmpnn default",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "ligandmpnn-default",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb"
+    }
+  },
+  {
+    "id": "ligandmpnn_v_32_005_25",
+    "label": "Design examples 20: ligandmpnn v 32 005 25",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "ligandmpnn-v-32-005-25",
+      "checkpoint_ligand_mpnn": "ligandmpnn_v_32_005_25.pt",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb"
+    }
+  },
+  {
+    "id": "ligandmpnn_no_context",
+    "label": "Design examples 21: ligandmpnn no context",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "ligandmpnn-no-context",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "ligand_mpnn_use_atom_context": false
+    }
+  },
+  {
+    "id": "ligandmpnn_use_side_chain_atoms",
+    "label": "Design examples 22: ligandmpnn use side chain atoms",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "ligandmpnn-use-side-chain-atoms",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "ligand_mpnn_use_side_chain_context": true,
+      "fixed_residues": "C1 C2 C3 C4 C5 C6 C7 C8 C9 C10"
+    }
+  },
+  {
+    "id": "soluble_mpnn_default",
+    "label": "Design examples 23: soluble mpnn default",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "soluble_mpnn",
+      "job_name": "soluble-mpnn-default",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb"
+    }
+  },
+  {
+    "id": "global_label_membrane_mpnn_0",
+    "label": "Design examples 24: global label membrane mpnn 0",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "global_label_membrane_mpnn",
+      "job_name": "global-label-membrane-mpnn-0",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "global_transmembrane_label": "0"
+    }
+  },
+  {
+    "id": "per_residue_label_membrane_mpnn_default",
+    "label": "Design examples 25: per residue label membrane mpnn default",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "per_residue_label_membrane_mpnn",
+      "job_name": "per-residue-label-membrane-mpnn-default",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "transmembrane_buried": "C1 C2 C3 C11",
+      "transmembrane_interface": "C4 C5 C6 C22"
+    }
+  },
+  {
+    "id": "fasta_seq_separation",
+    "label": "Design examples 26: fasta seq separation",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "fasta-seq-separation",
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "fasta_seq_separation": ":"
+    }
+  },
+  {
+    "id": "pdb_path_multi",
+    "label": "Design examples 27: pdb path multi",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "pdb-path-multi",
+      "pdb_path_multi": {
+        "1BC8": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+        "4GYT": "bio-tools://ligandmpnn/inputs/4GYT.pdb"
+      },
+      "seed": 111
+    }
+  },
+  {
+    "id": "fixed_residues_multi",
+    "label": "Design examples 28: fixed residues multi",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "fixed-residues-multi",
+      "pdb_path_multi": {
+        "1BC8": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+        "4GYT": "bio-tools://ligandmpnn/inputs/4GYT.pdb"
+      },
+      "fixed_residues_multi": {
+        "1BC8": "C1 C2 C3 C4 C5 C10 C22",
+        "4GYT": "A7 A8 A9 A10 A11 A12 A13 B38"
+      },
+      "seed": 111
+    }
+  },
+  {
+    "id": "redesigned_residues_multi",
+    "label": "Design examples 29: redesigned residues multi",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "redesigned-residues-multi",
+      "pdb_path_multi": {
+        "1BC8": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+        "4GYT": "bio-tools://ligandmpnn/inputs/4GYT.pdb"
+      },
+      "redesigned_residues_multi": {
+        "1BC8": "C1 C2 C3 C4 C5 C10",
+        "4GYT": "A7 A8 A9 A10 A12 A13 B38"
+      },
+      "seed": 111
+    }
+  },
+  {
+    "id": "omit_AA_per_residue_multi",
+    "label": "Design examples 30: omit AA per residue multi",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "omit-AA-per-residue-multi",
+      "pdb_path_multi": {
+        "1BC8": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+        "4GYT": "bio-tools://ligandmpnn/inputs/4GYT.pdb"
+      },
+      "omit_AA_per_residue_multi": {
+        "1BC8": {
+          "C1": "ACDEFGHILMNPQRSTVWY",
+          "C2": "ACDEFGHILMNPQRSTVWY",
+          "C3": "ACDEFGHILMNPQRSTVWY"
+        },
+        "4GYT": {
+          "A7": "ACDEFGHILMNPQRSTVWY",
+          "A8": "ACDEFGHILMNPQRSTVWY"
+        }
+      },
+      "seed": 111
+    }
+  },
+  {
+    "id": "bias_AA_per_residue_multi",
+    "label": "Design examples 31: bias AA per residue multi",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "bias-AA-per-residue-multi",
+      "pdb_path_multi": {
+        "1BC8": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+        "4GYT": "bio-tools://ligandmpnn/inputs/4GYT.pdb"
+      },
+      "bias_AA_per_residue_multi": {
+        "1BC8": {
+          "C1": {
+            "A": 3.0,
+            "P": -2.0
+          },
+          "C2": {
+            "W": 10.0,
+            "G": -0.43
+          }
+        },
+        "4GYT": {
+          "A7": {
+            "Y": 5.0,
+            "S": -2.0
+          },
+          "A8": {
+            "M": 3.9,
+            "G": -0.43
+          }
+        }
+      },
+      "seed": 111
+    }
+  },
+  {
+    "id": "ligand_mpnn_cutoff_for_score",
+    "label": "Design examples 32: ligand mpnn cutoff for score",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "ligand-mpnn-cutoff-for-score",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "ligand_mpnn_cutoff_for_score": 6.0
+    }
+  },
+  {
+    "id": "insertion_code",
+    "label": "Design examples 33: insertion code",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "protein_mpnn",
+      "job_name": "insertion-code",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/2GFB.pdb",
+      "redesigned_residues": "B82 B82A B82B B82C",
+      "parse_these_chains_only": "B"
+    }
+  },
+  {
+    "id": "parse_atoms_with_zero_occupancy",
+    "label": "Design examples 34: parse atoms with zero occupancy",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#design-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "parse-atoms-with-zero-occupancy",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "parse_atoms_with_zero_occupancy": true
+    }
+  },
+  {
+    "id": "autoregressive_score_w_seq",
+    "label": "Scoring examples 1: autoregressive score w seq",
+    "description": "Official scoring example using the bundled upstream output backbone, so a prior design run is not required.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#scoring-examples",
+    "values": {
+      "task": "autoregressive_score",
+      "model_type": "ligand_mpnn",
+      "job_name": "autoregressive-score-w-seq",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/outputs/ligandmpnn_default/backbones/1BC8_1.pdb",
+      "use_sequence": true,
+      "batch_size": 1,
+      "number_of_batches": 10
+    }
+  },
+  {
+    "id": "autoregressive_score_wo_seq",
+    "label": "Scoring examples 2: autoregressive score wo seq",
+    "description": "Official scoring example using the bundled upstream output backbone, so a prior design run is not required.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#scoring-examples",
+    "values": {
+      "task": "autoregressive_score",
+      "model_type": "ligand_mpnn",
+      "job_name": "autoregressive-score-wo-seq",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/outputs/ligandmpnn_default/backbones/1BC8_1.pdb",
+      "use_sequence": false,
+      "batch_size": 1,
+      "number_of_batches": 10
+    }
+  },
+  {
+    "id": "single_aa_score_w_seq",
+    "label": "Scoring examples 3: single aa score w seq",
+    "description": "Official scoring example using the bundled upstream output backbone, so a prior design run is not required.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#scoring-examples",
+    "values": {
+      "task": "single_aa_score",
+      "model_type": "ligand_mpnn",
+      "job_name": "single-aa-score-w-seq",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/outputs/ligandmpnn_default/backbones/1BC8_1.pdb",
+      "use_sequence": true,
+      "batch_size": 1,
+      "number_of_batches": 10
+    }
+  },
+  {
+    "id": "single_aa_score_wo_seq",
+    "label": "Scoring examples 4: single aa score wo seq",
+    "description": "Official scoring example using the bundled upstream output backbone, so a prior design run is not required.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#scoring-examples",
+    "values": {
+      "task": "single_aa_score",
+      "model_type": "ligand_mpnn",
+      "job_name": "single-aa-score-wo-seq",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/outputs/ligandmpnn_default/backbones/1BC8_1.pdb",
+      "use_sequence": false,
+      "batch_size": 1,
+      "number_of_batches": 10
+    }
+  },
+  {
+    "id": "sc_default_fast",
+    "label": "Side chain packing examples 1: sc default fast",
+    "description": "Official fast-packing example corrected to request 1 pack: current run.py performs zero packs for the README value 0.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#side-chain-packing-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "sc-default-fast",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "pack_side_chains": true,
+      "number_of_packs_per_design": 1,
+      "pack_with_ligand_context": true
+    }
+  },
+  {
+    "id": "sc_default",
+    "label": "Side chain packing examples 2: sc default",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#side-chain-packing-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "sc-default",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "pack_side_chains": true,
+      "number_of_packs_per_design": 4,
+      "pack_with_ligand_context": true
+    }
+  },
+  {
+    "id": "sc_fixed_residues",
+    "label": "Side chain packing examples 3: sc fixed residues",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#side-chain-packing-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "sc-fixed-residues",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "pack_side_chains": true,
+      "number_of_packs_per_design": 4,
+      "pack_with_ligand_context": true,
+      "fixed_residues": "C6 C7 C8 C9 C10 C11 C12 C13 C14 C15",
+      "repack_everything": false
+    }
+  },
+  {
+    "id": "sc_fixed_residues_full_repack",
+    "label": "Side chain packing examples 4: sc fixed residues full repack",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#side-chain-packing-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "sc-fixed-residues-full-repack",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "pack_side_chains": true,
+      "number_of_packs_per_design": 4,
+      "pack_with_ligand_context": true,
+      "fixed_residues": "C6 C7 C8 C9 C10 C11 C12 C13 C14 C15",
+      "repack_everything": true
+    }
+  },
+  {
+    "id": "sc_no_context",
+    "label": "Side chain packing examples 5: sc no context",
+    "description": "Official README example; input files are bundled with the catalog.",
+    "source_url": "https://github.com/dauparas/LigandMPNN/blob/26ec57ac976ade5379920dbd43c7f97a91cf82de/README.md#side-chain-packing-examples",
+    "values": {
+      "task": "design",
+      "model_type": "ligand_mpnn",
+      "job_name": "sc-no-context",
+      "seed": 111,
+      "pdb_path": "bio-tools://ligandmpnn/inputs/1BC8.pdb",
+      "pack_side_chains": true,
+      "number_of_packs_per_design": 4,
+      "pack_with_ligand_context": false
+    }
+  }
+]

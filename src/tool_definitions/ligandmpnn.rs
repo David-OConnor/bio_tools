@@ -25,13 +25,13 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         evaluation of binding interactions. Experimental characterization demonstrates that LigandMPNN can \
         generate small molecule and DNA-binding proteins with high affinity and specificity. \
         It allows explicit modeling of small molecule, nucleotide, metal, and other atomic contexts.",
-        availability: "Installed by setup_system.sh with CUDA-enabled PyTorch for Linux/WSL and an NVIDIA GPU",
+        availability: "Installed by bio_tools with PyTorch, parser/packing dependencies and all official model variants; CPU or CUDA",
         license_details: "MIT, weights included. Commercial use is unrestricted.",
         repo_url: Some("https://github.com/dauparas/LigandMPNN"),
         home_url: None,
-        docs_url: None,
-        input_params_url: None,
-        examples_url: None,
+        docs_url: Some("https://github.com/dauparas/LigandMPNN#readme"),
+        input_params_url: Some("https://github.com/dauparas/LigandMPNN/blob/main/run.py"),
+        examples_url: Some("https://github.com/dauparas/LigandMPNN#design-examples"),
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2023.12.22.573103v1"),
         license: License::Mit,
         license_url: None,

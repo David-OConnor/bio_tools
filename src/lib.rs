@@ -25,7 +25,9 @@ pub mod tool_definitions;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LaunchType {
     PythonLib,
+    /// Installable with UV
     PythonBasedApp,
+    /// Installable with Micromamba, or in some cases, requires the full Conda.
     CondaBasedApp,
     Executable,
 }
