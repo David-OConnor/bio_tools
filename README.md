@@ -228,6 +228,33 @@ print(result.run_log_dir)
 `Installer::tool_command` (Python: `Installer.run`) is the variant to reach for when the tool lives in a
 managed environment rather than on `PATH`; it resolves the installed console entry point for you.
 
+RFdiffusion3 and ProteinMPNN examples and their input files are bundled with the library.
+Rust callers use `tool_definitions::presets::payload(slug, preset_id, &overrides)` to load
+the shared form values, and `presets::materialize(slug, &values, job_directory)` to replace
+bundled file references with absolute paths. This includes references inside RFD3's JSON
+`inputs`, and ProteinMPNN's FASTA and PSSM inputs, without a download or a Bio Web dependency.
+
+Python callers can do both in one call:
+
+```python
+from pathlib import Path
+import bio_tools
+
+values = bio_tools.catalog_preset(
+    "rfd3", "demo/M0255_1mg5_unfixed",
+    overrides={"n_batches": 1},
+    workdir=Path("work"),
+)
+print(values["input"])  # An existing PDB in the job directory.
+```
+
+These are editable field values, which the caller maps to the tool's native inputs and
+command arguments. Omit `workdir` to keep portable `bio-tools://` references for a form or
+saved job. `presets::input_text` (Python: `catalog_input_text`) resolves a reference to its
+contents for consumers accepting file text. Explicit overrides, including empty values,
+take precedence; materialization leaves existing files intact. Keep the job directory
+until inference has finished.
+
 
 ### Run logs
 

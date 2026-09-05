@@ -34,6 +34,7 @@ required-features = ["cli"]
 [dependencies]
 ureq = "3.3.0"  # Downloading tool assets and source distributions.
 url = "2.5.8"  # Validating download URLs prior to fetching them.
+serde_json = "1.0.149"  # Shared preset payloads for Rust and Python consumers.
 
 # todo: These A/R
 #na_seq = "0.3.15"

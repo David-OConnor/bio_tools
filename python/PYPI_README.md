@@ -219,6 +219,28 @@ print(result.run_log_dir)
 `Installer::tool_command` (Python: `Installer.run`) is the variant to reach for when the tool lives in a
 managed environment rather than on `PATH`; it resolves the installed console entry point for you.
 
+RFdiffusion3 and ProteinMPNN presets include their structure and auxiliary files. Load
+editable field values with `bio_tools.catalog_preset(slug, preset_id)`, or pass a job
+directory to copy the files there and replace bundled references with absolute paths:
+
+```python
+from pathlib import Path
+import bio_tools
+
+values = bio_tools.catalog_preset(
+    "proteinmpnn", "example_1/5L33",
+    overrides={"num_seq_per_target": 2},
+    workdir=Path("work"),
+)
+print(values["pdb_path"])  # Existing PDB, ready for the caller's tool adapter.
+```
+
+The same preparation handles RFD3's JSON `inputs` and ProteinMPNN's FASTA and PSSM
+assets, without downloading files or importing Bio Web. Omit `workdir` for portable
+`bio-tools://` references; `bio_tools.catalog_input_text(slug, value)` resolves a reference
+to text for adapters accepting file contents. Explicit overrides, including empty values,
+win. Keep the job directory until inference finishes; existing files are never overwritten.
+
 ### Run logs
 
 When a run log is configured, each invocation gets a unique directory below the given root and run

@@ -1,10 +1,12 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap},
+    path::PathBuf,
+};
 
 use bio_tools_rs::{
-    LaunchType as RustLaunchType, License as RustLicense,
-    LicenseCategory as RustLicenseCategory, Process as RustProcess,
-    ProcessExpense as RustProcessExpense, Spec as RustSpec, ToolCategory as RustToolCategory,
-    tool_definitions::catalog,
+    LaunchType as RustLaunchType, License as RustLicense, LicenseCategory as RustLicenseCategory,
+    Process as RustProcess, ProcessExpense as RustProcessExpense, Spec as RustSpec,
+    ToolCategory as RustToolCategory, tool_definitions::catalog,
 };
 use pyo3::{
     PyClass,
@@ -505,30 +507,44 @@ fn catalog_presets(py: Python<'_>, slug: &str) -> PyResult<Py<PyAny>> {
 }
 
 /// Return a complete preset payload, including the tool's ordinary defaults.
-/// Callers may override individual values before submitting a job.
+/// Explicit overrides win, including empty file values. Pass workdir to copy all
+/// bundled assets there and replace references with absolute paths, including
+/// references inside JSON input documents. Omit it for portable form values.
 #[pyfunction]
-fn catalog_preset(py: Python<'_>, slug: &str, preset_id: &str) -> PyResult<Py<PyDict>> {
-    let presets = catalog_presets(py, slug)?;
-    for preset in presets.bind(py).try_iter()? {
-        let preset = preset?;
-        if preset.get_item("id")?.extract::<String>()? != preset_id {
-            continue;
+#[pyo3(signature = (slug, preset_id, *, overrides=None, workdir=None))]
+fn catalog_preset(
+    py: Python<'_>,
+    slug: &str,
+    preset_id: &str,
+    overrides: Option<Bound<'_, PyDict>>,
+    workdir: Option<PathBuf>,
+) -> PyResult<Py<PyDict>> {
+    let json = py.import("json")?;
+    let overrides = match overrides {
+        Some(values) => {
+            serde_json::from_str(&json.call_method1("dumps", (values,))?.extract::<String>()?)
+                .map_err(|error| PyValueError::new_err(error.to_string()))?
         }
-        let payload = PyDict::new(py);
-        let contract = form_catalog_entry(py, slug)?;
-        if let Some(modes) = contract.get_item("input_modes")? {
-            payload.set_item(modes.get_item("name")?, modes.get_item("default")?)?;
-        }
-        for field in contract.get_item("fields")?.unwrap().try_iter()? {
-            let field = field?;
-            payload.set_item(field.get_item("name")?, field.get_item("default")?)?;
-        }
-        for item in preset.get_item("values")?.cast::<PyDict>()?.iter() {
-            payload.set_item(item.0, item.1)?;
-        }
-        return Ok(payload.unbind());
+        None => serde_json::Map::new(),
+    };
+    let mut payload = bio_tools_rs::tool_definitions::presets::payload(slug, preset_id, &overrides)
+        .map_err(|error| PyValueError::new_err(error.to_string()))?;
+    if let Some(directory) = workdir {
+        payload = bio_tools_rs::tool_definitions::presets::materialize(slug, &payload, &directory)?;
     }
-    Err(PyValueError::new_err(format!("unknown preset {preset_id:?} for {slug:?}")))
+    Ok(json
+        .call_method1("loads", (payload.to_string(),))?
+        .cast::<PyDict>()?
+        .clone()
+        .unbind())
+}
+
+/// Resolve a bundled asset reference, or return ordinary uploaded/pasted text unchanged.
+#[pyfunction]
+fn catalog_input_text(slug: &str, value: &str) -> PyResult<String> {
+    bio_tools_rs::tool_definitions::presets::input_text(slug, value)
+        .map(str::to_owned)
+        .map_err(|error| PyValueError::new_err(error.to_string()))
 }
 
 /// Read an embedded example asset without downloading it or exposing local paths.
@@ -722,6 +738,7 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(catalog_tasks, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_presets, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_preset, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_input_text, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_asset, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_spec, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_process, module)?)?;
