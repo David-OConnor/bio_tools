@@ -31,5 +31,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://academic.oup.com/bib/article/24/3/bbad116/7084794"),
         license: License::Other,
         license_url: None,
+        tested: false,
     },
 };

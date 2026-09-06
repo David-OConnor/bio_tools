@@ -37,5 +37,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: None,
         license: License::Other,
         license_url: None,
+        tested: false,
     },
 };

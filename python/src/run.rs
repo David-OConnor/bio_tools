@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::PathBuf, time::Duration};
 use bio_tools_rs::run::{CaptureLimits, CommandSpec, ExitPolicy, RunLogSpec};
 use pyo3::{create_exception, exceptions::PyRuntimeError, prelude::*};
 
-create_exception!(bio_tools, CommandError, PyRuntimeError);
+create_exception!(bio_tools, RunError, PyRuntimeError);
 
 #[pyclass(
     name = "CommandOutput",
@@ -41,7 +41,7 @@ pub(crate) fn execute(
             elapsed_seconds: output.elapsed.as_secs_f64(),
             run_log_dir: output.run_log_dir,
         })
-        .map_err(|error| CommandError::new_err(error.to_string()))
+        .map_err(|error| RunError::new_err(error.to_string()))
 }
 
 #[pymethods]
@@ -61,8 +61,8 @@ impl PyCommandOutput {
 /// hours, so a library-imposed limit is only ever a wrong guess about someone
 /// else's workload. An application that needs a run to be cut off -- because a
 /// wedged tool would hold a queue -- passes its own budget.
-#[pyclass(name = "Command", module = "bio_tools", frozen, skip_from_py_object)]
-pub(crate) struct PyCommand {
+#[pyclass(name = "CommandSpec", module = "bio_tools", frozen, skip_from_py_object)]
+pub(crate) struct PyCommandSpec {
     command: Vec<String>,
     cwd: Option<PathBuf>,
     /// None means the run is not time limited; see the constructor.
@@ -77,7 +77,7 @@ pub(crate) struct PyCommand {
 }
 
 #[pymethods]
-impl PyCommand {
+impl PyCommandSpec {
     #[new]
     #[pyo3(signature = (
         command,
@@ -162,7 +162,7 @@ impl PyCommand {
 
     fn __repr__(&self) -> String {
         format!(
-            "Command({:?}, cwd={:?}, timeout={:?}, check={})",
+            "CommandSpec({:?}, cwd={:?}, timeout={:?}, check={})",
             self.command, self.cwd, self.timeout, self.check
         )
     }
@@ -178,8 +178,8 @@ pub(crate) fn command_label(program: &str) -> String {
 }
 
 pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add("CommandError", module.py().get_type::<CommandError>())?;
-    module.add_class::<PyCommand>()?;
+    module.add("RunError", module.py().get_type::<RunError>())?;
+    module.add_class::<PyCommandSpec>()?;
     module.add_class::<PyCommandOutput>()?;
     Ok(())
 }

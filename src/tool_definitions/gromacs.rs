@@ -29,5 +29,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://doi.org/10.1016/j.softx.2015.06.001"),
         license: License::Lgpl21OrLater,
         license_url: None,
+        tested: false,
     },
 };

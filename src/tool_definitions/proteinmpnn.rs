@@ -36,5 +36,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://doi.org/10.1126/science.add2187"),
         license: License::Mit,
         license_url: None,
+        tested: true,
     },
 };

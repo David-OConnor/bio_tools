@@ -204,7 +204,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 from pathlib import Path
 import bio_tools
 
-result = bio_tools.Command(
+result = bio_tools.CommandSpec(
     ["opendde", "predict", "input.yaml"],
     cwd=Path("work"),
     timeout=600,

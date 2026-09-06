@@ -29,5 +29,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://www.nature.com/articles/s41467-025-57215-9"),
         license: License::Mit,
         license_url: None,
+        tested: false,
     },
 };

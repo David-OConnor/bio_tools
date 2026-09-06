@@ -25,5 +25,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://arxiv.org/abs/2607.03787"),
         license: License::ApacheV2,
         license_url: None,
+        tested: false,
     },
 };

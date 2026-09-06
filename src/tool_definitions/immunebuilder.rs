@@ -32,5 +32,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://doi.org/10.1038/s42003-023-04927-7"),
         license: License::Bsd3Clause,
         license_url: None,
+        tested: false,
     },
 };

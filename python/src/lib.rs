@@ -13,7 +13,7 @@ use pyo3::{exceptions::PyRuntimeError, prelude::*};
 
 use crate::run::{PyCommandOutput, command_label, execute};
 
-#[pyclass(name = "Status", module = "bio_tools", frozen, skip_from_py_object)]
+#[pyclass(name = "ToolStatus", module = "bio_tools", frozen, skip_from_py_object)]
 #[derive(Clone)]
 struct PyStatus {
     #[pyo3(get)]
@@ -43,7 +43,7 @@ impl From<ToolStatus> for PyStatus {
 impl PyStatus {
     fn __repr__(&self) -> String {
         format!(
-            "Status(result={:?}, detail={:?}, device={:?})",
+            "ToolStatus(result={:?}, detail={:?}, device={:?})",
             self.result, self.detail, self.device
         )
     }

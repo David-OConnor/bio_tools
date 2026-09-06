@@ -25,5 +25,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.01.08.631967"),
         license: License::ApacheV2,
         license_url: None,
+        tested: false,
     },
 };

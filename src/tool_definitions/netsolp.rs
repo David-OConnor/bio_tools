@@ -29,5 +29,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://academic.oup.com/bioinformatics/article/38/4/941/6444984"),
         license: License::Other,
         license_url: None,
+        tested: false,
     },
 };

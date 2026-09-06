@@ -26,5 +26,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         license_url: Some(
             "https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md",
         ),
+        tested: false,
     },
 };

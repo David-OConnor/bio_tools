@@ -27,5 +27,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://academic.oup.com/bib/article/25/3/bbae215/7665139"),
         license: License::Mit,
         license_url: None,
+        tested: false,
     },
 };

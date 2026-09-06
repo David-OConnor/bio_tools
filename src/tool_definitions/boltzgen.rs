@@ -34,5 +34,6 @@ Explicitly focuses our experimental validation on targets that are highly dissim
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2025.11.20.689494"),
         license: License::Mit,
         license_url: None,
+        tested: false,
     },
 };

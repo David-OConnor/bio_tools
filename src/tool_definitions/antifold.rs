@@ -31,5 +31,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         ),
         license: License::Bsd3Clause,
         license_url: None,
+        tested: false,
     },
 };

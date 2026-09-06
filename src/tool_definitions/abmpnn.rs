@@ -31,5 +31,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://icml-compbio.github.io/2023/papers/WCBICML2023_paper61.pdf"),
         license: License::Mit,
         license_url: None,
+        tested: false,
     },
 };

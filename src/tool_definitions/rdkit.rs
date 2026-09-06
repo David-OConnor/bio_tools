@@ -24,5 +24,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: None,
         license: License::Bsd3Clause,
         license_url: None,
+        tested: false,
     },
 };

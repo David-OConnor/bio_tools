@@ -27,5 +27,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://doi.org/10.1021/jm030580l"),
         license: License::Other,
         license_url: None,
+        tested: false,
     },
 };

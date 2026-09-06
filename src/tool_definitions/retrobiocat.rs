@@ -27,5 +27,6 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         paper_url: Some("https://doi.org/10.1021/acscatal.3c01418"),
         license: License::Other,
         license_url: Some("https://github.com/willfinnigan/RetroBioCat-2/blob/main/LICENSE.md"),
+        tested: false,
     },
 };

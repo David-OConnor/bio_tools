@@ -220,6 +220,10 @@ pub struct SpecData<S> {
     /// [`License::Other`] (or any other variant without a fixed
     /// [`License::official_url`]).
     pub license_url: Option<S>,
+    /// Tested, compared inputs and outputs against official docs if available,
+    /// and had results evaluated in at least some cases, e.g. official examples.
+    // todo: Once there are no more untested tools, remove this field
+    pub tested: bool,
 }
 
 impl SpecData<&'static str> {
@@ -238,6 +242,7 @@ impl SpecData<&'static str> {
             paper_url: self.paper_url.map(str::to_owned),
             license: self.license,
             license_url: self.license_url.map(str::to_owned),
+            tested: self.tested,
         }
     }
 }
@@ -265,6 +270,7 @@ impl Spec {
         paper_url: Option<String>,
         license: License,
         license_url: Option<String>,
+        tested: bool,
     ) -> Self {
         Self {
             slug: slug.into(),
@@ -281,6 +287,7 @@ impl Spec {
                 paper_url,
                 license,
                 license_url,
+                tested,
             },
         }
     }

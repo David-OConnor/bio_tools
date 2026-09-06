@@ -180,6 +180,7 @@ impl PySpec {
         paper_url=None,
         license=None,
         license_url=None,
+        tested=false,
         refresh_fields=None,
         tasks=None
     ))]
@@ -200,6 +201,7 @@ impl PySpec {
         paper_url: Option<String>,
         license: Option<Py<PyLicense>>,
         license_url: Option<String>,
+        tested: bool,
         refresh_fields: Option<Py<PyAny>>,
         tasks: Option<Py<PyAny>>,
     ) -> Self {
@@ -220,6 +222,7 @@ impl PySpec {
             paper_url,
             license,
             license_url,
+            tested,
         );
         Self {
             inner,
@@ -295,6 +298,11 @@ impl PySpec {
     }
 
     #[getter]
+    fn tested(&self) -> bool {
+        self.inner.data.tested
+    }
+
+    #[getter]
     fn fields(&self, py: Python<'_>) -> Py<PyAny> {
         self.fields.clone_ref(py)
     }
@@ -356,16 +364,20 @@ impl PySpec {
         data.set_item("paper_url", &self.inner.data.paper_url)?;
         data.set_item("license", self.inner.data.license.to_string())?;
         data.set_item("license_url", &self.inner.data.license_url)?;
+        data.set_item("tested", &self.inner.data.tested)?;
+
         let fields = self.active_fields(py)?;
         data.set_item("fields", serialize_dataclasses(py, &fields)?)?;
         data.set_item("tasks", serialize_dataclasses(py, &self.tasks)?)?;
         data.set_item("presets", catalog_presets(py, &self.inner.slug)?)?;
+
         if let Some(source) = bio_tools_rs::tool_definitions::fields::by_slug(&self.inner.slug) {
             let contract = py.import("json")?.call_method1("loads", (source,))?;
             data.set_item("input_modes", contract.call_method1("get", ("input_modes",))?)?;
             data.set_item("task_group", contract.call_method1("get", ("task_group", ""))?)?;
             data.set_item("field_groups", contract.call_method1("get", ("field_groups", PyList::empty(py)))?)?;
         }
+
         data.set_item("links", self.links())?;
         Ok(data.unbind())
     }
