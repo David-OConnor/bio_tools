@@ -164,7 +164,7 @@
       "task": "",
       "group": "InputSpecification fields",
       "input_modes": "parameters",
-      "help_note": "Enter a JSON object. The local cache_dir option is not available."
+      "help_note": "Enter a JSON object. The local cache_dir option is not available, and extra_fields is accepted only alongside an mmCIF structure because the PDB reader ignores it."
     },
     {
       "name": "extra",
@@ -227,7 +227,8 @@
       "accept": "",
       "task": "",
       "group": "InputSpecification fields",
-      "input_modes": "parameters"
+      "input_modes": "parameters",
+      "help_note": "Name a ligand by its chemical component code, such as NAI, rather than by chain and residue number. A ligand written into a chain that also holds polymer residues is moved onto a chain of its own while the structure is parsed, so a chain-and-number reference to it no longer matches."
     },
     {
       "name": "select_unfixed_sequence",
@@ -524,7 +525,8 @@
       "accept": "",
       "task": "",
       "group": "InputSpecification fields",
-      "input_modes": "parameters"
+      "input_modes": "parameters",
+      "help_note": "Accepting such a structure logs a warning that the shared chain is being separated, which is expected. The ligands end up on a chain of their own, so select them by chemical component code."
     },
     {
       "name": "job_name",
@@ -1218,7 +1220,7 @@
     "atom_array_input": "Internal Python AtomArray; not a web/JSON input.",
     "out_dir": "Directory name inside the isolated run.",
     "ckpt_path": "Filename inside the configured checkpoint directory.",
-    "cif_parser_args": "cache_dir is excluded because it refers to a server path."
+    "cif_parser_args": "cache_dir is excluded because it refers to a server path; extra_fields is rejected without an mmCIF structure instead of being silently dropped."
   },
   "_comment": "Field help is transcribed from the official input documentation (BSD-3-Clause): https://rosettacommons.github.io/foundry/models/rfd3/input.html . Formatting is plain text; help_note describes web input adaptations. See ../presets/rfd3/LICENSE.md for the upstream license."
 }
