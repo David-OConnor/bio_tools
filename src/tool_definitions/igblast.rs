@@ -1,7 +1,9 @@
-use crate::tool_definitions::catalog::{CatalogEntry, Identity};
 use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
-    tool_definitions::Tool,
+    tool_definitions::{
+        Tool,
+        catalog::{CatalogEntry, Identity},
+    },
 };
 
 /// One query against the germline databases: the process start and

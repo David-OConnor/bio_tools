@@ -1,5 +1,7 @@
-use crate::tool_definitions::catalog::{CatalogEntry, Identity};
-use crate::{LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory};
+use crate::{
+    LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
+    tool_definitions::catalog::{CatalogEntry, Identity},
+};
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
     identity: Identity::Uninstalled {

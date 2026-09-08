@@ -8,10 +8,13 @@
 use crate::{
     LaunchType, LicenseCategory, ProcessExpense, Spec, SpecData, ToolCategory,
     tool_definitions::{
-        Tool, abmpnn, aggrescan3d, alphafold3
+        Tool, abmpnn, aggrescan3d, alphafold3, antibody_annotator, antifold, bindcraft, biophi,
+        boltz_adme, boltz2, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat,
+        enzymemap, esmfold2, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
+        ligandmpnn, mber, netsolp, opendde, orca, pdbbind, placer, proteinmpnn, proteinmpnn_ddg,
+        protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn, tlimmuno,
     },
 };
-use crate::tool_definitions::{antibody_annotator, antifold, bindcraft, biophi, boltz2, boltz_adme, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat, enzymemap, esmfold2, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder, ligandmpnn, mber, netsolp, opendde, orca, pdbbind, placer, proteinmpnn, proteinmpnn_ddg, protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn, tlimmuno};
 
 /// How a catalog entry's slug and name relate to an install recipe in [`Tool`].
 ///

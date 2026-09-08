@@ -151,42 +151,90 @@ pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
         ("ligandmpnn", "inputs/1BC8.pdb") => Some(include_str!("ligandmpnn/inputs/1BC8.pdb")),
         ("ligandmpnn", "inputs/2GFB.pdb") => Some(include_str!("ligandmpnn/inputs/2GFB.pdb")),
         ("ligandmpnn", "inputs/4GYT.pdb") => Some(include_str!("ligandmpnn/inputs/4GYT.pdb")),
-        ("ligandmpnn", "inputs/bias_AA_per_residue.json") => Some(include_str!("ligandmpnn/inputs/bias_AA_per_residue.json")),
-        ("ligandmpnn", "inputs/bias_AA_per_residue_multi.json") => Some(include_str!("ligandmpnn/inputs/bias_AA_per_residue_multi.json")),
-        ("ligandmpnn", "inputs/fix_residues_multi.json") => Some(include_str!("ligandmpnn/inputs/fix_residues_multi.json")),
-        ("ligandmpnn", "inputs/omit_AA_per_residue.json") => Some(include_str!("ligandmpnn/inputs/omit_AA_per_residue.json")),
-        ("ligandmpnn", "inputs/omit_AA_per_residue_multi.json") => Some(include_str!("ligandmpnn/inputs/omit_AA_per_residue_multi.json")),
-        ("ligandmpnn", "inputs/pdb_ids.json") => Some(include_str!("ligandmpnn/inputs/pdb_ids.json")),
-        ("ligandmpnn", "inputs/redesigned_residues_multi.json") => Some(include_str!("ligandmpnn/inputs/redesigned_residues_multi.json")),
+        ("ligandmpnn", "inputs/bias_AA_per_residue.json") => {
+            Some(include_str!("ligandmpnn/inputs/bias_AA_per_residue.json"))
+        }
+        ("ligandmpnn", "inputs/bias_AA_per_residue_multi.json") => Some(include_str!(
+            "ligandmpnn/inputs/bias_AA_per_residue_multi.json"
+        )),
+        ("ligandmpnn", "inputs/fix_residues_multi.json") => {
+            Some(include_str!("ligandmpnn/inputs/fix_residues_multi.json"))
+        }
+        ("ligandmpnn", "inputs/omit_AA_per_residue.json") => {
+            Some(include_str!("ligandmpnn/inputs/omit_AA_per_residue.json"))
+        }
+        ("ligandmpnn", "inputs/omit_AA_per_residue_multi.json") => Some(include_str!(
+            "ligandmpnn/inputs/omit_AA_per_residue_multi.json"
+        )),
+        ("ligandmpnn", "inputs/pdb_ids.json") => {
+            Some(include_str!("ligandmpnn/inputs/pdb_ids.json"))
+        }
+        ("ligandmpnn", "inputs/redesigned_residues_multi.json") => Some(include_str!(
+            "ligandmpnn/inputs/redesigned_residues_multi.json"
+        )),
         ("ligandmpnn", "LICENSE") => Some(include_str!("ligandmpnn/LICENSE")),
-        ("ligandmpnn", "outputs/ligandmpnn_default/backbones/1BC8_1.pdb") => Some(include_str!("ligandmpnn/outputs/ligandmpnn_default/backbones/1BC8_1.pdb")),
+        ("ligandmpnn", "outputs/ligandmpnn_default/backbones/1BC8_1.pdb") => Some(include_str!(
+            "ligandmpnn/outputs/ligandmpnn_default/backbones/1BC8_1.pdb"
+        )),
         ("ligandmpnn", "provenance.json") => Some(include_str!("ligandmpnn/provenance.json")),
 
-        ("proteinmpnn", "inputs/PDB_complexes/pdbs/3HTN.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_complexes/pdbs/3HTN.pdb")),
-        ("proteinmpnn", "inputs/PDB_complexes/pdbs/4YOW.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_complexes/pdbs/4YOW.pdb")),
-        ("proteinmpnn", "inputs/PDB_homooligomers/pdbs/4GYT.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_homooligomers/pdbs/4GYT.pdb")),
-        ("proteinmpnn", "inputs/PDB_homooligomers/pdbs/6EHB.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_homooligomers/pdbs/6EHB.pdb")),
-        ("proteinmpnn", "inputs/PDB_monomers/pdbs/5L33.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_monomers/pdbs/5L33.pdb")),
-        ("proteinmpnn", "inputs/PDB_monomers/pdbs/6MRR.pdb") => Some(include_str!("proteinmpnn/inputs/PDB_monomers/pdbs/6MRR.pdb")),
+        ("proteinmpnn", "inputs/PDB_complexes/pdbs/3HTN.pdb") => Some(include_str!(
+            "proteinmpnn/inputs/PDB_complexes/pdbs/3HTN.pdb"
+        )),
+        ("proteinmpnn", "inputs/PDB_complexes/pdbs/4YOW.pdb") => Some(include_str!(
+            "proteinmpnn/inputs/PDB_complexes/pdbs/4YOW.pdb"
+        )),
+        ("proteinmpnn", "inputs/PDB_homooligomers/pdbs/4GYT.pdb") => Some(include_str!(
+            "proteinmpnn/inputs/PDB_homooligomers/pdbs/4GYT.pdb"
+        )),
+        ("proteinmpnn", "inputs/PDB_homooligomers/pdbs/6EHB.pdb") => Some(include_str!(
+            "proteinmpnn/inputs/PDB_homooligomers/pdbs/6EHB.pdb"
+        )),
+        ("proteinmpnn", "inputs/PDB_monomers/pdbs/5L33.pdb") => Some(include_str!(
+            "proteinmpnn/inputs/PDB_monomers/pdbs/5L33.pdb"
+        )),
+        ("proteinmpnn", "inputs/PDB_monomers/pdbs/6MRR.pdb") => Some(include_str!(
+            "proteinmpnn/inputs/PDB_monomers/pdbs/6MRR.pdb"
+        )),
         ("proteinmpnn", "LICENSE") => Some(include_str!("proteinmpnn/LICENSE")),
-        ("proteinmpnn", "outputs/example_3_outputs/seqs/3HTN.fa") => Some(include_str!("proteinmpnn/outputs/example_3_outputs/seqs/3HTN.fa")),
-        ("proteinmpnn", "inputs/PSSM_inputs/3HTN.json") => Some(include_str!("proteinmpnn/inputs/PSSM_inputs/3HTN.json")),
-        ("proteinmpnn", "inputs/PSSM_inputs/4YOW.json") => Some(include_str!("proteinmpnn/inputs/PSSM_inputs/4YOW.json")),
+        ("proteinmpnn", "outputs/example_3_outputs/seqs/3HTN.fa") => Some(include_str!(
+            "proteinmpnn/outputs/example_3_outputs/seqs/3HTN.fa"
+        )),
+        ("proteinmpnn", "inputs/PSSM_inputs/3HTN.json") => {
+            Some(include_str!("proteinmpnn/inputs/PSSM_inputs/3HTN.json"))
+        }
+        ("proteinmpnn", "inputs/PSSM_inputs/4YOW.json") => {
+            Some(include_str!("proteinmpnn/inputs/PSSM_inputs/4YOW.json"))
+        }
         ("proteinmpnn", "provenance.json") => Some(include_str!("proteinmpnn/provenance.json")),
         ("rfd3", "LICENSE.md") => Some(include_str!("rfd3/LICENSE.md")),
         ("rfd3", "input_pdbs/1bna.pdb") => Some(include_str!("rfd3/input_pdbs/1bna.pdb")),
         ("rfd3", "input_pdbs/1q75.pdb") => Some(include_str!("rfd3/input_pdbs/1q75.pdb")),
         ("rfd3", "input_pdbs/2r5z.pdb") => Some(include_str!("rfd3/input_pdbs/2r5z.pdb")),
-        ("rfd3", "input_pdbs/4zxb_cropped.pdb") => Some(include_str!("rfd3/input_pdbs/4zxb_cropped.pdb")),
-        ("rfd3", "input_pdbs/5o45_cropped.pdb") => Some(include_str!("rfd3/input_pdbs/5o45_cropped.pdb")),
+        ("rfd3", "input_pdbs/4zxb_cropped.pdb") => {
+            Some(include_str!("rfd3/input_pdbs/4zxb_cropped.pdb"))
+        }
+        ("rfd3", "input_pdbs/5o45_cropped.pdb") => {
+            Some(include_str!("rfd3/input_pdbs/5o45_cropped.pdb"))
+        }
         ("rfd3", "input_pdbs/5o4d.pdb") => Some(include_str!("rfd3/input_pdbs/5o4d.pdb")),
         ("rfd3", "input_pdbs/7v11.pdb") => Some(include_str!("rfd3/input_pdbs/7v11.pdb")),
         ("rfd3", "input_pdbs/IAI.pdb") => Some(include_str!("rfd3/input_pdbs/IAI.pdb")),
-        ("rfd3", "input_pdbs/M0255_1mg5.pdb") => Some(include_str!("rfd3/input_pdbs/M0255_1mg5.pdb")),
-        ("rfd3", "input_pdbs/symmetry_examples/1bfr_C2.pdb") => Some(include_str!("rfd3/input_pdbs/symmetry_examples/1bfr_C2.pdb")),
-        ("rfd3", "input_pdbs/symmetry_examples/1e3v_C2.pdb") => Some(include_str!("rfd3/input_pdbs/symmetry_examples/1e3v_C2.pdb")),
-        ("rfd3", "input_pdbs/symmetry_examples/1j79_C2.pdb") => Some(include_str!("rfd3/input_pdbs/symmetry_examples/1j79_C2.pdb")),
-        ("rfd3", "input_pdbs/symmetry_examples/6t8h_C3.pdb") => Some(include_str!("rfd3/input_pdbs/symmetry_examples/6t8h_C3.pdb")),
+        ("rfd3", "input_pdbs/M0255_1mg5.pdb") => {
+            Some(include_str!("rfd3/input_pdbs/M0255_1mg5.pdb"))
+        }
+        ("rfd3", "input_pdbs/symmetry_examples/1bfr_C2.pdb") => Some(include_str!(
+            "rfd3/input_pdbs/symmetry_examples/1bfr_C2.pdb"
+        )),
+        ("rfd3", "input_pdbs/symmetry_examples/1e3v_C2.pdb") => Some(include_str!(
+            "rfd3/input_pdbs/symmetry_examples/1e3v_C2.pdb"
+        )),
+        ("rfd3", "input_pdbs/symmetry_examples/1j79_C2.pdb") => Some(include_str!(
+            "rfd3/input_pdbs/symmetry_examples/1j79_C2.pdb"
+        )),
+        ("rfd3", "input_pdbs/symmetry_examples/6t8h_C3.pdb") => Some(include_str!(
+            "rfd3/input_pdbs/symmetry_examples/6t8h_C3.pdb"
+        )),
         ("rfd3", "provenance.json") => Some(include_str!("rfd3/provenance.json")),
         _ => None,
     }

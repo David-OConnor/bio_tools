@@ -1,7 +1,9 @@
-use crate::tool_definitions::catalog::{CatalogEntry, Identity};
 use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
-    tool_definitions::Tool,
+    tool_definitions::{
+        Tool,
+        catalog::{CatalogEntry, Identity},
+    },
 };
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
@@ -24,10 +26,16 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         availability: "Installed by setup_system.sh, which fetches the public model checkpoint; an NVIDIA GPU is required",
         license_details: "BSD 3-Clause from the Institute for Protein Design, University of Washington, covering the inference code, the training code, and the public checkpoint alike: unrestricted academic and commercial use.",
         repo_url: Some("https://github.com/RosettaCommons/foundry"),
-        home_url: Some("https://github.com/RosettaCommons/foundry/blob/production/models/rfd3/README.md"),
+        home_url: Some(
+            "https://github.com/RosettaCommons/foundry/blob/production/models/rfd3/README.md",
+        ),
         docs_url: Some("https://rosettacommons.github.io/foundry/models/rfd3/index.html"),
-        input_params_url: Some("https://rosettacommons.github.io/foundry/models/rfd3/input.html#inputspecification-fields"),
-        examples_url: Some("https://github.com/RosettaCommons/foundry/tree/production/models/rfd3/docs/examples"),
+        input_params_url: Some(
+            "https://rosettacommons.github.io/foundry/models/rfd3/input.html#inputspecification-fields",
+        ),
+        examples_url: Some(
+            "https://github.com/RosettaCommons/foundry/tree/production/models/rfd3/docs/examples",
+        ),
         paper_url: Some("https://doi.org/10.1101/2025.09.18.676967"),
         license: License::Bsd3Clause,
         license_url: None,

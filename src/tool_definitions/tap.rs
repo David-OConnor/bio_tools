@@ -1,5 +1,7 @@
-use crate::tool_definitions::catalog::{CatalogEntry, Identity};
-use crate::{LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory};
+use crate::{
+    LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
+    tool_definitions::catalog::{CatalogEntry, Identity},
+};
 
 /// A structural model is built before the five metrics are measured on
 /// it, so this is not the sequence-only calculation it looks like.

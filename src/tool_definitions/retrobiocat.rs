@@ -1,5 +1,7 @@
-use crate::tool_definitions::catalog::{CatalogEntry, Identity};
-use crate::{LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory};
+use crate::{
+    LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
+    tool_definitions::catalog::{CatalogEntry, Identity},
+};
 
 /// RetroBioCat 2 is the maintained downloadable Python synthesis-planning package. The separate
 /// RetroBioCat website exposes the curated database interactively but does not publish a stable
