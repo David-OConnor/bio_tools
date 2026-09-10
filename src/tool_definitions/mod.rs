@@ -241,6 +241,7 @@ impl Tool {
             Self::BindCraft => &["BindCraft"],
             Self::IgBlast => &["igblast"],
             Self::AntiFold => &["AntiFold"],
+            Self::EsmFold2 => &["esmfold2-esm"],
             Self::ProteinMpnn => &["ProteinMPNN"],
             Self::LigandMpnn => &["LigandMPNN"],
             Self::RfDiffusion3 => &["rfd3"],

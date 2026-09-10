@@ -6,6 +6,11 @@ use super::{
 };
 use crate::tool_definitions::Tool;
 
+const ESMFOLD2_ESM_REVISION: &str = "bf343ba264b650dff7a073643725f9aaa1fdbe8d";
+const ESMFOLD2_ESM_URL: &str = "https://github.com/Biohub/esm.git";
+const ESMFOLD2_STREAMING_LOADER_PATCH: &str =
+    include_str!("patches/esmfold2_streaming_loader.patch");
+
 struct FetchedScript {
     name: &'static str,
     url: &'static str,
@@ -333,27 +338,61 @@ fn install_thermompnn(installer: &mut Installer) -> Result<(), InstallError> {
 
 fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
     // The audited all-atom API is version 3.4.1 in the Biohub repository, while PyPI currently
-    // stops at 3.4.0. Pin the immutable source revision that supplies that API and version.
-    install_recipe(
-        installer,
-        UvRecipe {
-            verify: Some((
-                "python",
-                &[
-                    "-c",
-                    "from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model",
-                ],
-            )),
-            ..UvRecipe::simple(
-                Tool::EsmFold2.slug(),
-                "3.12",
-                &[
-                    "esm @ git+https://github.com/Biohub/esm.git@bf343ba264b650dff7a073643725f9aaa1fdbe8d",
-                ],
-                &[],
-            )
-        },
-    )
+    // stops at 3.4.0. Keep a patched checkout of the immutable source revision so ESMC-6B's fp32
+    // checkpoint tensors are moved and narrowed one at a time instead of filling host RAM before
+    // the model is converted to bf16 and transferred to CUDA.
+    let source = installer.tools_root().join("esmfold2-esm");
+    installer.clone_or_update(ESMFOLD2_ESM_URL, &source)?;
+
+    let mut fetch = Command::new("git");
+    fetch.args(["-C"]).arg(&source).args([
+        "fetch",
+        "--depth",
+        "1",
+        "origin",
+        ESMFOLD2_ESM_REVISION,
+    ]);
+    installer.checked(&mut fetch)?;
+
+    let mut checkout = Command::new("git");
+    checkout
+        .args(["-C"])
+        .arg(&source)
+        .args(["checkout", "--detach", "FETCH_HEAD"]);
+    installer.checked(&mut checkout)?;
+
+    let scratch = ScratchDir::new_in(installer.tools_root(), "esmfold2-patch")?;
+    let patch = scratch.path().join("streaming-loader.patch");
+    fs::write(&patch, ESMFOLD2_STREAMING_LOADER_PATCH)
+        .map_err(|error| InstallError::io(format!("unable to write {}", patch.display()), error))?;
+    let mut check_patch = Command::new("git");
+    check_patch
+        .args(["-C"])
+        .arg(&source)
+        .args(["apply", "--check"])
+        .arg(&patch);
+    installer.checked(&mut check_patch)?;
+    let mut apply_patch = Command::new("git");
+    apply_patch
+        .args(["-C"])
+        .arg(&source)
+        .arg("apply")
+        .arg(&patch);
+    installer.checked(&mut apply_patch)?;
+
+    let requirement = source.to_string_lossy().into_owned();
+    installer.create_venv(Tool::EsmFold2.slug(), "3.12")?;
+    installer.pip_install(
+        Tool::EsmFold2.slug(),
+        &[&requirement],
+        PipOptions::default(),
+    )?;
+    let mut verify = Command::new(installer.venv_python(Tool::EsmFold2.slug()));
+    verify.args([
+        "-c",
+        "from inspect import signature; from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model; from esm.models.hub import read_safetensors_dir; assert 'dtype' in signature(read_safetensors_dir).parameters",
+    ]);
+    installer.checked(&mut verify)
 }
 
 fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {

@@ -305,7 +305,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     if tool == Tool::EsmFold2 {
         return Some(installer.tool_python_command(tool).args([
             "-c",
-            "from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model",
+            "from inspect import signature; from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model; from esm.models.hub import read_safetensors_dir; assert 'dtype' in signature(read_safetensors_dir).parameters, 'ESMFold2 needs reinstalling to enable its low-memory checkpoint loader'",
         ]));
     }
     let arguments: &[&str] = match tool {
