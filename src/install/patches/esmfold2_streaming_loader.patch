@@ -1,0 +1,92 @@
+diff --git a/esm/models/hub.py b/esm/models/hub.py
+index 7452ac0..ae2ea9a 100644
+--- a/esm/models/hub.py
++++ b/esm/models/hub.py
+@@ -16,7 +16,7 @@ from typing import ClassVar, Self
+ import torch
+ import torch.nn as nn
+ from accelerate import init_empty_weights
+-from safetensors.torch import load_file
++from safetensors import safe_open
+ 
+ CONFIG_NAME = "config.json"
+ _SAFETENSORS_INDEX = "model.safetensors.index.json"
+@@ -33,24 +33,45 @@ def drop_te_extra_state(
+             del state_dict[key]
+ 
+ 
+-def read_safetensors_dir(directory: str | os.PathLike) -> dict[str, torch.Tensor]:
+-    """Read a (possibly sharded) safetensors checkpoint into a single dict."""
++def read_safetensors_dir(
++    directory: str | os.PathLike,
++    *,
++    device: torch.device | str = "cpu",
++    dtype: torch.dtype | None = None,
++) -> dict[str, torch.Tensor]:
++    """Read a checkpoint directly into its requested placement and precision.
++
++    ``safe_open`` materializes one tensor at a time. Moving and narrowing that
++    tensor before opening the next one avoids retaining an entire fp32 shard in
++    host memory while a large model is destined for bf16 CUDA inference.
++    """
+     directory = Path(directory)
+     index = directory / _SAFETENSORS_INDEX
+     if index.exists():
+         with open(index) as f:
+             weight_map = json.load(f)["weight_map"]
+-        state_dict: dict[str, torch.Tensor] = {}
+-        for shard in sorted(set(weight_map.values())):
+-            state_dict.update(load_file(str(directory / shard)))
+-        return state_dict
+-    single = directory / _SAFETENSORS_SINGLE
+-    if single.exists():
+-        return load_file(str(single))
+-    raise FileNotFoundError(
+-        f"No safetensors checkpoint found in {directory} "
+-        f"(looked for {_SAFETENSORS_INDEX} and {_SAFETENSORS_SINGLE})."
+-    )
++        files = [directory / shard for shard in sorted(set(weight_map.values()))]
++    else:
++        single = directory / _SAFETENSORS_SINGLE
++        if not single.exists():
++            raise FileNotFoundError(
++                f"No safetensors checkpoint found in {directory} "
++                f"(looked for {_SAFETENSORS_INDEX} and {_SAFETENSORS_SINGLE})."
++            )
++        files = [single]
++
++    target = torch.device(device)
++    state_dict: dict[str, torch.Tensor] = {}
++    for checkpoint in files:
++        with safe_open(str(checkpoint), framework="pt", device=str(target)) as tensors:
++            for key in tensors.keys():
++                tensor = tensors.get_tensor(key)
++                if dtype is not None and (
++                    tensor.is_floating_point() or tensor.is_complex()
++                ):
++                    tensor = tensor.to(dtype=dtype)
++                state_dict[key] = tensor
++    return state_dict
+ 
+ 
+ def resolve_model_dir(
+@@ -165,7 +186,9 @@ class HubPreTrainedModel(nn.Module):
+         with init_empty_weights():
+             model = cls(config)
+ 
+-        raw = cls._normalize_checkpoint_layout(read_safetensors_dir(local_dir))
++        raw = cls._normalize_checkpoint_layout(
++            read_safetensors_dir(local_dir, device=device, dtype=dtype)
++        )
+         adapted = cls._adapt_checkpoint_keys(raw, set(model.state_dict().keys()))
+         incompatible = model.load_state_dict(adapted, strict=False, assign=True)
+ 
+@@ -199,7 +222,7 @@ class HubPreTrainedModel(nn.Module):
+                 f"  checkpoint entries that reached nothing: {dropped}"
+             )
+ 
+-        model._materialize_uninitialized(device="cpu")
++        model._materialize_uninitialized(device=device)
+         del raw, adapted
+         if dtype is not None:
+             model.to(dtype)

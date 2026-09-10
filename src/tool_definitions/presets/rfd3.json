@@ -416,6 +416,7 @@
       "job_name": "uncond_C5",
       "diffusion_batch_size": 1,
       "n_batches": 1,
+      "low_memory_mode": true,
       "length": 100,
       "is_non_loopy": true,
       "symmetry": {
