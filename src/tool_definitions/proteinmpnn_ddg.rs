@@ -23,16 +23,18 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         summary: "Estimate changes in protein stability upon point mutation",
         description: "A modification of ProteinMPNN to use full sequence context. It introduces a decoding scheme \
         to improve computational efficiency and enable saturation mutagenesis studies at scale.",
-        availability: "Installed by setup_system.sh with JAX CUDA 12 for Linux/WSL and an NVIDIA GPU",
+        availability: "Installed by setup_system.sh with JAX for CPU or CUDA 12 on Linux/WSL",
         license_details: "MIT (Peptone), over MIT-licensed ProteinMPNN weights. Commercial use is unrestricted.",
         repo_url: Some("https://github.com/PeptoneLtd/proteinmpnn_ddg"),
         home_url: Some("https://peptone.io/"),
-        docs_url: None,
-        input_params_url: None,
-        examples_url: None,
+        docs_url: Some("https://github.com/PeptoneLtd/proteinmpnn_ddg#readme"),
+        input_params_url: Some(
+            "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/main/predict.py",
+        ),
+        examples_url: Some("https://github.com/PeptoneLtd/proteinmpnn_ddg/tree/main/example"),
         paper_url: Some("https://www.biorxiv.org/content/10.1101/2024.06.15.599145"),
         license: License::Mit,
         license_url: None,
-        tested: false,
+        tested: true,
     },
 };

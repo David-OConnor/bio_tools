@@ -1,0 +1,42 @@
+[
+  {
+    "id": "minimal_protein",
+    "label": "Minimal protein",
+    "description": "Official minimal input shape: one 20-residue protein, one seed, and no external MSA or template search.",
+    "source_url": "https://github.com/aurekaresearch/OpenDDE/blob/ddfa1df8aff1babf1fddac4247b7d2351bd0ce9f/docs/infer_json_format.md",
+    "values": {
+      "input_json": "[\n  {\n    \"name\": \"example_job\",\n    \"modelSeeds\": [101],\n    \"sequences\": [\n      {\n        \"proteinChain\": {\n          \"sequence\": \"ACDEFGHIKLMNPQRSTVWY\",\n          \"count\": 1\n        }\n      }\n    ]\n  }\n]",
+      "samples": 1,
+      "use_msa": false,
+      "use_template": false,
+      "use_rna_msa": false
+    }
+  },
+  {
+    "id": "synthetic_protein_200",
+    "label": "Synthetic protein · 200 aa",
+    "description": "Official 200-residue single-chain example, reduced to one sample for an economical ready-to-run preset.",
+    "source_url": "https://github.com/aurekaresearch/OpenDDE/blob/ddfa1df8aff1babf1fddac4247b7d2351bd0ce9f/examples/protein_200.json",
+    "values": {
+      "input_json": "[\n  {\n    \"name\": \"synthetic_protein_200\",\n    \"modelSeeds\": [101],\n    \"sequences\": [\n      {\n        \"proteinChain\": {\n          \"sequence\": \"ACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWY\",\n          \"count\": 1\n        }\n      }\n    ]\n  }\n]",
+      "samples": 1,
+      "use_msa": false,
+      "use_template": false,
+      "use_rna_msa": false
+    }
+  },
+  {
+    "id": "protein_dna_ligand_7pzb",
+    "label": "Protein–DNA–ligand · 7PZB",
+    "description": "Official no-MSA co-folding example with a protein dimer, two DNA duplex components, and CCD ligand PCG.",
+    "source_url": "https://github.com/aurekaresearch/OpenDDE/blob/ddfa1df8aff1babf1fddac4247b7d2351bd0ce9f/examples/example_without_msa.json",
+    "values": {
+      "input_json": "[\n  {\n    \"name\": \"7pzb_need_search_msa\",\n    \"sequences\": [\n      {\n        \"proteinChain\": {\n          \"sequence\": \"MAEVIRSSAFWRSFPIFEEFDSETLCELSGIASYRKWSAGTVIFQRGDQGDYMIVVVSGRIKLSLFTPQGRELMLRQHEAGALFGEMALLDGQPRSADATAVTAAEGYVIGKKDFLALITQRPKTAEAVIRFLCAQLRDTTDRLETIALYDLNARVARFFLATLRQIHGSEMPQSANLRLTLSQTDIASILGASRPKVNRAILSLEESGAIKRADGIICCNVGRLLSIADPEEDLEHHHHHHHH\",\n          \"count\": 2\n        }\n      },\n      {\n        \"dnaSequence\": {\n          \"sequence\": \"CTAGGTAACATTACTCGCG\",\n          \"count\": 2\n        }\n      },\n      {\n        \"dnaSequence\": {\n          \"sequence\": \"GCGAGTAATGTTAC\",\n          \"count\": 2\n        }\n      },\n      {\n        \"ligand\": {\n          \"ligand\": \"CCD_PCG\",\n          \"count\": 2\n        }\n      }\n    ]\n  }\n]",
+      "seeds": "101",
+      "samples": 1,
+      "use_msa": false,
+      "use_template": false,
+      "use_rna_msa": false
+    }
+  }
+]

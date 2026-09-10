@@ -1,12 +1,8 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    process::Command,
-};
+use std::{fs, path::Path, process::Command};
 
 use super::{
     InstallError, Installer,
-    common::{PipOptions, ScratchDir},
+    common::{PipOptions, ScratchDir, TorchBackend},
 };
 use crate::tool_definitions::Tool;
 
@@ -126,27 +122,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::RfDiffusion3 => install_rfd3(installer),
         Tool::RfAntibody => install_rfantibody(installer),
         Tool::IgDesign => install_igdesign(installer),
-        Tool::ThermoMpnn => install_checkout_recipe(
-            installer,
-            UvRecipe {
-                torch: &["torch==2.7.1"],
-                ..UvRecipe::simple(
-                    Tool::ThermoMpnn.slug(),
-                    "3.12",
-                    &[
-                        "numpy<2",
-                        "pandas",
-                        "biopython",
-                        "tqdm",
-                        "omegaconf",
-                        "pytorch-lightning",
-                    ],
-                    &[],
-                )
-            },
-            "https://github.com/Kuhlman-Lab/ThermoMPNN",
-            "ThermoMPNN",
-        ),
+        Tool::ThermoMpnn => install_thermompnn(installer),
         Tool::DeepSp => install_deepsp(installer),
         Tool::DeepImmuno => install_checkout_recipe(
             installer,
@@ -286,155 +262,98 @@ fn install_checkout_recipe(
     installer.clone_or_update(url, &target)
 }
 
-fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
-    // openfold's setup.py compiles a CUDA extension and torch refuses to load it unless the
-    // `nvcc` used to build it is the same *major* CUDA version as the `torch==2.7.1` wheel above
-    // (cu126). The system's own `nvcc` is whatever the machine image ships and can be a newer
-    // major version, so build against a scoped toolchain that is guaranteed to match instead.
-    // nvcc additionally rejects host compilers newer than itself, and torch's own CUDA headers
-    // pull in cusparse.h/cublas_v2.h/etc, so the toolchain also needs a pinned gcc 13 and the
-    // library dev headers, matching the combination Genie 3's bundled ESMFold build already
-    // proves works (see `install_genie3`'s `install_esmfold` step in its upstream setup.sh).
-    let prefix = installer.ensure_cuda_toolchain(
-        Tool::EsmFold2.slug(),
-        "12.6",
-        &[
-            // Unpinned: conda-forge versions these by the library's own release, not the CUDA
-            // toolkit release (e.g. libcusparse-dev's "12.x" isn't the same axis as cuda-version
-            // 12.6), so pinning them to "=12.6" here used to fight the `cuda-version=12.6`
-            // constraint above instead of complementing it, and broke as conda-forge's indexed
-            // builds for that literal version drifted. Letting the solver pick each library's
-            // build for the pinned `cuda-version` is what `ensure_cuda_toolchain` already expects
-            // callers to do (see its own doc comment).
-            "libcusparse-dev",
-            "libcublas-dev",
-            "libcusolver-dev",
-            "libcurand-dev",
-            "libcufft-dev",
-            "gcc_linux-64=13",
-            "gxx_linux-64=13",
-        ],
-    )?;
-    let cuda_home = prefix.to_string_lossy().into_owned();
-    let cc = prefix
-        .join("bin")
-        .join("x86_64-conda-linux-gnu-gcc")
-        .to_string_lossy()
-        .into_owned();
-    let cxx = prefix
-        .join("bin")
-        .join("x86_64-conda-linux-gnu-g++")
-        .to_string_lossy()
-        .into_owned();
-    // openfold's setup.py picks its -gencode flags from the compute capability of the GPU it can
-    // see, and falls back to a hardcoded set that still contains sm_37 when it sees none -- an
-    // architecture CUDA 12 dropped, so that fallback ends the build at "Unsupported gpu
-    // architecture 'compute_37'". It looks for the driver with ctypes.CDLL("libcuda.so"), the
-    // development symlink rather than the versioned soname, and only the soname is in the loader
-    // cache; on WSL the file does not sit in a default search directory either. So the directory
-    // holding it goes on LD_LIBRARY_PATH, ahead of anything the caller already had there, which
-    // is kept rather than replaced for the same reason.
-    let library_path = prefix.join("lib").to_string_lossy().into_owned();
-    let mut search_path = vec![library_path.clone()];
-    if let Some(driver) = cuda_driver_library_dir() {
-        search_path.push(driver.to_string_lossy().into_owned());
-    }
-    if let Ok(inherited) = std::env::var("LD_LIBRARY_PATH") {
-        if !inherited.is_empty() {
-            search_path.push(inherited);
-        }
-    }
-    let ld_library_path = search_path.join(":");
-    install_recipe(
+fn install_thermompnn(installer: &mut Installer) -> Result<(), InstallError> {
+    install_checkout_recipe(
         installer,
         UvRecipe {
             torch: &["torch==2.7.1"],
-            // Without this, `--upgrade` reads pytorch-lightning's `torch>=1.10` floor as licence
-            // to replace the torch pinned above with the newest release on PyPI -- while
-            // openfold's extension is compiling against the headers of the one being replaced,
-            // since uv installs ready wheels and builds source distributions at the same time.
-            // That surfaced as `fatal error: ATen/NamedTensorUtils.h: No such file or directory`
-            // mid-build, and when the build happened to win the race instead, as an environment
-            // whose compiled kernel and installed torch were different versions.
-            upgrade: false,
-            no_build_isolation: true,
-            // Held below 81, which dropped `pkg_resources`: lightning_fabric (a
-            // pytorch-lightning dependency) still imports it, and uv's minimal venvs carry no
-            // setuptools of their own for it to find.
-            build_requirements: &["setuptools<81"],
-            extra_env: &[
-                ("NVCC_APPEND_FLAGS", "-std=c++17"),
-                ("CUDA_HOME", &cuda_home),
-                ("CC", &cc),
-                ("CXX", &cxx),
-                ("LIBRARY_PATH", &library_path),
-                ("LD_LIBRARY_PATH", &ld_library_path),
-            ],
-            fetched_scripts: &[FetchedScript {
-                name: "esm-fold",
-                url: "https://raw.githubusercontent.com/facebookresearch/esm/v2.0.0/scripts/esmfold_inference.py",
-            }],
+            ..UvRecipe::simple(
+                Tool::ThermoMpnn.slug(),
+                "3.12",
+                &[
+                    "numpy<2",
+                    "pandas",
+                    "biopython",
+                    "tqdm",
+                    "omegaconf",
+                    "pytorch-lightning",
+                    // Imported unconditionally by train_thermompnn.py, including inference.
+                    "wandb",
+                ],
+                &[],
+            )
+        },
+        "https://github.com/Kuhlman-Lab/ThermoMPNN",
+        "ThermoMPNN",
+    )?;
+
+    // Upstream ships local.yaml with the authors' private /proj/kuhl_lab checkout path. The
+    // inference loader uses this setting to find the bundled ProteinMPNN weights, despite the
+    // README saying no local.yaml edits are needed for custom inference.
+    let checkout = installer.tools_root().join("ThermoMPNN");
+    let config_path = checkout.join("local.yaml");
+    let source = fs::read_to_string(&config_path).map_err(|error| {
+        InstallError::io(format!("unable to read {}", config_path.display()), error)
+    })?;
+    let escaped_checkout = checkout
+        .to_string_lossy()
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"");
+    let mut found = false;
+    let mut configured = source
+        .lines()
+        .map(|line| {
+            if line.trim_start().starts_with("thermompnn_dir:") {
+                found = true;
+                let indentation = &line[..line.len() - line.trim_start().len()];
+                format!("{indentation}thermompnn_dir: \"{escaped_checkout}\"")
+            } else {
+                line.to_owned()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    if !found {
+        return Err(InstallError::InvalidConfiguration(format!(
+            "{} no longer defines platform.thermompnn_dir",
+            config_path.display()
+        )));
+    }
+    if source.ends_with('\n') {
+        configured.push('\n');
+    }
+    fs::write(&config_path, configured).map_err(|error| {
+        InstallError::io(
+            format!("unable to configure {}", config_path.display()),
+            error,
+        )
+    })?;
+    Ok(())
+}
+
+fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
+    // The audited all-atom API is version 3.4.1 in the Biohub repository, while PyPI currently
+    // stops at 3.4.0. Pin the immutable source revision that supplies that API and version.
+    install_recipe(
+        installer,
+        UvRecipe {
+            verify: Some((
+                "python",
+                &[
+                    "-c",
+                    "from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model",
+                ],
+            )),
             ..UvRecipe::simple(
                 Tool::EsmFold2.slug(),
-                // 3.10, not 3.11: esm/esmfold/v1/trunk.py gives its `structure_module` field a
-                // `StructureModuleConfig()` default, and 3.11 rejects any dataclass default whose
-                // class is unhashable rather than only list/dict/set as 3.10 did. On 3.11 that is
-                // a ValueError raised while importing the module, so ESMFold cannot load at all.
-                "3.10",
+                "3.12",
                 &[
-                    // fair-esm's `esmfold` extra, expanded here so that one member of it --
-                    // `deepspeed==0.5.9` -- can be left out. That release imports `torch._six`,
-                    // which torch 2.0 deleted, so it cannot be imported alongside any torch this
-                    // environment can install; openfold imports deepspeed unconditionally once it
-                    // is present on the path, and the failure lands on the first fold. Nothing
-                    // here needs it: openfold looks it up with importlib.util.find_spec and uses
-                    // it only when it is also initialized, which inference never does.
-                    "fair-esm~=2.0.0",
-                    "biopython",
-                    "dm-tree",
-                    "einops",
-                    "ml-collections",
-                    "omegaconf",
-                    "scipy",
-                    // Held below 2, which moved `seed_everything` out of
-                    // pytorch_lightning.utilities.seed -- where openfold/utils/seed.py imports it
-                    // from. openfold/utils/__init__.py imports every module beside it eagerly, so
-                    // that one import decides whether `import openfold` works at all.
-                    "pytorch-lightning<2",
-                    // openfold/utils/logger.py imports dllogger, which openfold's setup.py never
-                    // declares (upstream installs it from git in environment.yml instead). It is
-                    // on the same eager-import path, so it is as required as the rest.
-                    "dllogger @ git+https://github.com/NVIDIA/dllogger.git@0540a43971f4a8a16693a9de9de73c1072020769",
-                    "openfold @ git+https://github.com/aqlaboratory/openfold.git@4b41059694619831a7db195b7e0988fc4ff3a307",
+                    "esm @ git+https://github.com/Biohub/esm.git@bf343ba264b650dff7a073643725f9aaa1fdbe8d",
                 ],
-                &["esm-fold"],
+                &[],
             )
         },
     )
-}
-
-/// The directory holding the NVIDIA driver's `libcuda.so`, when one can be found.
-///
-/// `ldconfig` indexes the library under its soname (`libcuda.so.1`), so it locates the driver
-/// itself; the plain `.so` beside it is the development symlink a `dlopen("libcuda.so")` needs,
-/// and it is only reported here when it is actually there.
-fn cuda_driver_library_dir() -> Option<PathBuf> {
-    let output = Command::new("ldconfig").arg("-p").output().ok()?;
-    for line in String::from_utf8_lossy(&output.stdout).lines() {
-        let Some((name, path)) = line.split_once("=>") else {
-            continue;
-        };
-        if name.split_whitespace().next() != Some("libcuda.so.1") {
-            continue;
-        }
-        let Some(directory) = Path::new(path.trim()).parent() else {
-            continue;
-        };
-        if directory.join("libcuda.so").is_file() {
-            return Some(directory.to_path_buf());
-        }
-    }
-    None
 }
 
 fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
@@ -453,7 +372,7 @@ fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
     // at install time -- via `torch.utils.cpp_extension.load()`. That build shells out to
     // whatever `nvcc`/`gcc` it finds, and this machine's system compiler is newer than what
     // torch==2.7.1's bundled ATen headers compile under, so every later invocation used to fail.
-    // Building it once here with the same scoped, torch-compatible toolchain ESMFold2 uses seeds
+    // Building it once here with a scoped, torch-compatible toolchain seeds
     // torch's on-disk extension cache (keyed by source hash, outside this venv), so ordinary
     // runtime invocations -- which still use the system compiler -- find a cached build and never
     // need to invoke a compiler at all.
@@ -524,6 +443,27 @@ fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
 }
 
 fn install_proteinmpnn_ddg(installer: &mut Installer) -> Result<(), InstallError> {
+    let backend = installer.select_torch_backend()?;
+    let (requirements, gpu_probe): (&[&str], Option<&str>) = if backend == TorchBackend::Cuda126 {
+        (
+            &[
+                "ProteinMPNN-ddG[cuda12] @ git+https://github.com/PeptoneLtd/proteinmpnn_ddg.git@main",
+                "dm-haiku==0.0.13",
+            ],
+            Some(
+                "import jax; assert any(d.platform == 'gpu' for d in jax.devices()), \
+                 'ProteinMPNN-ddG CUDA installation does not report a JAX GPU'",
+            ),
+        )
+    } else {
+        (
+            &[
+                "ProteinMPNN-ddG @ git+https://github.com/PeptoneLtd/proteinmpnn_ddg.git@main",
+                "dm-haiku==0.0.13",
+            ],
+            None,
+        )
+    };
     install_recipe(
         installer,
         UvRecipe {
@@ -531,17 +471,11 @@ fn install_proteinmpnn_ddg(installer: &mut Installer) -> Result<(), InstallError
                 name: "proteinmpnn-ddg",
                 url: "https://raw.githubusercontent.com/PeptoneLtd/proteinmpnn_ddg/main/predict.py",
             }],
-            gpu_probe: Some(
-                "import jax; assert any(d.platform == 'gpu' for d in jax.devices()), \
-                 'ProteinMPNN-ddG requires a JAX CUDA device'",
-            ),
+            gpu_probe,
             ..UvRecipe::simple(
                 Tool::ProteinMpnnDdg.slug(),
                 "3.10",
-                &[
-                    "ProteinMPNN-ddG[cuda12] @ git+https://github.com/PeptoneLtd/proteinmpnn_ddg.git@main",
-                    "dm-haiku==0.0.13",
-                ],
+                requirements,
                 &["proteinmpnn-ddg"],
             )
         },

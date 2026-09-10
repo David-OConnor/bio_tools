@@ -27,12 +27,14 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         license_details: "MIT (Kuhlman Lab), weights included, over MIT-licensed ProteinMPNN. Commercial use is unrestricted.",
         repo_url: Some("https://github.com/Kuhlman-Lab/ThermoMPNN"),
         home_url: None,
-        docs_url: Some("https://www.pnas.org/doi/10.1073/pnas.2314853121"),
-        input_params_url: None,
-        examples_url: None,
+        docs_url: Some("https://github.com/Kuhlman-Lab/ThermoMPNN#readme"),
+        input_params_url: Some(
+            "https://github.com/Kuhlman-Lab/ThermoMPNN/blob/main/analysis/custom_inference.py",
+        ),
+        examples_url: Some("https://github.com/Kuhlman-Lab/ThermoMPNN/tree/main/examples"),
         paper_url: Some("https://www.pnas.org/doi/10.1073/pnas.2314853121"),
         license: License::Mit,
         license_url: None,
-        tested: false,
+        tested: true,
     },
 };

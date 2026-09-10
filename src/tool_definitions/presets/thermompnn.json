@@ -1,0 +1,13 @@
+[
+  {
+    "id": "custom_inference/2OCJ",
+    "label": "Custom inference · 2OCJ chain A",
+    "description": "Official custom-inference example. The upstream 2OCJ PDB and chain A setting are included for a complete site-saturation scan.",
+    "source_url": "https://github.com/Kuhlman-Lab/ThermoMPNN/blob/370f76ec62bd929f7425e311d8df04a0d094990f/examples/inference.sh",
+    "values": {
+      "job_name": "thermompnn-2ocj",
+      "pdb": "bio-tools://thermompnn/examples/2OCJ.pdb",
+      "chain": "A"
+    }
+  }
+]

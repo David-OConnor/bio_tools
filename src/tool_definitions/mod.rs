@@ -181,7 +181,7 @@ impl Tool {
         match self {
             Self::Boltz2 => "boltz",
             Self::Chai1 => "chai-lab",
-            Self::EsmFold2 => "esm-fold",
+            Self::EsmFold2 => "python",
             Self::ImmuneBuilder => "ABodyBuilder2",
             Self::AggreScan3d => "aggrescan",
             Self::Mber => "mber-vhh",

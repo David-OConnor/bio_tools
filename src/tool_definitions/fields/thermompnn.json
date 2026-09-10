@@ -6,23 +6,24 @@
       "kind": "text",
       "default": "thermompnn-demo",
       "required": false,
-      "help": "",
+      "help": "A label for this run and its results.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 80,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inputs"
     },
     {
       "name": "pdb",
-      "label": "Protein PDB",
+      "label": "Protein structure",
       "kind": "file",
-      "default": "HEADER    PASTE A PROTEIN PDB HERE",
+      "default": "",
       "required": true,
-      "help": "",
+      "help": "PDB structure used for ThermoMPNN site-saturation mutagenesis.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -30,65 +31,34 @@
       "step": null,
       "maxlength": null,
       "accept": ".pdb,.ent",
-      "task": ""
+      "task": "",
+      "group": "Inputs",
+      "help_note": "Upload PDB text or choose a preset with the official 2OCJ example. ThermoMPNN writes one CSV containing every standard amino-acid substitution for the selected chain."
     },
     {
       "name": "chain",
-      "label": "Chain",
+      "label": "Chain to scan",
       "kind": "text",
       "default": "A",
-      "required": true,
-      "help": "The chain the mutations are scored in; the rest of the structure is context.",
-      "options": [],
-      "rows": null,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": 4,
-      "accept": "",
-      "task": ""
-    },
-    {
-      "name": "mutations",
-      "label": "Mutations",
-      "kind": "textarea",
-      "default": "T27A\nH31Q\nY100F",
-      "required": true,
-      "help": "One per line, as wild-type residue, position, and mutant residue, for example T27A. Prefix with a chain and a colon to override the chain above.",
-      "options": [],
-      "rows": 5,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": "mutations"
-    },
-    {
-      "name": "top_k",
-      "label": "Top mutations to highlight",
-      "kind": "number",
-      "default": 20,
       "required": false,
-      "help": "Return the K most stabilising substitutions alongside the full table. 0 returns the full table only.",
+      "help": "Single PDB chain to score. The upstream default is A; leave blank to use the first chain in the structure.",
       "options": [],
       "rows": null,
-      "minimum": 0,
-      "maximum": 1000,
+      "minimum": null,
+      "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 1,
       "accept": "",
-      "task": "scan"
+      "task": "",
+      "group": "Inputs"
     }
   ],
-  "tasks": [
+  "tasks": [],
+  "field_groups": [
     {
-      "value": "scan",
-      "label": "Saturation scan"
-    },
-    {
-      "value": "mutations",
-      "label": "Named mutations"
+      "label": "Inputs",
+      "docs_url": "https://github.com/Kuhlman-Lab/ThermoMPNN/blob/370f76ec62bd929f7425e311d8df04a0d094990f/analysis/custom_inference.py"
     }
-  ]
+  ],
+  "_comment": "The public custom_inference.py entry point accepts pdb, chain, model_path and out_dir. The service manages the installed model path and per-job output directory. It always performs site-saturation mutagenesis; named-mutation and top-k modes are not upstream APIs."
 }

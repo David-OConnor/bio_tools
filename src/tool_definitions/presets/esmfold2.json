@@ -1,0 +1,24 @@
+[
+  {
+    "id": "carbonic_anhydrase_2cba",
+    "label": "Protein · carbonic anhydrase",
+    "description": "Official ESMFold2 protein example (PDB 2CBA), using the released local API's 100-step example setting.",
+    "source_url": "https://github.com/Biohub/esm/blob/bf343ba264b650dff7a073643725f9aaa1fdbe8d/README.md",
+    "values": {
+      "job_name": "esmfold2-2cba",
+      "input_json": "{\n  \"sequences\": [\n    {\n      \"type\": \"protein\",\n      \"id\": \"A\",\n      \"sequence\": \"MSHHWGYGKHNGPEHWHKDFPIAKGERQSPVDIDTHTAKYDPSLKPLSVSYDQATSLRILNNGHAFNVEFDDSQDKAVLKGGPLDGTYRLIQFHFHWGSLDGQGSEHTVDKKKYAAELHLVHWNTKYGDFGKAVQQPDGLAVLGIFLKVGSAKPGLQKVVDVLDSIKTKGKSADFTNFDPRGLLPESLDYWTYPGSLTTPPLLECVTWIVLKEPISVSSEQVLKFRKLNFNGEGEPEELMVDNWRPAQPLKNRQIKASFK\"\n    }\n  ]\n}",
+      "num_sampling_steps": 100
+    }
+  },
+  {
+    "id": "protein_dna_ligand_1mht",
+    "label": "Protein–DNA–ligand · 1MHT",
+    "description": "Official local ESMFold2 example with protein HHAI, modified DNA, and CCD ligand SAH.",
+    "source_url": "https://github.com/Biohub/esm/blob/bf343ba264b650dff7a073643725f9aaa1fdbe8d/README.md#running-esmfold2-through-hugging-face",
+    "values": {
+      "job_name": "esmfold2-1mht",
+      "input_json": "{\n  \"sequences\": [\n    {\n      \"type\": \"protein\",\n      \"id\": \"A\",\n      \"sequence\": \"MIEIKDKQLTGLRFIDLFAGLGGFRLALESCGAECVYSNEWDKYAQEVYEMNFGEKPEGDITQVNEKTIPDHDILCAGFPCQAFSISGKQKGFEDSRGTLFFDIARIVREKKPKVVFMENVKNFASHDNGNTLEVVKNTMNELDYSFHAKVLNALDYGIPQKRERIYMICFRNDLNIQNFQFPKPFELNTFVKDLLLPDSEVEHLVIDRKDLVMTNQEIEQTTPKTVRLGIVGKGGQGERIYSTRGIAITLSAYGGGIFAKTGGYLVNGKTRKLHPRECARVMGYPDSYKVHPSTSQAYKQFGNSVVINVLQYIAYNIGSSLNFKPY\"\n    },\n    {\n      \"type\": \"dna\",\n      \"id\": \"B\",\n      \"sequence\": \"GATAGCGCTATC\",\n      \"modifications\": [{\"position\": 5, \"ccd\": \"C36\"}]\n    },\n    {\n      \"type\": \"dna\",\n      \"id\": \"C\",\n      \"sequence\": \"TGATAGCGCTATC\",\n      \"modifications\": [{\"position\": 6, \"ccd\": \"C36\"}]\n    },\n    {\n      \"type\": \"ligand\",\n      \"id\": \"L\",\n      \"ccd\": [\"SAH\"]\n    }\n  ]\n}",
+      "num_sampling_steps": 100
+    }
+  }
+]

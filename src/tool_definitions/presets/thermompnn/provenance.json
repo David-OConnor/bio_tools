@@ -1,0 +1,32 @@
+{
+  "repository": "https://github.com/Kuhlman-Lab/ThermoMPNN",
+  "commit": "370f76ec62bd929f7425e311d8df04a0d094990f",
+  "input_reference": "https://github.com/Kuhlman-Lab/ThermoMPNN/blob/370f76ec62bd929f7425e311d8df04a0d094990f/analysis/custom_inference.py",
+  "example_reference": "https://github.com/Kuhlman-Lab/ThermoMPNN/blob/370f76ec62bd929f7425e311d8df04a0d094990f/examples/inference.sh",
+  "assets": [
+    {
+      "path": "examples/2OCJ.pdb",
+      "source_url": "https://github.com/Kuhlman-Lab/ThermoMPNN/blob/370f76ec62bd929f7425e311d8df04a0d094990f/examples/2OCJ.pdb",
+      "sha256": "287696a0bbfb9b193b219059e1992a763e2b5a027332c5f16bb0ba7c3a33bbb8"
+    },
+    {
+      "path": "LICENSE",
+      "source_url": "https://github.com/Kuhlman-Lab/ThermoMPNN/blob/370f76ec62bd929f7425e311d8df04a0d094990f/LICENSE",
+      "sha256": "038bd3438019e6dfe2c02efaea630ef46e60f07aad542d4a8440c40a67d61aab"
+    }
+  ],
+  "adaptations": [
+    "The service supplies uploaded PDB contents through a per-job file and manages model_path and out_dir.",
+    "The public custom_inference.py entry point always performs a complete site-saturation scan; no named-mutation or top-k mode is added."
+  ],
+  "validation": {
+    "date": "2026-09-09",
+    "runtime": "Ubuntu 26.04, official thermoMPNN_default.pt model, CUDA",
+    "official_examples": 1,
+    "checks": [
+      "Compared every displayed field, default, and managed argument with custom_inference.py.",
+      "Ran the bundled official 2OCJ example through the web page and its installed CUDA environment.",
+      "Verified 3,880 mutation rows and the native Model, Dataset, ddG_pred, position, wildtype, mutation, pdb, and chain columns."
+    ]
+  }
+}

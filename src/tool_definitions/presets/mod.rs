@@ -137,9 +137,14 @@ pub fn materialize(slug: &str, values: &Value, directory: &Path) -> io::Result<V
 /// Serialized preset descriptors: id, label, description, source_url and form values.
 pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
+        "boltz2" => Some(include_str!("boltz2.json")),
+        "esmfold2" => Some(include_str!("esmfold2.json")),
         "ligandmpnn" => Some(include_str!("ligandmpnn.json")),
+        "opendde" => Some(include_str!("opendde.json")),
         "proteinmpnn" => Some(include_str!("proteinmpnn.json")),
+        "proteinmpnn_ddg" => Some(include_str!("proteinmpnn_ddg.json")),
         "rfd3" => Some(include_str!("rfd3.json")),
+        "thermompnn" => Some(include_str!("thermompnn.json")),
         _ => None,
     }
 }
@@ -207,6 +212,14 @@ pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
             Some(include_str!("proteinmpnn/inputs/PSSM_inputs/4YOW.json"))
         }
         ("proteinmpnn", "provenance.json") => Some(include_str!("proteinmpnn/provenance.json")),
+
+        ("proteinmpnn_ddg", "example/AF-A0A7L5GP87-F1-model_v4.pdb") => Some(include_str!(
+            "proteinmpnn_ddg/example/AF-A0A7L5GP87-F1-model_v4.pdb"
+        )),
+        ("proteinmpnn_ddg", "LICENSE") => Some(include_str!("proteinmpnn_ddg/LICENSE")),
+        ("proteinmpnn_ddg", "provenance.json") => {
+            Some(include_str!("proteinmpnn_ddg/provenance.json"))
+        }
         ("rfd3", "LICENSE.md") => Some(include_str!("rfd3/LICENSE.md")),
         ("rfd3", "input_pdbs/1bna.pdb") => Some(include_str!("rfd3/input_pdbs/1bna.pdb")),
         ("rfd3", "input_pdbs/1q75.pdb") => Some(include_str!("rfd3/input_pdbs/1q75.pdb")),
@@ -236,6 +249,10 @@ pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
             "rfd3/input_pdbs/symmetry_examples/6t8h_C3.pdb"
         )),
         ("rfd3", "provenance.json") => Some(include_str!("rfd3/provenance.json")),
+
+        ("thermompnn", "examples/2OCJ.pdb") => Some(include_str!("thermompnn/examples/2OCJ.pdb")),
+        ("thermompnn", "LICENSE") => Some(include_str!("thermompnn/LICENSE")),
+        ("thermompnn", "provenance.json") => Some(include_str!("thermompnn/provenance.json")),
         _ => None,
     }
 }

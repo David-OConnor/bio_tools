@@ -1,0 +1,34 @@
+{
+  "repository": "https://github.com/PeptoneLtd/proteinmpnn_ddg",
+  "commit": "98302b5e7d6b2962aa03336cf950196c33f2c3a1",
+  "input_reference": "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/98302b5e7d6b2962aa03336cf950196c33f2c3a1/predict.py",
+  "example_reference": "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/98302b5e7d6b2962aa03336cf950196c33f2c3a1/README.md#usage",
+  "assets": [
+    {
+      "path": "example/AF-A0A7L5GP87-F1-model_v4.pdb",
+      "source_url": "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/98302b5e7d6b2962aa03336cf950196c33f2c3a1/example/AF-A0A7L5GP87-F1-model_v4.pdb",
+      "sha256": "2070d3ba85e0c4814558e184ce8ac4130734d983e65910cdb7498f474ebf1c6e",
+      "normalization": "A final newline was added when embedding the upstream text asset."
+    },
+    {
+      "path": "LICENSE",
+      "source_url": "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/98302b5e7d6b2962aa03336cf950196c33f2c3a1/LICENSE",
+      "sha256": "e76c415443be9d463ca6b3494b34819b0778b5ca536cf8de2e08f89a925a997f"
+    }
+  ],
+  "adaptations": [
+    "The web/API field names and defaults follow predict.py; uploaded PDB contents are written to a per-job pdb_path and outpath is managed by the service.",
+    "The official CLI always predicts every standard point mutation for one chain, so no top-k mode is added.",
+    "The job_name field labels the service run and is not passed to the upstream CLI."
+  ],
+  "validation": {
+    "date": "2026-09-09",
+    "runtime": "Ubuntu 26.04, official v_48_020 model",
+    "official_examples": 1,
+    "checks": [
+      "Ran the bundled README PDB with its documented chain, seed, and model settings.",
+      "Verified 4,300 mutation rows and the native pre, post, pos, logit_difference, and logit_difference_ddg columns.",
+      "Compared every displayed field, default, and managed argument with predict.py."
+    ]
+  }
+}

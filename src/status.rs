@@ -302,12 +302,17 @@ fn alphafold3_command(
 fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     // The executable's name comes from `Tool::console_script`, which is not always the slug; only
     // the probe argument is decided here.
+    if tool == Tool::EsmFold2 {
+        return Some(installer.tool_python_command(tool).args([
+            "-c",
+            "from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model",
+        ]));
+    }
     let arguments: &[&str] = match tool {
         Tool::OpenDde => &["--version"],
         Tool::Boltz2
         | Tool::Chai1
         | Tool::Protenix
-        | Tool::EsmFold2
         | Tool::ImmuneBuilder
         | Tool::BoltzGen
         | Tool::BioPhi

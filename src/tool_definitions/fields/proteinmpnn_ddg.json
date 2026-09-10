@@ -1,12 +1,29 @@
 {
   "fields": [
     {
-      "name": "pdb",
-      "label": "Protein PDB",
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "proteinmpnn-ddg-demo",
+      "required": false,
+      "help": "A label for this run and its results.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 80,
+      "accept": "",
+      "task": "",
+      "group": "Inputs"
+    },
+    {
+      "name": "pdb_path",
+      "label": "Protein structure",
       "kind": "file",
-      "default": "HEADER    PASTE A PROTEIN PDB HERE",
+      "default": "",
       "required": true,
-      "help": "",
+      "help": "PDB structure whose point mutations will be scored.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -14,23 +31,26 @@
       "step": null,
       "maxlength": null,
       "accept": ".pdb,.ent",
-      "task": ""
+      "task": "",
+      "group": "Inputs",
+      "help_note": "Upload PDB text or choose the preset containing the official AlphaFold example structure."
     },
     {
       "name": "chains",
-      "label": "Context chains",
+      "label": "Chains to load",
       "kind": "text",
       "default": "A",
-      "required": true,
-      "help": "Comma-separated chains; the first is predicted by default.",
+      "required": false,
+      "help": "Comma-separated PDB chains used as structural and sequence context, e.g. A,B,C. By default, substitutions are predicted for the first chain.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 100,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inputs"
     },
     {
       "name": "chain_to_predict",
@@ -38,39 +58,40 @@
       "kind": "text",
       "default": "",
       "required": false,
-      "help": "Optional; defaults to the first context chain.",
+      "help": "Optional chain whose substitutions are predicted. It is moved to the front of the loaded chain list; blank uses the first chain above.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 1,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inputs"
     },
     {
       "name": "model_name",
-      "label": "Model",
+      "label": "ProteinMPNN model",
       "kind": "select",
       "default": "v_48_020",
       "required": false,
-      "help": "",
+      "help": "48-neighbor ProteinMPNN checkpoint trained with the indicated backbone noise.",
       "options": [
         {
           "value": "v_48_002",
-          "label": "v_48_002"
+          "label": "v_48_002 (0.02 Å training noise)"
         },
         {
           "value": "v_48_010",
-          "label": "v_48_010"
+          "label": "v_48_010 (0.10 Å training noise)"
         },
         {
           "value": "v_48_020",
-          "label": "v_48_020"
+          "label": "v_48_020 (0.20 Å training noise)"
         },
         {
           "value": "v_48_030",
-          "label": "v_48_030"
+          "label": "v_48_030 (0.30 Å training noise)"
         }
       ],
       "rows": null,
@@ -79,7 +100,8 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Model and averaging"
     },
     {
       "name": "seed",
@@ -87,39 +109,41 @@
       "kind": "number",
       "default": 42,
       "required": false,
-      "help": "",
+      "help": "Seed used to split the per-repeat JAX random keys.",
       "options": [],
       "rows": null,
       "minimum": 0,
       "maximum": 2147483647,
-      "step": null,
+      "step": 1,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Model and averaging"
     },
     {
-      "name": "repeats",
+      "name": "nrepeats",
       "label": "Model repeats",
       "kind": "number",
       "default": 1,
       "required": false,
-      "help": "",
+      "help": "Run with this many keys split from the input seed and average the resulting predictions.",
       "options": [],
       "rows": null,
       "minimum": 1,
       "maximum": 100,
-      "step": null,
+      "step": 1,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Model and averaging"
     },
     {
-      "name": "without_ddg_correction",
-      "label": "Disable the published ddG correction",
+      "name": "without_ddG_correction",
+      "label": "Disable the ddG correction",
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "Required when selecting a model other than v_48_020.",
+      "help": "Write raw logit differences without the paper's single-residue ddG correction. The correction is defined only for v_48_020, so this must be enabled with every other model.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -127,24 +151,20 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
-    },
-    {
-      "name": "top_k",
-      "label": "Top mutations to highlight (optional)",
-      "kind": "number",
-      "default": 0,
-      "required": false,
-      "help": "Return only the K most stability-improving mutations, ranked by predicted ddG. 0 returns the full table only.",
-      "options": [],
-      "rows": null,
-      "minimum": 0,
-      "maximum": 1000,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Model and averaging"
     }
   ],
-  "tasks": []
+  "tasks": [],
+  "field_groups": [
+    {
+      "label": "Inputs",
+      "docs_url": "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/98302b5e7d6b2962aa03336cf950196c33f2c3a1/README.md#usage"
+    },
+    {
+      "label": "Model and averaging",
+      "docs_url": "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/98302b5e7d6b2962aa03336cf950196c33f2c3a1/predict.py"
+    }
+  ],
+  "_comment": "Field names and defaults follow predict.py. The service manages outpath. ProteinMPNN-ddG always scores every standard point mutation for one chain; top-k filtering is not part of its public CLI."
 }

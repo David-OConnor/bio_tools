@@ -14,19 +14,21 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     expense: ProcessExpense::Expensive,
     top_choice: false,
     spec: SpecData {
-        summary: "Protein structure prediction; fast.",
-        description: "Similar use cases to AlphaFold3, Boltz-2, and OpenDDE. Faster, but can only fold \
-        single-chain proteins, and doesn't support other molecule types.",
-        availability: "Installed by setup_system.sh into its own uv environment (needs nvcc to build OpenFold); ESM-2 weights download on first execution",
-        license_details: "fair-esm and the ESM-2 weights are MIT; the OpenFold dependency this environment builds is Apache 2.0. Both allow commercial use.",
-        repo_url: Some("https://github.com/facebookresearch/esm"),
-        home_url: Some("https://esmatlas.com/"),
-        docs_url: Some("https://github.com/facebookresearch/esm#esmfold"),
-        input_params_url: None,
-        examples_url: None,
-        paper_url: Some("https://www.science.org/doi/10.1126/science.ade2574"),
+        summary: "Fast all-atom structure prediction for biomolecular complexes.",
+        description: "ESMFold2 predicts all-atom structures for protein complexes, DNA, RNA, \
+        ligands, modified residues, and covalent complexes through the released 6B-parameter model.",
+        availability: "Installed by setup_system.sh into a Python 3.12 uv environment; Biohub/ESMFold2 weights download from Hugging Face on first execution",
+        license_details: "The ESM code and released ESMFold2 model are provided under the MIT license, allowing academic and commercial use.",
+        repo_url: Some("https://github.com/Biohub/esm"),
+        home_url: Some("https://biohub.ai/models/esmfold2"),
+        docs_url: Some("https://github.com/Biohub/esm#running-esmfold2-through-hugging-face"),
+        input_params_url: Some(
+            "https://github.com/Biohub/esm/blob/main/esm/utils/structure/input_builder.py",
+        ),
+        examples_url: Some("https://github.com/Biohub/esm/tree/main/cookbook/tutorials"),
+        paper_url: Some("https://www.biorxiv.org/content/10.64898/2026.06.03.729735v1"),
         license: License::Mit,
         license_url: None,
-        tested: false,
+        tested: true,
     },
 };

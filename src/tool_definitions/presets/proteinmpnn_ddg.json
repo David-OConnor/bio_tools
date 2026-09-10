@@ -1,0 +1,17 @@
+[
+  {
+    "id": "readme/AF-A0A7L5GP87",
+    "label": "README · AlphaFold A0A7L5GP87 chain A",
+    "description": "Official README example. The AlphaFold PDB and documented chain, seed, and v_48_020 model settings are included.",
+    "source_url": "https://github.com/PeptoneLtd/proteinmpnn_ddg/blob/98302b5e7d6b2962aa03336cf950196c33f2c3a1/README.md#usage",
+    "values": {
+      "job_name": "proteinmpnn-ddg-a0a7l5gp87",
+      "pdb_path": "bio-tools://proteinmpnn_ddg/example/AF-A0A7L5GP87-F1-model_v4.pdb",
+      "chains": "A",
+      "seed": 42,
+      "nrepeats": 1,
+      "model_name": "v_48_020",
+      "without_ddG_correction": false
+    }
+  }
+]
