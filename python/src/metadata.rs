@@ -813,7 +813,7 @@ fn catalog_fields(
         ] {
             kwargs.set_item(key, get(key)?)?;
         }
-        for key in ["group", "input_modes", "help_note"] {
+        for key in ["group", "input_modes", "help_note", "molecule_features"] {
             if let Some(value) = descriptor.get_item(key)? {
                 kwargs.set_item(key, value)?;
             }

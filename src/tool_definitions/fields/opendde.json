@@ -1,12 +1,30 @@
 {
   "fields": [
     {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "opendde-job",
+      "required": false,
+      "help": "Names the single OpenDDE job generated from these parameters.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 80,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters"
+    },
+    {
       "name": "sequence_molecules",
       "label": "Molecules",
       "kind": "molecule_builder",
-      "default": "[{\"type\": \"protein\", \"sequence\": \"ACDEFGHIKLMNPQRSTVWY\", \"cyclic\": false, \"modifications\": []}]",
+      "default": "[{\"type\": \"protein\", \"id\": \"A\", \"count\": 1, \"sequence\": \"ACDEFGHIKLMNPQRSTVWY\", \"modifications\": []}]",
       "required": true,
-      "help": "Add one box per chain: Protein, Ligand, DNA, RNA, or Ion. Ligands take a SMILES string or a CCD_ code. A modification applies a CCD residue code at a given position. Chains are lettered A, B, C in the order they appear here.",
+      "help": "Add one box per unique OpenDDE entity. Set count and an optional matching list of comma-separated IDs, plus the sequence/ligand/ion, type-specific modifications, and optional MSA or template paths.",
       "options": [
         {
           "value": "protein",
@@ -34,6 +52,25 @@
       "maximum": null,
       "step": null,
       "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters",
+      "molecule_features": "id,count,modifications,protein_paired_msa,protein_unpaired_msa,protein_templates,rna_unpaired_msa"
+    },
+    {
+      "name": "covalent_bonds",
+      "label": "Covalent bonds (JSON, optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "Native OpenDDE covalent_bonds array. Entity references are 1-based sequence indexes; copy references are 1-based within count.",
+      "options": [],
+      "rows": 6,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 500000,
       "accept": "",
       "task": "",
       "group": "Input",
