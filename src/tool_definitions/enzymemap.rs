@@ -16,6 +16,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::CondaBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
+    primary_output: None,
+    primary_inputs: &[],
     top_choice: false,
     spec: SpecData {
         summary: "Query or build balanced, atom-mapped enzymatic reaction data.",

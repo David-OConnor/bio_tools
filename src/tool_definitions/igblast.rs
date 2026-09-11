@@ -14,6 +14,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::Executable,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
+    primary_output: None,
+    primary_inputs: &[],
     top_choice: false,
     spec: SpecData {
         summary: "Identify germline V(D)J matches in an antibody sequence.",

@@ -17,6 +17,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::CondaBasedApp,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
+    primary_output: None,
+    primary_inputs: &[],
     top_choice: true,
     spec: SpecData {
         summary: "A therapeutic antibody profiler",

@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -19,6 +19,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
+    primary_output: Some(DataType::AaSequence),
+    primary_inputs: &[PrimaryInput::new("pdb", &[DataType::Pdb])],
     top_choice: false,
     spec: SpecData {
         summary: "Design antibody sequences from a backbone structure.",

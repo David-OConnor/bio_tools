@@ -1,24 +1,26 @@
 [
   {
     "id": "protein_msa_server",
-    "label": "Protein · MSA server",
+    "label": "Protein \u00b7 MSA server",
     "description": "Official protein example, with the public MSA server enabled because the YAML does not provide an MSA.",
     "source_url": "https://github.com/jwohlwend/boltz/blob/b1ebfc46ecf57f5414e0d1a6f9027bbb122c53bc/examples/prot.yaml",
     "values": {
       "job_name": "boltz2-protein",
       "yaml_spec": "version: 1  # Optional, defaults to 1\nsequences:\n  - protein:\n      id: A\n      sequence: QLEDSEVEAVAKGLEEMYANGVTEDNFKNYVKNNFAQQEISSVEEELNVNISDSCVANKIKDEFFAMISISAIVKAAQKKAWKELAVTVLRFAKANGLKTNAIIVAGQLALWAVQCG\n",
-      "use_msa_server": true
+      "use_msa_server": true,
+      "input_mode": "text"
     }
   },
   {
     "id": "protein_single_sequence",
-    "label": "Protein · single sequence",
+    "label": "Protein \u00b7 single sequence",
     "description": "Official protein example that explicitly disables MSA input; it runs without an MSA server.",
     "source_url": "https://github.com/jwohlwend/boltz/blob/b1ebfc46ecf57f5414e0d1a6f9027bbb122c53bc/examples/prot_no_msa.yaml",
     "values": {
       "job_name": "boltz2-protein-no-msa",
       "yaml_spec": "version: 1  # Optional, defaults to 1\nsequences:\n  - protein:\n      id: A\n      sequence: QLEDSEVEAVAKGLEEMYANGVTEDNFKNYVKNNFAQQEISSVEEELNVNISDSCVANKIKDEFFAMISISAIVKAAQKKAWKELAVTVLRFAKANGLKTNAIIVAGQLALWAVQCG\n      msa: empty\n",
-      "use_msa_server": false
+      "use_msa_server": false,
+      "input_mode": "text"
     }
   },
   {
@@ -29,7 +31,8 @@
     "values": {
       "job_name": "boltz2-multimer",
       "yaml_spec": "version: 1  # Optional, defaults to 1\nsequences:\n  - protein:\n      id: A\n      sequence: MAHHHHHHVAVDAVSFTLLQDQLQSVLDTLSEREAGVVRLRFGLTDGQPRTLDEIGQVYGVTRERIRQIESKTMSKLRHPSRSQVLRDYLDGSSGSGTPEERLLRAIFGEKA\n  - protein:\n      id: B\n      sequence: MRYAFAAEATTCNAFWRNVDMTVTALYEVPLGVCTQDPDRWTTTPDDEAKTLCRACPRRWLCARDAVESAGAEGLWAGVVIPESGRARAFALGQLRSLAERNGYPVRDHRVSAQSA\n",
-      "use_msa_server": true
+      "use_msa_server": true,
+      "input_mode": "text"
     }
   },
   {
@@ -40,18 +43,20 @@
     "values": {
       "job_name": "boltz2-cyclic-protein",
       "yaml_spec": "version: 1  # Optional, defaults to 1\nsequences:\n  - protein:\n      id: A\n      sequence: QLEDSEVEAVAKG\n      cyclic: true\n",
-      "use_msa_server": true
+      "use_msa_server": true,
+      "input_mode": "text"
     }
   },
   {
     "id": "protein_ligand_affinity",
-    "label": "Protein–ligand affinity",
-    "description": "Official protein–ligand example requesting Boltz-2's affinity property for the ligand.",
+    "label": "Protein\u2013ligand affinity",
+    "description": "Official protein\u2013ligand example requesting Boltz-2's affinity property for the ligand.",
     "source_url": "https://github.com/jwohlwend/boltz/blob/b1ebfc46ecf57f5414e0d1a6f9027bbb122c53bc/examples/affinity.yaml",
     "values": {
       "job_name": "boltz2-affinity",
       "yaml_spec": "version: 1  # Optional, defaults to 1\nsequences:\n  - protein:\n      id: A\n      sequence: MVTPEGNVSLVDESLLVGVTDEDRAVRSAHQFYERLIGLWAPAVMEAAHELGVFAALAEAPADSGELARRLDCDARAMRVLLDALYAYDVIDRIHDTNGFRYLLSAEARECLLPGTLFSLVGKFMHDINVAWPAWRNLAEVVRHGARDTSGAESPNGIAQEDYESLVGGINFWAPPIVTTLSRKLRASGRSGDATASVLDVGCGTGLYSQLLLREFPRWTATGLDVERIATLANAQALRLGVEERFATRAGDFWRGGWGTGYDLVLFANIFHLQTPASAVRLMRHAAACLAPDGLVAVVDQIVDADREPKTPQDRFALLFAASMTNTGGGDAYTFQEYEEWFTAAGLQRIETLDTPMHRILLARRATEPSAVPEGQASENLYFQ\n  - ligand:\n      id: B\n      smiles: 'N[C@@H](Cc1ccc(O)cc1)C(=O)O'\nproperties:\n  - affinity:\n      binder: B\n",
-      "use_msa_server": true
+      "use_msa_server": true,
+      "input_mode": "text"
     }
   }
 ]

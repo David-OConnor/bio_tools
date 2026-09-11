@@ -13,6 +13,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonLib,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Cheap,
+    primary_output: None,
+    primary_inputs: &[],
     top_choice: false,
     spec: SpecData {
         summary: "A collection of binding affinities for protein−ligand complexes",

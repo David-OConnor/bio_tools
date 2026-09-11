@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -15,6 +15,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::Executable,
     license_type: LicenseCategory::Copyleft,
     expense: ProcessExpense::Moderate,
+    primary_output: None,
+    primary_inputs: &[PrimaryInput::new("pdb", &[DataType::Pdb])],
     top_choice: false,
     spec: SpecData {
         summary: "A free and open-source software suite for high-performance molecular dynamics and output analysis.",

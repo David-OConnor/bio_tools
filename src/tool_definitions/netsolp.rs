@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -17,6 +17,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
+    primary_output: None,
+    primary_inputs: &[PrimaryInput::new("fasta", &[DataType::AaSequence])],
     top_choice: false,
     spec: SpecData {
         summary: "Predict whether a protein will be soluble and usable when expressed in E. coli.",

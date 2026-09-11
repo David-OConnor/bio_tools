@@ -6,7 +6,10 @@ use std::{
 use bio_tools_rs::{
     LaunchType as RustLaunchType, License as RustLicense, LicenseCategory as RustLicenseCategory,
     Process as RustProcess, ProcessExpense as RustProcessExpense, Spec as RustSpec,
-    ToolCategory as RustToolCategory, tool_definitions::catalog,
+    ToolCategory as RustToolCategory,
+    tool_definitions::catalog::{
+        self, DataType as RustDataType, PrimaryInput as RustPrimaryInput,
+    },
 };
 use pyo3::{
     PyClass,
@@ -15,8 +18,20 @@ use pyo3::{
     types::{PyDict, PyList},
 };
 
+/// Wrap a Rust enum as a frozen Python one.
+///
+/// A trailing braced block adds methods of the enum's own, which have to be
+/// declared here rather than in a second `#[pymethods] impl`: pyo3 allows one
+/// such block per class unless its `multiple-pymethods` feature is on.
 macro_rules! python_enum {
-    ($python:ident, $python_name:literal, $rust:ty, {$($variant:ident = $value:expr),+ $(,)?}) => {
+    (
+        $python:ident,
+        $python_name:literal,
+        $rust:ty,
+        {$($variant:ident = $value:expr),+ $(,)?}
+        $(, {$($extra:item)*})?
+        $(,)?
+    ) => {
         #[pyclass(name = $python_name, module = "bio_tools", frozen, skip_from_py_object)]
         pub(crate) struct $python {
             pub(crate) inner: $rust,
@@ -67,6 +82,8 @@ macro_rules! python_enum {
             fn __hash__(&self) -> u8 {
                 self.value
             }
+
+            $($($extra)*)?
         }
 
         impl $python {
@@ -151,6 +168,103 @@ python_enum!(
         Other = 6,
     }
 );
+
+python_enum!(
+    PyDataType,
+    "DataType",
+    RustDataType,
+    {
+        MmCif = 1,
+        Pdb = 2,
+        AaSequence = 3,
+        DnaSequence = 4,
+        RnaSequence = 5,
+        Csv = 6,
+    },
+    {
+        /// "Structure", "Sequence" or "Table": the family, which is what
+        /// finding the file a run left comes down to.
+        #[getter]
+        fn category(&self) -> String {
+            self.inner.category().to_string()
+        }
+
+        /// A word for a job row, where there is room for one: "Structure", "Seq".
+        #[getter]
+        fn label(&self) -> &'static str {
+            self.inner.category().label()
+        }
+
+        /// Every suffix this family is written with, lower-case and before any `.gz`.
+        #[getter]
+        fn suffixes(&self) -> Vec<&'static str> {
+            self.inner.category().suffixes().to_vec()
+        }
+
+        /// Whether a file of this type can be handed to an input wanting `wanted`.
+        fn feeds(&self, py: Python<'_>, wanted: Py<Self>) -> bool {
+            self.inner.feeds(wanted.borrow(py).inner)
+        }
+    }
+);
+
+/// The one file a tool is chiefly given: the field it goes in, and what that
+/// field accepts there.
+#[pyclass(
+    name = "PrimaryInput",
+    module = "bio_tools",
+    frozen,
+    skip_from_py_object
+)]
+pub(crate) struct PyPrimaryInput {
+    inner: RustPrimaryInput,
+}
+
+#[pymethods]
+impl PyPrimaryInput {
+    /// The field, by the `name` it carries in this tool's field descriptors.
+    #[getter]
+    fn field(&self) -> &'static str {
+        self.inner.field
+    }
+
+    #[getter]
+    fn accepts(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let values = PyList::empty(py);
+        for data_type in self.inner.accepts {
+            values.append(Py::new(py, PyDataType::from_inner(*data_type))?)?;
+        }
+        Ok(values.into_any().unbind())
+    }
+
+    /// "file" for the bytes exactly as the producing tool wrote them,
+    /// "residues" for a field that wants bare sequence with FASTA headers
+    /// dropped, "document" for one holding a whole input document that a
+    /// chosen sequence joins as one more chain.
+    #[getter]
+    fn form(&self) -> &'static str {
+        self.inner.form.kind()
+    }
+
+    /// Which document dialect that field holds, for a "document" form.
+    #[getter]
+    fn dialect(&self) -> Option<&'static str> {
+        self.inner.form.dialect()
+    }
+
+    /// Whether a file of `produced` can be dropped into this field.
+    fn accepts_type(&self, py: Python<'_>, produced: Py<PyDataType>) -> bool {
+        self.inner.accepts(produced.borrow(py).inner)
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "PrimaryInput(field={:?}, form={:?})",
+            self.inner.field,
+            self.form()
+        )
+    }
+}
 
 /// Shared tool description plus application-owned field descriptors.
 #[pyclass(name = "Spec", module = "bio_tools", frozen, skip_from_py_object)]
@@ -366,6 +480,16 @@ impl PySpec {
         data.set_item("license_url", &self.inner.data.license_url)?;
         data.set_item("tested", &self.inner.data.tested)?;
 
+        // What this tool hands on, and what it can be handed: the pair a
+        // consuming UI needs to offer one run's output as the next run's input.
+        if let Some(entry) = catalog::by_slug(&self.inner.slug) {
+            data.set_item(
+                "primary_output",
+                entry.primary_output.map(RustDataType::as_str),
+            )?;
+            data.set_item("primary_inputs", serialize_primary_inputs(py, entry)?)?;
+        }
+
         let fields = self.active_fields(py)?;
         data.set_item("fields", serialize_dataclasses(py, &fields)?)?;
         data.set_item("tasks", serialize_dataclasses(py, &self.tasks)?)?;
@@ -373,9 +497,18 @@ impl PySpec {
 
         if let Some(source) = bio_tools_rs::tool_definitions::fields::by_slug(&self.inner.slug) {
             let contract = py.import("json")?.call_method1("loads", (source,))?;
-            data.set_item("input_modes", contract.call_method1("get", ("input_modes",))?)?;
-            data.set_item("task_group", contract.call_method1("get", ("task_group", ""))?)?;
-            data.set_item("field_groups", contract.call_method1("get", ("field_groups", PyList::empty(py)))?)?;
+            data.set_item(
+                "input_modes",
+                contract.call_method1("get", ("input_modes",))?,
+            )?;
+            data.set_item(
+                "task_group",
+                contract.call_method1("get", ("task_group", ""))?,
+            )?;
+            data.set_item(
+                "field_groups",
+                contract.call_method1("get", ("field_groups", PyList::empty(py)))?,
+            )?;
         }
 
         data.set_item("links", self.links())?;
@@ -481,6 +614,18 @@ impl PyProcess {
         self.spec.clone_ref(py)
     }
 
+    /// The kind of file this tool's headline output is, or None.
+    #[getter]
+    fn primary_output(&self, py: Python<'_>) -> PyResult<Option<Py<PyDataType>>> {
+        catalog_primary_output(py, &self.inner.spec.slug)
+    }
+
+    /// Where a previous run's output can be dropped into this tool's form.
+    #[getter]
+    fn primary_inputs(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        catalog_primary_inputs(py, &self.inner.spec.slug)
+    }
+
     fn serialize(&self, py: Python<'_>) -> PyResult<Py<PyDict>> {
         let data = self.spec.borrow(py).serialize_dict(py)?;
         let data = data.bind(py);
@@ -515,7 +660,10 @@ fn form_catalog_entry<'py>(py: Python<'py>, slug: &str) -> PyResult<Bound<'py, P
 #[pyfunction]
 fn catalog_presets(py: Python<'_>, slug: &str) -> PyResult<Py<PyAny>> {
     let source = bio_tools_rs::tool_definitions::presets::by_slug(slug).unwrap_or("[]");
-    Ok(py.import("json")?.call_method1("loads", (source,))?.unbind())
+    Ok(py
+        .import("json")?
+        .call_method1("loads", (source,))?
+        .unbind())
 }
 
 /// Return a complete preset payload, including the tool's ordinary defaults.
@@ -549,6 +697,57 @@ fn catalog_preset(
         .cast::<PyDict>()?
         .clone()
         .unbind())
+}
+
+/// The kind of file this tool's headline output is, or None where it has no
+/// single one. Keyed by slug so a caller holding only a finished run's tool
+/// name can ask; see also `Process.primary_output`.
+#[pyfunction]
+fn catalog_primary_output(py: Python<'_>, slug: &str) -> PyResult<Option<Py<PyDataType>>> {
+    let Some(entry) = catalog::by_slug(slug) else {
+        return Ok(None);
+    };
+    entry
+        .primary_output
+        .map(|data_type| Py::new(py, PyDataType::from_inner(data_type)))
+        .transpose()
+}
+
+/// Where a previous run's output can be dropped into this tool's form: one
+/// entry per field that takes one, which for a tool offering a choice of input
+/// modes is one per mode. Empty for a tool nothing can be fed to.
+#[pyfunction]
+fn catalog_primary_inputs(py: Python<'_>, slug: &str) -> PyResult<Py<PyAny>> {
+    let values = PyList::empty(py);
+    if let Some(entry) = catalog::by_slug(slug) {
+        for inner in entry.primary_inputs {
+            values.append(Py::new(py, PyPrimaryInput { inner: *inner })?)?;
+        }
+    }
+    Ok(values.into_any().unbind())
+}
+
+fn serialize_primary_inputs<'py>(
+    py: Python<'py>,
+    entry: &catalog::CatalogEntry,
+) -> PyResult<Bound<'py, PyList>> {
+    let values = PyList::empty(py);
+    for input in entry.primary_inputs {
+        let data = PyDict::new(py);
+        data.set_item("field", input.field)?;
+        data.set_item(
+            "accepts",
+            input
+                .accepts
+                .iter()
+                .map(|data_type| data_type.as_str())
+                .collect::<Vec<_>>(),
+        )?;
+        data.set_item("form", input.form.kind())?;
+        data.set_item("dialect", input.form.dialect())?;
+        values.append(data)?;
+    }
+    Ok(values)
 }
 
 /// Resolve a bundled asset reference, or return ordinary uploaded/pasted text unchanged.
@@ -744,6 +943,8 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<PyProcessExpense>()?;
     module.add_class::<PyLicenseCategory>()?;
     module.add_class::<PyLicense>()?;
+    module.add_class::<PyDataType>()?;
+    module.add_class::<PyPrimaryInput>()?;
     module.add_class::<PySpec>()?;
     module.add_class::<PyProcess>()?;
     module.add_function(wrap_pyfunction!(catalog_fields, module)?)?;
@@ -751,6 +952,8 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(catalog_presets, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_preset, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_input_text, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_primary_output, module)?)?;
+    module.add_function(wrap_pyfunction!(catalog_primary_inputs, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_asset, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_spec, module)?)?;
     module.add_function(wrap_pyfunction!(catalog_process, module)?)?;

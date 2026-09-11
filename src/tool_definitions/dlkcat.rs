@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -15,6 +15,11 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Moderate,
+    primary_output: None,
+    primary_inputs: &[PrimaryInput::residues(
+        "protein_sequence",
+        &[DataType::AaSequence],
+    )],
     top_choice: false,
     spec: SpecData {
         summary: "Predict an enzyme turnover number from its sequence and a substrate structure.",

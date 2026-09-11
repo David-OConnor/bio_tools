@@ -21,6 +21,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Proprietary,
     expense: ProcessExpense::Moderate,
+    primary_output: None,
+    primary_inputs: &[],
     top_choice: false,
     spec: SpecData {
         summary: "Predict Tier-1 ADME summary properties (lipophilicity, permeability, and solubility) for \

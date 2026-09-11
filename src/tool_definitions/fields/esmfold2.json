@@ -1,15 +1,276 @@
 {
   "fields": [
-    {"name":"job_name","label":"Job name","kind":"text","default":"esmfold2-demo","required":false,"help":"Used to name the predicted mmCIF file.","options":[],"rows":null,"minimum":null,"maximum":null,"step":null,"maxlength":80,"accept":"","task":"","group":"Input"},
-    {"name":"input_json","label":"StructurePredictionInput (JSON)","kind":"textarea","default":"{\n  \"sequences\": [\n    {\n      \"type\": \"protein\",\n      \"id\": \"A\",\n      \"sequence\": \"MSHHWGYGKHNGPEHWHKDFPIAKGERQSPVDIDTHTAKYDPSLK\"\n    }\n  ]\n}","required":true,"help":"JSON representation of ESMFold2's StructurePredictionInput. Sequence entries use type protein, dna, rna, or ligand; polymers take id and sequence, while ligands take id plus either smiles or a ccd list. Native pocket, distogram, covalent-bond, modification, and serialized MSA fields are passed through.","options":[],"rows":16,"minimum":null,"maximum":null,"step":null,"maxlength":500000,"accept":"","task":"","group":"Input","help_note":"Modification positions are zero-indexed, exactly as in the official ESMFold2 Python dataclass. Use the JSON-safe shape produced by serialize_structure_prediction_input."},
-    {"name":"num_loops","label":"Recycling loops","kind":"number","default":20,"required":false,"help":"Recycling loops passed to ESMFold2InputBuilder.fold. The released API default is 20.","options":[],"rows":null,"minimum":1,"maximum":64,"step":1,"maxlength":null,"accept":"","task":"","group":"Inference"},
-    {"name":"num_sampling_steps","label":"Diffusion sampling steps","kind":"number","default":200,"required":false,"help":"Diffusion sampling steps passed to ESMFold2InputBuilder.fold. The released API default is 200.","options":[],"rows":null,"minimum":2,"maximum":1000,"step":1,"maxlength":null,"accept":"","task":"","group":"Inference"},
-    {"name":"num_diffusion_samples","label":"Diffusion samples","kind":"number","default":1,"required":false,"help":"Number of independently sampled structures. More than one produces one mmCIF per sample.","options":[],"rows":null,"minimum":1,"maximum":16,"step":1,"maxlength":null,"accept":"","task":"","group":"Inference"},
-    {"name":"seed","label":"Random seed","kind":"number","default":0,"required":false,"help":"Seeds input preparation and diffusion sampling.","options":[],"rows":null,"minimum":0,"maximum":4294967295,"step":1,"maxlength":null,"accept":"","task":"","group":"Inference"},
-    {"name":"lm_dropout","label":"Language-model dropout","kind":"number","default":0.3,"required":false,"help":"Inference-time LM embedding dropout. The released folding API defaults to 0.3; set 0 to disable it.","options":[],"rows":null,"minimum":0,"maximum":1,"step":0.01,"maxlength":null,"accept":"","task":"","group":"Inference"},
-    {"name":"chunk_size","label":"Pair-operation chunk size","kind":"number","default":64,"required":false,"help":"Chunk size for memory-heavy pair operations. The released model defaults to 64; smaller values use less memory. Set 0 to disable chunking.","options":[],"rows":null,"minimum":0,"maximum":512,"step":1,"maxlength":null,"accept":"","task":"","group":"Runtime"},
-    {"name":"device","label":"Device","kind":"select","default":"auto","required":false,"help":"Auto selects CUDA when available and otherwise CPU. The published 6B model is intended for GPU inference.","options":[{"value":"auto","label":"Auto"},{"value":"cuda","label":"CUDA"},{"value":"cpu","label":"CPU"}],"rows":null,"minimum":null,"maximum":null,"step":null,"maxlength":null,"accept":"","task":"","group":"Runtime"},
-    {"name":"precision","label":"Model precision","kind":"select","default":"default","required":false,"help":"Use the checkpoint's published dtype, or explicitly cast model weights to BF16 or FP32.","options":[{"value":"default","label":"Checkpoint default"},{"value":"bf16","label":"BF16"},{"value":"fp32","label":"FP32"}],"rows":null,"minimum":null,"maximum":null,"step":null,"maxlength":null,"accept":"","task":"","group":"Runtime"}
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "esmfold2-demo",
+      "required": false,
+      "help": "Used to name the predicted mmCIF file.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 80,
+      "accept": "",
+      "task": "",
+      "group": "Input"
+    },
+    {
+      "name": "sequence_molecules",
+      "label": "Molecules",
+      "kind": "molecule_builder",
+      "default": "[{\"type\": \"protein\", \"sequence\": \"MSHHWGYGKHNGPEHWHKDFPIAKGERQSPVDIDTHTAKYDPSLK\", \"cyclic\": false, \"modifications\": []}]",
+      "required": true,
+      "help": "Add one box per chain: Protein, Ligand, DNA, or RNA. Ligands take a SMILES string or a CCD_ code. A modification applies a CCD residue code at a given position. Chains are lettered A, B, C in the order they appear here.",
+      "options": [
+        {
+          "value": "protein",
+          "label": "Protein"
+        },
+        {
+          "value": "ligand",
+          "label": "Ligand"
+        },
+        {
+          "value": "dna",
+          "label": "DNA"
+        },
+        {
+          "value": "rna",
+          "label": "RNA"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "input_json",
+      "label": "StructurePredictionInput (JSON)",
+      "kind": "textarea",
+      "default": "{\n  \"sequences\": [\n    {\n      \"type\": \"protein\",\n      \"id\": \"A\",\n      \"sequence\": \"MSHHWGYGKHNGPEHWHKDFPIAKGERQSPVDIDTHTAKYDPSLK\"\n    }\n  ]\n}",
+      "required": true,
+      "help": "JSON representation of ESMFold2's StructurePredictionInput. Sequence entries use type protein, dna, rna, or ligand; polymers take id and sequence, while ligands take id plus either smiles or a ccd list. Native pocket, distogram, covalent-bond, modification, and serialized MSA fields are passed through.",
+      "options": [],
+      "rows": 16,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 500000,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "help_note": "Modification positions are zero-indexed, exactly as in the official ESMFold2 Python dataclass. Use the JSON-safe shape produced by serialize_structure_prediction_input.",
+      "input_modes": "text"
+    },
+    {
+      "name": "inputs_file",
+      "label": "StructurePredictionInput file (JSON)",
+      "kind": "file",
+      "default": "",
+      "required": false,
+      "help": "The JSON file defining this prediction, in ESMFold2's own StructurePredictionInput format.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".json",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload",
+      "help_note": "Choose a file. Its contents are read here and sent as the input document."
+    },
+    {
+      "name": "num_loops",
+      "label": "Recycling loops",
+      "kind": "number",
+      "default": 20,
+      "required": false,
+      "help": "Recycling loops passed to ESMFold2InputBuilder.fold. The released API default is 20.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 64,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "num_sampling_steps",
+      "label": "Diffusion sampling steps",
+      "kind": "number",
+      "default": 200,
+      "required": false,
+      "help": "Diffusion sampling steps passed to ESMFold2InputBuilder.fold. The released API default is 200.",
+      "options": [],
+      "rows": null,
+      "minimum": 2,
+      "maximum": 1000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "num_diffusion_samples",
+      "label": "Diffusion samples",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "Number of independently sampled structures. More than one produces one mmCIF per sample.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 16,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "seed",
+      "label": "Random seed",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "Seeds input preparation and diffusion sampling.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 4294967295,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "lm_dropout",
+      "label": "Language-model dropout",
+      "kind": "number",
+      "default": 0.3,
+      "required": false,
+      "help": "Inference-time LM embedding dropout. The released folding API defaults to 0.3; set 0 to disable it.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 1,
+      "step": 0.01,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "chunk_size",
+      "label": "Pair-operation chunk size",
+      "kind": "number",
+      "default": 64,
+      "required": false,
+      "help": "Chunk size for memory-heavy pair operations. The released model defaults to 64; smaller values use less memory. Set 0 to disable chunking.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 512,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "device",
+      "label": "Device",
+      "kind": "select",
+      "default": "auto",
+      "required": false,
+      "help": "Auto selects CUDA when available and otherwise CPU. The published 6B model is intended for GPU inference.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "cuda",
+          "label": "CUDA"
+        },
+        {
+          "value": "cpu",
+          "label": "CPU"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "precision",
+      "label": "Model precision",
+      "kind": "select",
+      "default": "default",
+      "required": false,
+      "help": "Use the checkpoint's published dtype, or explicitly cast model weights to BF16 or FP32.",
+      "options": [
+        {
+          "value": "default",
+          "label": "Checkpoint default"
+        },
+        {
+          "value": "bf16",
+          "label": "BF16"
+        },
+        {
+          "value": "fp32",
+          "label": "FP32"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    }
   ],
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Inputs",
+    "default": "parameters",
+    "options": [
+      {
+        "value": "parameters",
+        "label": "Set parameters here"
+      },
+      {
+        "value": "text",
+        "label": "Enter YAML or JSON"
+      },
+      {
+        "value": "upload",
+        "label": "Upload YAML or JSON"
+      }
+    ]
+  },
   "tasks": []
 }

@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -14,6 +14,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::CondaBasedApp,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
+    primary_output: None,
+    primary_inputs: &[PrimaryInput::new("pdb", &[DataType::Pdb])],
     top_choice: false,
     spec: SpecData {
         summary: "Map aggregation-prone patches onto a protein structure and score them.",

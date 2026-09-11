@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -12,6 +12,11 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Expensive,
+    primary_output: Some(DataType::MmCif),
+    primary_inputs: &[PrimaryInput::residues(
+        "protein_sequence",
+        &[DataType::AaSequence],
+    )],
     top_choice: true,
     spec: SpecData {
         summary: "Accurate structure prediction of biomolecular interactions; protein structure prediction",

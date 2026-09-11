@@ -15,6 +15,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonLib,
     license_type: LicenseCategory::NonCommercial,
     expense: ProcessExpense::Moderate,
+    primary_output: None,
+    primary_inputs: &[],
     top_choice: false,
     spec: SpecData {
         summary: "Plan biocatalytic routes and connect reaction rules to candidate enzyme classes.",

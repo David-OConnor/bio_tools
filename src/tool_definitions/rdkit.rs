@@ -12,6 +12,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonLib,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Cheap,
+    primary_output: None,
+    primary_inputs: &[],
     top_choice: false,
     spec: SpecData {
         summary: "Standardize molecules and turn atom-mapped reactions into explicit bond edits.",

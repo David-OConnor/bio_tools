@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -15,6 +15,30 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::PythonBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
+    primary_output: Some(DataType::MmCif),
+    primary_inputs: &[
+        // "Set parameters here": the molecule boxes, which are a list of
+        //   chains before this tool's adapter turns them into its own document.
+        PrimaryInput::document(
+            "sequence_molecules",
+            &[
+                DataType::AaSequence,
+                DataType::DnaSequence,
+                DataType::RnaSequence,
+            ],
+            "molecule_boxes",
+        ),
+        // "Enter YAML or JSON": the document itself.
+        PrimaryInput::document(
+            "yaml_spec",
+            &[
+                DataType::AaSequence,
+                DataType::DnaSequence,
+                DataType::RnaSequence,
+            ],
+            "boltz_yaml",
+        ),
+    ],
     top_choice: true,
     spec: SpecData {
         summary: "All-atom biomolecular structure and binding-affinity prediction.",

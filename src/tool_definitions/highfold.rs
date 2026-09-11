@@ -2,7 +2,7 @@ use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
     tool_definitions::{
         Tool,
-        catalog::{CatalogEntry, Identity},
+        catalog::{CatalogEntry, DataType, Identity, PrimaryInput},
     },
 };
 
@@ -15,6 +15,11 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     launch_type: LaunchType::CondaBasedApp,
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
+    primary_output: Some(DataType::Pdb),
+    primary_inputs: &[PrimaryInput::residues(
+        "peptide_sequence",
+        &[DataType::AaSequence],
+    )],
     top_choice: false,
     spec: SpecData {
         summary: "Predict the structure of a cyclic peptide or a cyclic-peptide complex.",
