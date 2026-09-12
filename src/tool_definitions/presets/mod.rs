@@ -137,6 +137,7 @@ pub fn materialize(slug: &str, values: &Value, directory: &Path) -> io::Result<V
 /// Serialized preset descriptors: id, label, description, source_url and form values.
 pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
+        "chai1" => Some(include_str!("chai1.json")),
         "boltz2" => Some(include_str!("boltz2.json")),
         "esmfold2" => Some(include_str!("esmfold2.json")),
         "ligandmpnn" => Some(include_str!("ligandmpnn.json")),

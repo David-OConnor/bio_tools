@@ -1,0 +1,106 @@
+[
+  {
+    "id": "protein_ligand",
+    "label": "Protein complex + ligand",
+    "description": "Official predict_structure.py example: two proteins, a peptide and a SMILES ligand, without MSAs.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/predict_structure.py",
+    "values": {
+      "job_name": "chai1-protein-ligand",
+      "input_mode": "text",
+      "input_fasta": ">protein|name=example-of-long-protein\nAGSHSMRYFSTSVSRPGRGEPRFIAVGYVDDTQFVRFDSDAASPRGEPRAPWVEQEGPEYWDRETQKYKRQAQTDRVSLRNLRGYYNQSEAGSHTLQWMFGCDLGPDGRLLRGYDQSAYDGKDYIALNEDLRSWTAADTAAQITQRKWEAAREAEQRRAYLEGTCVEWLRRYLENGKETLQRAEHPKTHVTHHPVSDHEATLRCWALGFYPAEITLTWQWDGEDQTQDTELVETRPAGDGTFQKWAAVVVPSGEEQRYTCHVQHEGLPEPLTLRWEP\n>protein|name=example-of-short-protein\nAIQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYYTEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM\n>protein|name=example-peptide\nGAAL\n>ligand|name=example-ligand-as-smiles\nCCCCCCCCCCCCCC(=O)O\n",
+      "seed": 42
+    }
+  },
+  {
+    "id": "supplied_msas",
+    "label": "Protein complex + supplied MSAs",
+    "description": "Official supplied-MSA example with Chai\u2019s two aligned.pqt files.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/msas/predict_with_msas.py",
+    "values": {
+      "job_name": "chai1-supplied-msas",
+      "input_mode": "text",
+      "input_fasta": ">protein|name=example-of-long-protein\nAGSHSMRYFSTSVSRPGRGEPRFIAVGYVDDTQFVRFDSDAASPRGEPRAPWVEQEGPEYWDRETQKYKRQAQTDRVSLRNLRGYYNQSEAGSHTLQWMFGCDLGPDGRLLRGYDQSAYDGKDYIALNEDLRSWTAADTAAQITQRKWEAAREAEQRRAYLEGTCVEWLRRYLENGKETLQRAEHPKTHVTHHPVSDHEATLRCWALGFYPAEITLTWQWDGEDQTQDTELVETRPAGDGTFQKWAAVVVPSGEEQRYTCHVQHEGLPEPLTLRWEP\n>protein|name=example-of-short-protein\nAIQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYYTEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM\n>protein|name=example-peptide\nGAAL\n>ligand|name=example-ligand-as-smiles\nCCCCCCCCCCCCCC(=O)O\n",
+      "use_example_msas": true,
+      "seed": 42
+    }
+  },
+  {
+    "id": "msa_server",
+    "label": "Protein complex + MSA server",
+    "description": "The official protein-complex example with Chai\u2019s public MMseqs2 server enabled, as an alternative to supplied alignments.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/msas/README.md",
+    "values": {
+      "job_name": "chai1-msa-server",
+      "input_mode": "text",
+      "input_fasta": ">protein|name=example-of-long-protein\nAGSHSMRYFSTSVSRPGRGEPRFIAVGYVDDTQFVRFDSDAASPRGEPRAPWVEQEGPEYWDRETQKYKRQAQTDRVSLRNLRGYYNQSEAGSHTLQWMFGCDLGPDGRLLRGYDQSAYDGKDYIALNEDLRSWTAADTAAQITQRKWEAAREAEQRRAYLEGTCVEWLRRYLENGKETLQRAEHPKTHVTHHPVSDHEATLRCWALGFYPAEITLTWQWDGEDQTQDTELVETRPAGDGTFQKWAAVVVPSGEEQRYTCHVQHEGLPEPLTLRWEP\n>protein|name=example-of-short-protein\nAIQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYYTEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM\n>protein|name=example-peptide\nGAAL\n>ligand|name=example-ligand-as-smiles\nCCCCCCCCCCCCCC(=O)O\n",
+      "use_msa_server": true,
+      "seed": 42
+    }
+  },
+  {
+    "id": "templates_7wcu",
+    "label": "7WCU \u00b7 template search",
+    "description": "Official template example with the public MSA and pdb100 template servers.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/templates/predict_with_templates.py",
+    "values": {
+      "job_name": "chai1-templates-7wcu",
+      "input_mode": "text",
+      "input_fasta": ">protein|101\nTNLCPFGEVFNATRFASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYRYRLFRKSNLKPFERDISTEIYQAGSKPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAPATVCGPKKST\n>protein|102\nEVQLVESGGGLIQPGGSLRLSCAASEFIVSRNYMSWVRQAPGTGLEWVSVIYPGGSTFYADSVKGRFTISRDNSKNTLYLQMDSLRVEDTAVYYCARDYGDFYFDYWGQGTLVTVSSASTKGPSVFPLAPSSKSTSGGTAALGCLVKDYFPEPVTVSWNSGALTSGVHTFPAVLQSSGLYSLSSVVTVPSSSLGTQTYICNVNHKPSNTKVDKKVEPKSCDK\n>protein|103\nEIVMTQSPVSLSVSPGERATLSCRASQGVASNLAWYQQKAGQAPRLLIYGASTRATGIPARFSGSGSGTEFTLTISTLQSEDSAVYYCQQYNDRPRTFGQGTKLEIKRT\n",
+      "use_msa_server": true,
+      "use_templates_server": true,
+      "seed": 1234
+    }
+  },
+  {
+    "id": "contact_7syz",
+    "label": "7SYZ \u00b7 contact restraints",
+    "description": "Official antibody\u2013viral protein example with two residue-to-residue contact restraints.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/restraints/predict_with_restraints.py",
+    "values": {
+      "job_name": "chai1-contact-7syz",
+      "input_mode": "text",
+      "input_fasta": ">protein|7SYZ_1_prot\nMMADSKLVSLNNNLSGKIKDQGKVIKNYYGTMDIKKINDGLLDSKILGAFNTVIALLGSIIIIVMNIMIIQNYTRTTDNQALIKESLQSVQQQIKALTDKIGTEIGPKVSLIDTSSTITIPANIGLLGSKISQSTSSINENVNDKCKFTLPPLKIHECNISCPNPLPFREYRPISQGVSDLVGLPNQICLQKTTSTILKPRLISYTLPINTREGVCITDPLLAVDNGFFAYSHLEKIGSCTRGIAKQRIIGVGEVLDRGDKVPSMFMTNVWTPPNPSTIHHCSSTYHEDFYYTLCAVSHVGDPILNSTSWTESLSLIRLAVRPKSDSGDYNQKYIAITKVERGKYDKVMPYGPSGIKQGDTLYFPAVGFLPRTEFQYNDSNCPIIHCKYSKAENCRLSMGVNSKSHYILRSGLLKYNLSLGGDIILQFIEIADNRLTIGSPSKIYNSLGQPVFYQASYSWDTMIKLGDVDTVDPLRVQWRNNSVISRPGQSQCPRFNVCPEVCWEGTYNDAFLIDRLNWVSAGVYLNSNQTAENPVFAVFKDNEILYQVPLAEDDTNAQKTITDCFLLENVIWCISLVEIYDTGDSVIRPKLFAVKIPAQCSES\n>protein|7SYZ_2_heavy\nQIQLVQSGPELKKPGETVKISCTTSGYTFTNYGLNWVKQAPGKGFKWMAWINTYTGEPTYADDFKGRFAFSLETSASTTYLQINNLKNEDMSTYFCARSGYYDGLKAMDYWGQGTSVTVSSAKTTPPSVYPLAPGSAAQTNSMVTLGCLVKGYFPEPVTVTWNSGSLSSGVHTFPAVLQSDLYTLSSSVTVPSSTWPSETVTCNVAHPASSTKVDKKIVPRDC\n>protein|7SYZ_3_light\nDVLMIQTPLSLPVSLGDQASISCRSSQSLIHINGNTYLEWYLQKPGQSPKLLIYKVSNRFSGVPDRFSGSGSGTDFTLKISRVEAEDLGVYYCFQGSHVPFTFGAGTKLELKRADAAPTVSIFPPSSEQLTSGGASVVCFLNNFYPKDINVKWKIDGSERQNGVLNSWTDQDSKDSTYSMSSTLTLTKDEYERHNSYTCEATHKTSTSPIVKSFNRNECVY\n",
+      "restraints_csv": "chainA,res_idxA,chainB,res_idxB,connection_type,confidence,min_distance_angstrom,max_distance_angstrom,comment,restraint_id\nA,C387,B,Y101,contact,1.0,0.0,5.5,protein-heavy,restraint_1\nC,I32,A,S483,contact,1.0,0.0,5.5,protein-light,restraint_2",
+      "seed": 42
+    }
+  },
+  {
+    "id": "pocket_7syz",
+    "label": "7SYZ \u00b7 pocket restraints",
+    "description": "Official alternative restraint table with two chain-to-residue pocket restraints.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/restraints/pocket.restraints",
+    "values": {
+      "job_name": "chai1-pocket-7syz",
+      "input_mode": "text",
+      "input_fasta": ">protein|7SYZ_1_prot\nMMADSKLVSLNNNLSGKIKDQGKVIKNYYGTMDIKKINDGLLDSKILGAFNTVIALLGSIIIIVMNIMIIQNYTRTTDNQALIKESLQSVQQQIKALTDKIGTEIGPKVSLIDTSSTITIPANIGLLGSKISQSTSSINENVNDKCKFTLPPLKIHECNISCPNPLPFREYRPISQGVSDLVGLPNQICLQKTTSTILKPRLISYTLPINTREGVCITDPLLAVDNGFFAYSHLEKIGSCTRGIAKQRIIGVGEVLDRGDKVPSMFMTNVWTPPNPSTIHHCSSTYHEDFYYTLCAVSHVGDPILNSTSWTESLSLIRLAVRPKSDSGDYNQKYIAITKVERGKYDKVMPYGPSGIKQGDTLYFPAVGFLPRTEFQYNDSNCPIIHCKYSKAENCRLSMGVNSKSHYILRSGLLKYNLSLGGDIILQFIEIADNRLTIGSPSKIYNSLGQPVFYQASYSWDTMIKLGDVDTVDPLRVQWRNNSVISRPGQSQCPRFNVCPEVCWEGTYNDAFLIDRLNWVSAGVYLNSNQTAENPVFAVFKDNEILYQVPLAEDDTNAQKTITDCFLLENVIWCISLVEIYDTGDSVIRPKLFAVKIPAQCSES\n>protein|7SYZ_2_heavy\nQIQLVQSGPELKKPGETVKISCTTSGYTFTNYGLNWVKQAPGKGFKWMAWINTYTGEPTYADDFKGRFAFSLETSASTTYLQINNLKNEDMSTYFCARSGYYDGLKAMDYWGQGTSVTVSSAKTTPPSVYPLAPGSAAQTNSMVTLGCLVKGYFPEPVTVTWNSGSLSSGVHTFPAVLQSDLYTLSSSVTVPSSTWPSETVTCNVAHPASSTKVDKKIVPRDC\n>protein|7SYZ_3_light\nDVLMIQTPLSLPVSLGDQASISCRSSQSLIHINGNTYLEWYLQKPGQSPKLLIYKVSNRFSGVPDRFSGSGSGTDFTLKISRVEAEDLGVYYCFQGSHVPFTFGAGTKLELKRADAAPTVSIFPPSSEQLTSGGASVVCFLNNFYPKDINVKWKIDGSERQNGVLNSWTDQDSKDSTYSMSSTLTLTKDEYERHNSYTCEATHKTSTSPIVKSFNRNECVY\n",
+      "restraints_csv": "chainA,res_idxA,chainB,res_idxB,connection_type,confidence,min_distance_angstrom,max_distance_angstrom,comment,restraint_id\nB,,A,C387,pocket,1.0,0.0,5.5,protein-heavy,restraint_0\nC,,A,S483,pocket,1.0,0.0,5.5,protein-light,restraint_1\n",
+      "seed": 42
+    }
+  },
+  {
+    "id": "glycan_1ac5",
+    "label": "1AC5 \u00b7 glycosylated protein",
+    "description": "Official two-glycan covalent-bond example.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/covalent_bonds/predict_glycosylated.py",
+    "values": {
+      "job_name": "chai1-glycan-1ac5",
+      "input_mode": "text",
+      "input_fasta": ">protein|1AC5\nLPSSEEYKVAYELLPGLSEVPDPSNIPQMHAGHIPLRSEDADEQDSSDLEYFFWKFTNNDSNGNVDRPLIIWLNGGPGCSSMDGALVESGPFRVNSDGKLYLNEGSWISKGDLLFIDQPTGTGFSVEQNKDEGKIDKNKFDEDLEDVTKHFMDFLENYFKIFPEDLTRKIILSGESYAGQYIPFFANAILNHNKFSKIDGDTYDLKALLIGNGWIDPNTQSLSYLPFAMEKKLIDESNPNFKHLTNAHENCQNLINSASTDEAAHFSYQECENILNLLLSYTRESSQKGTADCLNMYNFNLKDSYPSCGMNWPKDISFVSKFFSTPGVIDSLHLDSDKIDHWKECTNSVGTKLSNPISKPSIHLLPGLLESGIEIVLFNGDKDLICNNKGVLDTIDNLKWGGIKGFSDDAVSFDWIHKSKSTDDSEEFSGYVKYDRNLTFVSVYNASHMVPFDKSLVSRGIVDIYSNDVMIIDNNGKNVMITT\n>glycan|two-sugar\nNAG(4-1 NAG)\n>glycan|one-sugar\nNAG",
+      "restraints_csv": "chainA,res_idxA,chainB,res_idxB,connection_type,confidence,min_distance_angstrom,max_distance_angstrom,comment,restraint_id\nA,N437@N,B,@C1,covalent,1.0,0.0,0.0,protein-glycan,bond1\nA,N445@N,C,@C1,covalent,1.0,0.0,0.0,protein-glycan,bond2",
+      "seed": 42
+    }
+  },
+  {
+    "id": "covalent_ligand_8cyo",
+    "label": "8CYO \u00b7 covalent ligand",
+    "description": "Official SMILES-ligand covalent-bond example.",
+    "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/covalent_bonds/predict_covalent_ligand.py",
+    "values": {
+      "job_name": "chai1-covalent-ligand-8cyo",
+      "input_mode": "text",
+      "input_fasta": ">protein|8cyo-protein\nMKKGHHHHHHGAISLISALVRAHVDSNPAMTSLDYSRFQANPDYQMSGDDTQHIQQFYDLLTGSMEIIRGWAEKIPGFADLPKADQDLLFESAFLELFVLRLAYRSNPVEGKLIFCNGVVLHRLQCVRGFGEWIDSIVEFSSNLQNMNIDISAFSCIAALAMVTERHGLKEPKRVEELQNKIVNTLKDHVTFNNGGLNRPNYLSKLLGKLPELRTLCTQGLQRIFYLKLEDLVPPPAIIDKLFLDTLPF\n>ligand|8cyo-ligand\nc1cc(c(cc1OCC(=O)NCCS)Cl)Cl",
+      "restraints_csv": "chainA,res_idxA,chainB,res_idxB,connection_type,confidence,min_distance_angstrom,max_distance_angstrom,comment,restraint_id\nA,C217@SG,B,@S1,covalent,1.0,0.0,0.0,protein-ligand,bond1\n",
+      "seed": 42
+    }
+  }
+]

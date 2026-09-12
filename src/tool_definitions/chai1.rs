@@ -13,7 +13,26 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     license_type: LicenseCategory::Permissive,
     expense: ProcessExpense::Expensive,
     primary_output: Some(DataType::MmCif),
-    primary_inputs: &[PrimaryInput::residues("proteins", &[DataType::AaSequence])],
+    primary_inputs: &[
+        PrimaryInput::document(
+            "sequence_molecules",
+            &[
+                DataType::AaSequence,
+                DataType::DnaSequence,
+                DataType::RnaSequence,
+            ],
+            "molecule_boxes",
+        ),
+        PrimaryInput::document(
+            "input_fasta",
+            &[
+                DataType::AaSequence,
+                DataType::DnaSequence,
+                DataType::RnaSequence,
+            ],
+            "chai_fasta",
+        ),
+    ],
     top_choice: true,
     spec: SpecData {
         summary: "Molecular structure prediction, including proteins. Similar to AlphaFold3.",
@@ -24,12 +43,14 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         license_details: "Apache 2.0 for both the code and the model weights; upstream states this covers commercial use including drug discovery. Earlier releases used the narrower Chai Discovery Community Licence.",
         repo_url: Some("https://github.com/chaidiscovery/chai-lab"),
         home_url: Some("https://www.chaidiscovery.com/"),
-        docs_url: None,
-        input_params_url: None,
-        examples_url: None,
-        paper_url: Some("https://www.biorxiv.org/content/10.1101/2024.10.10.615955"),
+        docs_url: Some("https://github.com/chaidiscovery/chai-lab/tree/main/examples"),
+        input_params_url: Some(
+            "https://github.com/chaidiscovery/chai-lab/blob/main/chai_lab/chai1.py#L482",
+        ),
+        examples_url: Some("https://github.com/chaidiscovery/chai-lab/tree/main/examples"),
+        paper_url: Some("https://www.biorxiv.org/content/10.1101/2024.10.10.615955v2"),
         license: License::ApacheV2,
-        license_url: None,
-        tested: false,
+        license_url: Some("https://github.com/chaidiscovery/chai-lab/blob/main/LICENSE"),
+        tested: true,
     },
 };

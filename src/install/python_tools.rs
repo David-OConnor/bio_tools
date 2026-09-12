@@ -83,7 +83,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                 ..UvRecipe::simple(
                     Tool::Chai1.slug(),
                     "3.11",
-                    &["chai_lab==0.6.1"],
+                    &["chai_lab==0.6.1", "urllib3>=2,<3", "requests>=2.32,<3"],
                     &["chai-lab"],
                 )
             },
