@@ -76,6 +76,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             installer,
             UvRecipe {
                 extra_indexes: &["https://download.pytorch.org/whl/cu124"],
+                index_strategy: Some("unsafe-best-match"),
                 gpu_probe: Some(
                     "import torch; assert torch.cuda.is_available() and \
                      torch.cuda.is_bf16_supported(), 'Chai-1 requires a CUDA GPU with bfloat16'",

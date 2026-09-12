@@ -422,7 +422,7 @@
       "kind": "number",
       "default": 5,
       "required": false,
-      "help": "",
+      "help": "Number of candidate structures to generate per trunk. More samples use more GPU memory; try 1 for large complexes or 16 GB GPUs.",
       "options": [],
       "rows": null,
       "minimum": 1,

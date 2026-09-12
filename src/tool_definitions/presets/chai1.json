@@ -80,13 +80,14 @@
   {
     "id": "glycan_1ac5",
     "label": "1AC5 \u00b7 glycosylated protein",
-    "description": "Official two-glycan covalent-bond example.",
+    "description": "Official two-glycan covalent-bond example. Uses one diffusion sample for 16 GB GPUs; raise the sample count if more memory is available.",
     "source_url": "https://github.com/chaidiscovery/chai-lab/blob/main/examples/covalent_bonds/predict_glycosylated.py",
     "values": {
       "job_name": "chai1-glycan-1ac5",
       "input_mode": "text",
       "input_fasta": ">protein|1AC5\nLPSSEEYKVAYELLPGLSEVPDPSNIPQMHAGHIPLRSEDADEQDSSDLEYFFWKFTNNDSNGNVDRPLIIWLNGGPGCSSMDGALVESGPFRVNSDGKLYLNEGSWISKGDLLFIDQPTGTGFSVEQNKDEGKIDKNKFDEDLEDVTKHFMDFLENYFKIFPEDLTRKIILSGESYAGQYIPFFANAILNHNKFSKIDGDTYDLKALLIGNGWIDPNTQSLSYLPFAMEKKLIDESNPNFKHLTNAHENCQNLINSASTDEAAHFSYQECENILNLLLSYTRESSQKGTADCLNMYNFNLKDSYPSCGMNWPKDISFVSKFFSTPGVIDSLHLDSDKIDHWKECTNSVGTKLSNPISKPSIHLLPGLLESGIEIVLFNGDKDLICNNKGVLDTIDNLKWGGIKGFSDDAVSFDWIHKSKSTDDSEEFSGYVKYDRNLTFVSVYNASHMVPFDKSLVSRGIVDIYSNDVMIIDNNGKNVMITT\n>glycan|two-sugar\nNAG(4-1 NAG)\n>glycan|one-sugar\nNAG",
       "restraints_csv": "chainA,res_idxA,chainB,res_idxB,connection_type,confidence,min_distance_angstrom,max_distance_angstrom,comment,restraint_id\nA,N437@N,B,@C1,covalent,1.0,0.0,0.0,protein-glycan,bond1\nA,N445@N,C,@C1,covalent,1.0,0.0,0.0,protein-glycan,bond2",
+      "num_samples": 1,
       "seed": 42
     }
   },
