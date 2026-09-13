@@ -48,8 +48,14 @@ bio_tools run open_dde --version
 
 bio_tools list-quick
 ```
-Note: Does not break system packages; this just downloads a binary and adds it to the path. That 
-override is required only on certain Linux distributions.
+Note: This does not break system packages; this just downloads a binary and adds it to the path. That 
+override is required only on certain newer Linux distributions. If you are still nervous about that, you can
+use *pipx* instead:
+
+```bash
+sudo apt install pipx
+pipx install bio_tools_app
+```
 
 
 ### As a CLI application

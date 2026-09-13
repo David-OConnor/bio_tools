@@ -33,7 +33,18 @@ fn format_status(status: &bio_tools::install::ToolStatus) -> String {
     }
 }
 
-const USAGE: &str = "Usage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status-quick <tool>\n  bio_tools [--root <directory>] status or status-full <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools [--root <directory>] list-quick\n  bio_tools [--root <directory>] list or list-full\n  bio_tools [--root <directory>] dir\n  bio_tools metadata <tool>\n\n`status` and `list` remain aliases for their full variants. `dir` prints the directory tools are installed to.\nThat directory is $BIO_TOOLS_ROOT when set, otherwise this platform's per-user data directory; `--root <directory>` overrides both.";
+macro_rules! version_line {
+    () => {
+        concat!("Bio Tools CLI application, version ", env!("CARGO_PKG_VERSION"))
+    };
+}
+
+const VERSION_LINE: &str = version_line!();
+
+const USAGE: &str = concat!(
+    version_line!(),
+    "\n\nUsage:\n  bio_tools [--root <directory>] install <tool>\n  bio_tools [--root <directory>] uninstall <tool>\n  bio_tools [--root <directory>] status-quick <tool>\n  bio_tools [--root <directory>] status or status-full <tool>\n  bio_tools [--root <directory>] run <tool> [-- <tool arguments...>]\n  bio_tools [--root <directory>] list-quick\n  bio_tools [--root <directory>] list or list-full\n  bio_tools [--root <directory>] dir\n  bio_tools metadata <tool>\n  bio_tools --version or -v\n\n`status` and `list` remain aliases for their full variants. `dir` prints the directory tools are installed to.\nThat directory is $BIO_TOOLS_ROOT when set, otherwise this platform's per-user data directory; `--root <directory>` overrides both."
+);
 
 fn main() {
     if let Err(error) = real_main() {
@@ -46,6 +57,11 @@ fn real_main() -> Result<(), Box<dyn Error>> {
     let mut args = env::args_os().skip(1).collect::<Vec<_>>();
     if args.is_empty() || matches!(args[0].to_str(), Some("-h" | "--help" | "help")) {
         println!("{USAGE}");
+        return Ok(());
+    }
+
+    if matches!(args[0].to_str(), Some("-v" | "--version" | "version")) {
+        println!("{VERSION_LINE}");
         return Ok(());
     }
 
