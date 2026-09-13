@@ -12,9 +12,9 @@
     packaged with `cargo publish --dry-run` and every wheel and sdist is built up front, so a
     broken build never leaves one registry published and the other not.
 
-    bio_tools_app ships the compiled executable rather than Python code, so its wheel is
-    platform-specific and this run only produces the Windows one. Run ./publish_cli_linux.sh on
-    Linux afterwards, from the commit this script pushes, for the Linux wheel.
+    Both wheels contain compiled code, so both are platform-specific and this run only produces
+    the Windows ones. Run ./publish_linux.sh on Linux afterwards, from the commit this script
+    pushes, for the Linux pair.
 
 .EXAMPLE
     ./publish.ps1
@@ -28,7 +28,7 @@
     ./publish.ps1 -CliOnly
     Publishes just the Windows bio_tools_app wheel, at the version already in Cargo.toml. No
     version bump, no commit, no crates.io, no athanor_bio_tools. This is the Windows counterpart
-    to ./publish_cli_linux.sh, and the way to add a wheel to a release that is already out.
+    to ./publish_linux.sh --cli-only, and the way to add a wheel to a release that is already out.
 #>
 # Positional binding is off so that a mistyped switch — `--CliOnly` instead of `-CliOnly`, say —
 # reports itself as an unrecognized argument rather than being silently bound to -Bump.
@@ -127,7 +127,7 @@ function Read-PypiToken {
 # The three parts of a bio_tools_app release, shared by a full run and by -CliOnly.
 
 # bio_tools_app gets its own token variable, because a token scoped to athanor-bio-tools cannot
-# upload to bio-tools-app. publish_cli_linux.sh reads the same variable on Linux.
+# upload to bio-tools-app. publish_linux.sh reads the same variable on Linux.
 function Resolve-CliToken {
     if (-not $env:BIO_TOOLS_APP_PYPI_TOKEN) {
         # A User-scope variable set on an earlier run is not in this process if the shell predates
@@ -215,7 +215,7 @@ foreach ($tool in @('git', 'cargo', 'uv')) {
 #
 # Adds this platform's bio_tools_app wheel to whatever version is already in Cargo.toml, and
 # touches nothing else: no bump, no commit, no other package. The Windows counterpart to
-# ./publish_cli_linux.sh, and the way to attach a wheel to a release that is already out.
+# ./publish_linux.sh --cli-only, and the way to attach a wheel to a release that is already out.
 if ($CliOnly) {
     # These only describe a full release, so accepting them here would imply a bump that never
     # happens. Better to say so than to ignore them.
@@ -262,7 +262,7 @@ if ($CliOnly) {
     Write-Host "Published bio_tools_app $cliVersion for Windows." -ForegroundColor Green
     Write-Host '    https://pypi.org/project/bio-tools-app'
     Write-Host ''
-    Write-Host 'Run ./publish_cli_linux.sh on Linux, from this same commit, for the Linux wheel.' -ForegroundColor DarkGray
+    Write-Host 'Run ./publish_linux.sh --cli-only on Linux, from this same commit, for the Linux wheel.' -ForegroundColor DarkGray
     exit 0
 }
 
@@ -405,7 +405,8 @@ if (-not $SkipRust) { Write-Host '    https://crates.io/crates/bio_tools' }
 if (-not $SkipPython) { Write-Host '    https://pypi.org/project/athanor-bio-tools' }
 if (-not $SkipCli) { Write-Host '    https://pypi.org/project/bio-tools-app  (Windows wheel)' }
 Write-Host ''
-Write-Host 'Note: both wheels are built for this platform only. For athanor_bio_tools, other' -ForegroundColor DarkGray
-Write-Host 'platforms install from the sdist and need a Rust toolchain. bio_tools_app has no sdist,' -ForegroundColor DarkGray
-Write-Host 'so Linux users get nothing until you run this from a Linux checkout at this commit:' -ForegroundColor DarkGray
-Write-Host '    ./publish_cli_linux.sh' -ForegroundColor DarkGray
+Write-Host 'Note: both wheels are built for this platform only. Until the Linux ones are up,' -ForegroundColor DarkGray
+Write-Host 'athanor_bio_tools installs there from the sdist and needs a Rust toolchain, and' -ForegroundColor DarkGray
+Write-Host 'bio_tools_app — which has no sdist — is not installable at all. Run this from a Linux' -ForegroundColor DarkGray
+Write-Host 'checkout at this commit to publish both:' -ForegroundColor DarkGray
+Write-Host '    ./publish_linux.sh' -ForegroundColor DarkGray
