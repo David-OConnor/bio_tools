@@ -594,10 +594,19 @@ fn failing(detail: impl Into<String>) -> PyStatus {
     }
 }
 
+/// Location of the embedded, versioned scientific adapter package.
+#[pyfunction]
+fn adapter_package_path() -> PyResult<String> {
+    bio_tools_rs::adapters::package_path()
+        .map(|path| path.to_string_lossy().into_owned())
+        .map_err(|error| pyo3::exceptions::PyRuntimeError::new_err(error.to_string()))
+}
+
 #[pymodule]
 fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     metadata::register(m)?;
+    m.add_function(wrap_pyfunction!(adapter_package_path, m)?)?;
     run::register(m)?;
     m.add_class::<PyTool>()?;
     m.add_class::<PyStatus>()?;

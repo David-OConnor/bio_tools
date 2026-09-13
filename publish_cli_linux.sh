@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
-# Builds and publishes the Linux `bio_tools_app` wheel.
+# Builds and publishes the Linux `bio_tools_app` wheel to Pypi.
+# Run this after `publish.ps`, which publishes the rust crate, and
+# the Windows wheel to Pypi.
 #
 # The wheel contains the prebuilt `bio_tools` executable and no Python code, so
 # `pip install bio_tools_app` puts `bio_tools` on PATH without a Rust toolchain. Wheels are

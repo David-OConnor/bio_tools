@@ -15,6 +15,7 @@
 
 use std::{fmt, io, path::Path};
 
+pub mod adapters;
 mod input;
 pub mod install;
 pub mod run;
