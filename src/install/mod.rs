@@ -466,6 +466,12 @@ impl Installer {
         chai1::ensure_example_msas(self)
     }
 
+    /// Build Kalign if it is not already installed, and return the directory holding it. Chai-1's
+    /// install does this too; this is for a first template run on an installation that predates it.
+    pub fn ensure_chai1_kalign(&self) -> Result<PathBuf, InstallError> {
+        chai1::ensure_kalign(self)
+    }
+
     /// Install or refresh one tool. Recipes are designed to be safely rerunnable.
     pub fn install(&mut self, tool: Tool) -> Result<(), InstallError> {
         if !tool.is_supported() {

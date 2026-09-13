@@ -615,12 +615,27 @@ fn chai1_example_msas(py: Python<'_>, process_executables: PathBuf) -> PyResult<
     .map_err(install_error)
 }
 
+/// Build Chai-1's Kalign under `process_executables` if it is not already there, and return the
+/// directory holding the binary. Chai-1 resolves `kalign` through PATH, so a template run puts
+/// this directory on the child's PATH.
+#[pyfunction]
+fn chai1_kalign(py: Python<'_>, process_executables: PathBuf) -> PyResult<PathBuf> {
+    py.detach(move || {
+        // Silent for the same reason as `chai1_example_msas`: this runs inside a tool request.
+        RustInstaller::for_process_executables(process_executables)?
+            .with_reporter(|_| {})
+            .ensure_chai1_kalign()
+    })
+    .map_err(install_error)
+}
+
 #[pymodule]
 fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     metadata::register(m)?;
     m.add_function(wrap_pyfunction!(adapter_package_path, m)?)?;
     m.add_function(wrap_pyfunction!(chai1_example_msas, m)?)?;
+    m.add_function(wrap_pyfunction!(chai1_kalign, m)?)?;
     run::register(m)?;
     m.add_class::<PyTool>()?;
     m.add_class::<PyStatus>()?;

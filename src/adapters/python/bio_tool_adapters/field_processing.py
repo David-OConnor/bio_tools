@@ -212,7 +212,9 @@ class MoleculeBox:
     templates_path: str = ""
 
 
-def _molecule_ids(molecule: dict[str, Any], default: str) -> list[str]:
+def _molecule_ids(
+    molecule: dict[str, Any], default: str, maximum_length: int
+) -> list[str]:
     if "id" not in molecule:
         return [default]
     raw = molecule.get("id")
@@ -233,9 +235,12 @@ def _molecule_ids(molecule: dict[str, Any], default: str) -> list[str]:
     if len(values) > 64:
         raise ToolInputError(f'Molecule "{default}" accepts at most 64 entity IDs.')
     for value in values:
-        if len(value) > 20 or any(character.isspace() for character in value):
+        if len(value) > maximum_length or any(
+            character.isspace() for character in value
+        ):
             raise ToolInputError(
-                f'Molecule "{default}" entity IDs must be 1-20 characters without spaces.'
+                f'Molecule "{default}" entity IDs must be 1-{maximum_length} '
+                "characters without spaces."
             )
     if len(set(values)) != len(values):
         raise ToolInputError(f'Molecule "{default}" has duplicated entity IDs.')
@@ -265,6 +270,7 @@ def molecule_boxes(
     require_ids: bool = False,
     id_count_matches: bool = False,
     modification_position_base: int = 1,
+    maximum_id_length: int = 20,
 ) -> list[MoleculeBox]:
     """Parse and validate a `molecule_builder` field: the JSON list of boxes
     the shared JS widget builds (see tool.js), one per chain/ligand/ion.
@@ -293,7 +299,7 @@ def molecule_boxes(
             )
         automatic_chain = string.ascii_uppercase[offset]
         ids = (
-            _molecule_ids(molecule, automatic_chain)
+            _molecule_ids(molecule, automatic_chain, maximum_id_length)
             if allow_ids
             else [automatic_chain]
         )

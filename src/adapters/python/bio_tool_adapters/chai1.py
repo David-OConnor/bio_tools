@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import string
 import tempfile
@@ -56,9 +57,18 @@ def _chain_name(index: int) -> str:
     return name
 
 
-def _from_boxes(payload: dict[str, Any]) -> str:
+def from_boxes(payload: dict[str, Any]) -> str:
+    """The molecule boxes as Chai's FASTA, for "Set parameters here".
+
+    A box's name is its record's name, because that is what the restraints
+    below refer to an entity by; an unnamed box falls back to its position,
+    which is A, B, C in the order the boxes are in.
+    """
+
     records: list[str] = []
-    for box in molecule_boxes(payload):
+    # A record's name is free text rather than a chain letter, so it is not held
+    # to the short entity IDs the JSON and YAML dialects want.
+    for box in molecule_boxes(payload, allow_ids=True, maximum_id_length=64):
         if box.kind == "ligand":
             if box.ligand.upper().startswith("CCD_"):
                 raise ToolInputError(
@@ -294,7 +304,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     payload = document_input(
         payload,
         "input_fasta",
-        from_boxes=_from_boxes,
+        from_boxes=from_boxes,
         upload_field="input_file",
         max_length=500_000,
     )
@@ -355,6 +365,17 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
                 "template_hits_path must be a file on the compute node."
             )
         template_hits_path = str(hits)
+    kalign_directory = ""
+    if use_templates or template_hits_path:
+        # Every template hit is aligned to the query by shelling out to `kalign`, which
+        # chai_lab looks up on PATH and asserts on if it is missing. Installing Chai-1
+        # builds it; an older installation gets it on first use.
+        try:
+            kalign_directory = str(Path(bio_tools.chai1_kalign(PROCESS_EXECUTABLES)))
+        except RuntimeError as exc:
+            raise ToolUnavailable(
+                f"Templates need Kalign, which could not be built: {exc}"
+            ) from exc
     min_distance = decimal(
         payload, "restraints_min_distance", default=0, minimum=0, maximum=100
     )
@@ -438,7 +459,14 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             )
             command += ["--constraint-path", "restraints.restraints"]
         command.extend(["input.fasta", "output"])
-        result = run_command(command, cwd=workdir)
+        environment = None
+        if kalign_directory:
+            environment = {
+                "PATH": os.pathsep.join(
+                    filter(None, (kalign_directory, os.environ.get("PATH", "")))
+                )
+            }
+        result = run_command(command, cwd=workdir, env=environment)
         generated = readable_files(workdir / "output")
     return {
         "status": "completed",

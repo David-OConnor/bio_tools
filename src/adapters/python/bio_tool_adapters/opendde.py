@@ -46,7 +46,7 @@ _MODIFICATION_KEYS = {
 }
 
 
-def _from_boxes(payload: dict[str, Any]) -> str:
+def from_boxes(payload: dict[str, Any]) -> str:
     """The molecule boxes as one OpenDDE job, for "Set parameters here".
 
     One job holding every box, which is what the boxes describe: a single
@@ -199,7 +199,7 @@ def _choice(
 
 
 def run(payload: dict[str, Any]) -> dict[str, Any]:
-    payload = document_input(payload, "input_json", from_boxes=_from_boxes)
+    payload = document_input(payload, "input_json", from_boxes=from_boxes)
     document, input_json = _input_document(payload)
     seeds = _seeds(payload)
     samples = integer(payload, "samples", default=5, minimum=1, maximum=64)

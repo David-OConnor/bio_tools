@@ -34,7 +34,7 @@ from .status_check import CheckResult, ToolStatus, probe_cli
 SPEC = catalog_spec("boltz2", fields=tool_fields("boltz2"))
 
 
-def _from_boxes(payload: dict[str, Any]) -> str:
+def from_boxes(payload: dict[str, Any]) -> str:
     """The molecule boxes as Boltz YAML, for "Set parameters here"."""
 
     boxes = molecule_boxes(payload, allow_ids=True, require_ids=True)
@@ -88,7 +88,7 @@ def _from_boxes(payload: dict[str, Any]) -> str:
 def run(payload: dict[str, Any]) -> dict[str, Any]:
     name = safe_name(payload, default="boltz2-demo")
     payload = document_input(
-        payload, "yaml_spec", from_boxes=_from_boxes, max_length=500_000
+        payload, "yaml_spec", from_boxes=from_boxes, max_length=500_000
     )
     yaml_input = text(payload, "yaml_spec", max_length=500_000)
 

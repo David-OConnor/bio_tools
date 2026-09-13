@@ -81,7 +81,7 @@ def _choice(
     return value
 
 
-def _from_boxes(payload: dict[str, Any]) -> str:
+def from_boxes(payload: dict[str, Any]) -> str:
     """The molecule boxes as a StructurePredictionInput, for "Set parameters here"."""
 
     boxes = molecule_boxes(
@@ -141,7 +141,7 @@ def _from_boxes(payload: dict[str, Any]) -> str:
 
 def run(payload: dict[str, Any]) -> dict[str, Any]:
     name = safe_name(payload, default="esmfold2-demo")
-    payload = document_input(payload, "input_json", from_boxes=_from_boxes)
+    payload = document_input(payload, "input_json", from_boxes=from_boxes)
     document, input_json = _input_document(payload)
     num_loops = integer(payload, "num_loops", default=20, minimum=1, maximum=64)
     sampling_steps = integer(

@@ -91,6 +91,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
                 },
             )?;
             installer.ensure_chai1_example_msas()?;
+            installer.ensure_chai1_kalign()?;
             Ok(())
         }
         Tool::Protenix => install_protenix(installer),
