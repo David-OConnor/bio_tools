@@ -17,14 +17,11 @@ const FILES: &[(&str, &[u8])] = &[
     ("bio_tool_adapters/proteinmpnn.py", include_bytes!("python/bio_tool_adapters/proteinmpnn.py")),
     ("bio_tool_adapters/rfdiffusion3.py", include_bytes!("python/bio_tool_adapters/rfdiffusion3.py")),
     ("bio_tool_adapters/status_check.py", include_bytes!("python/bio_tool_adapters/status_check.py")),
-    ("bio_tool_adapters/tool_data/chai1/LICENSE", include_bytes!("python/bio_tool_adapters/tool_data/chai1/LICENSE")),
-    ("bio_tool_adapters/tool_data/chai1/msas/703adc2c74b8d7e613549b6efcf37126da7963522dc33852ad3c691eef1da06f.aligned.pqt", include_bytes!("python/bio_tool_adapters/tool_data/chai1/msas/703adc2c74b8d7e613549b6efcf37126da7963522dc33852ad3c691eef1da06f.aligned.pqt")),
-    ("bio_tool_adapters/tool_data/chai1/msas/952a89ff052afbe8cd1656a317de8a4aa2457d6d73f50d228961bb84efd17e02.aligned.pqt", include_bytes!("python/bio_tool_adapters/tool_data/chai1/msas/952a89ff052afbe8cd1656a317de8a4aa2457d6d73f50d228961bb84efd17e02.aligned.pqt")),
-    ("bio_tool_adapters/tool_data/chai1/msas/SOURCE.txt", include_bytes!("python/bio_tool_adapters/tool_data/chai1/msas/SOURCE.txt")),
     ("bio_tool_adapters/tool_scripts/esmfold2_inference.py", include_bytes!("python/bio_tool_adapters/tool_scripts/esmfold2_inference.py")),
 ];
 
-/// Materialize the versioned adapter package, including its licensed example assets.
+/// Materialize the versioned adapter package. Large example data, such as Chai-1's MSAs, is not
+/// embedded; the installer downloads it instead.
 pub fn package_path() -> io::Result<PathBuf> {
     let mut hash = std::collections::hash_map::DefaultHasher::new();
     for (name, data) in FILES { name.hash(&mut hash); data.hash(&mut hash); }

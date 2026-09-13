@@ -9,7 +9,10 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import bio_tools
+
 from . import (
+    PROCESS_EXECUTABLES,
     ToolInputError,
     ToolUnavailable,
     catalog_spec,
@@ -36,7 +39,6 @@ SPEC = catalog_spec(
     "chai1",
     fields=tool_fields("chai1"),
 )
-EXAMPLE_MSAS = Path(__file__).resolve().parent / "tool_data" / "chai1" / "msas"
 
 
 _FASTA_HEADER = re.compile(
@@ -308,11 +310,14 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             "Choose one MSA source: server, local directory, or supplied examples."
         )
     if use_example_msas:
-        if not EXAMPLE_MSAS.is_dir():
+        # Installing Chai-1 downloads these; an older installation gets them on first use.
+        try:
+            example_msas = Path(bio_tools.chai1_example_msas(PROCESS_EXECUTABLES))
+        except RuntimeError as exc:
             raise ToolUnavailable(
-                "Chai’s supplied MSA files are not installed with Bio Web."
-            )
-        filenames = {path.name for path in EXAMPLE_MSAS.glob("*.aligned.pqt")}
+                f"Chai’s supplied MSA files could not be downloaded: {exc}"
+            ) from exc
+        filenames = {path.name for path in example_msas.glob("*.aligned.pqt")}
         hashes = {
             hashlib.sha256(sequence.encode()).hexdigest() + ".aligned.pqt"
             for sequence in sequences.values()
@@ -321,7 +326,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             raise ToolInputError(
                 "The supplied MSAs require Chai’s official example protein sequences."
             )
-        msa_directory = str(EXAMPLE_MSAS)
+        msa_directory = str(example_msas)
     if use_templates and template_hits_path:
         raise ToolInputError(
             "Choose either the template server or a template hits file."

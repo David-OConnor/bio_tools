@@ -72,23 +72,27 @@ impl<'a> UvRecipe<'a> {
 
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
     match tool {
-        Tool::Chai1 => install_recipe(
-            installer,
-            UvRecipe {
-                extra_indexes: &["https://download.pytorch.org/whl/cu124"],
-                index_strategy: Some("unsafe-best-match"),
-                gpu_probe: Some(
-                    "import torch; assert torch.cuda.is_available() and \
-                     torch.cuda.is_bf16_supported(), 'Chai-1 requires a CUDA GPU with bfloat16'",
-                ),
-                ..UvRecipe::simple(
-                    Tool::Chai1.slug(),
-                    "3.11",
-                    &["chai_lab==0.6.1", "urllib3>=2,<3", "requests>=2.32,<3"],
-                    &["chai-lab"],
-                )
-            },
-        ),
+        Tool::Chai1 => {
+            install_recipe(
+                installer,
+                UvRecipe {
+                    extra_indexes: &["https://download.pytorch.org/whl/cu124"],
+                    index_strategy: Some("unsafe-best-match"),
+                    gpu_probe: Some(
+                        "import torch; assert torch.cuda.is_available() and \
+                         torch.cuda.is_bf16_supported(), 'Chai-1 requires a CUDA GPU with bfloat16'",
+                    ),
+                    ..UvRecipe::simple(
+                        Tool::Chai1.slug(),
+                        "3.11",
+                        &["chai_lab==0.6.1", "urllib3>=2,<3", "requests>=2.32,<3"],
+                        &["chai-lab"],
+                    )
+                },
+            )?;
+            installer.ensure_chai1_example_msas()?;
+            Ok(())
+        }
         Tool::Protenix => install_protenix(installer),
         Tool::EsmFold2 => install_esmfold(installer),
         Tool::ImmuneBuilder => install_recipe(

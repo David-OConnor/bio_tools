@@ -4,7 +4,7 @@
     Publishes bio_tools to crates.io, and athanor_bio_tools and bio_tools_app to PyPI.
 
 .DESCRIPTION
-    Bumps the version, syncs it across the Rust and Python manifests, copies README.md to
+    Publishes the version in Cargo.toml (or -Version), syncs it across the Rust and Python manifests, copies README.md to
     python/PYPI_README.md and python_cli/PYPI_README.md, commits and pushes, then publishes all
     three packages.
 
@@ -18,10 +18,9 @@
 
 .EXAMPLE
     ./publish.ps1
-    Bumps the patch version and publishes.
+    Publishes the version already in Cargo.toml.
 
 .EXAMPLE
-    ./publish.ps1 -Bump minor
     ./publish.ps1 -Version 1.0.0
     ./publish.ps1 -DryRun
 
@@ -35,11 +34,8 @@
 # reports itself as an unrecognized argument rather than being silently bound to -Bump.
 [CmdletBinding(PositionalBinding = $false)]
 param(
-    # Which component to increment. Ignored when -Version is given.
-    [ValidateSet('patch', 'minor', 'major')]
-    [string] $Bump = 'patch',
-
-    # An explicit version, e.g. "1.0.0", instead of bumping.
+    # An explicit version to set, e.g. "1.0.0". Without it, the version already in Cargo.toml is
+    # published as-is; this script never increments the version on its own.
     [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string] $Version,
 
@@ -209,19 +205,6 @@ function Set-ManifestVersion {
     return $true
 }
 
-function Step-Version {
-    param(
-        [Parameter(Mandatory)][string] $Current,
-        [Parameter(Mandatory)][string] $Component
-    )
-    $parts = $Current.Split('.') | ForEach-Object { [int] $_ }
-    switch ($Component) {
-        'major' { return "$($parts[0] + 1).0.0" }
-        'minor' { return "$($parts[0]).$($parts[1] + 1).0" }
-        'patch' { return "$($parts[0]).$($parts[1]).$($parts[2] + 1)" }
-    }
-}
-
 foreach ($tool in @('git', 'cargo', 'uv')) {
     if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
         throw "$tool is not on PATH; it is required to publish."
@@ -236,7 +219,7 @@ foreach ($tool in @('git', 'cargo', 'uv')) {
 if ($CliOnly) {
     # These only describe a full release, so accepting them here would imply a bump that never
     # happens. Better to say so than to ignore them.
-    foreach ($conflict in @('Bump', 'Version', 'SkipRust', 'SkipPython', 'SkipCli')) {
+    foreach ($conflict in @('Version','SkipRust', 'SkipPython', 'SkipCli')) {
         if ($PSBoundParameters.ContainsKey($conflict)) {
             throw "-$conflict cannot be combined with -CliOnly; -CliOnly publishes the CLI wheel at the version already in Cargo.toml."
         }
@@ -316,7 +299,7 @@ if (-not $DryRun) {
 }
 
 $currentVersion = Get-ManifestVersion -Path $rootManifest
-$newVersion = if ($Version) { $Version } else { Step-Version -Current $currentVersion -Component $Bump }
+$newVersion = if ($Version) { $Version } else { $currentVersion }
 
 Write-Host ''
 Write-Host "bio_tools           $currentVersion -> $newVersion  (crates.io)" -ForegroundColor Green
@@ -394,7 +377,11 @@ if ($DryRun) {
 # --- Commit and push -------------------------------------------------------------------
 
 Invoke-Native -Description 'Staging changes' -Program 'git' -Arguments @('add', '-A')
-Invoke-Native -Description 'Committing' -Program 'git' -Arguments @('commit', '-m', "publish $newVersion")
+# A re-run after a failed publish has nothing new to commit, and `git commit` would fail on that.
+& git diff --cached --quiet
+if ($LASTEXITCODE -ne 0) {
+    Invoke-Native -Description 'Committing' -Program 'git' -Arguments @('commit', '-m', "publish $newVersion")
+}
 Invoke-Native -Description 'Pushing' -Program 'git' -Arguments @('push')
 
 # --- Publish ---------------------------------------------------------------------------

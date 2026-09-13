@@ -602,11 +602,25 @@ fn adapter_package_path() -> PyResult<String> {
         .map_err(|error| pyo3::exceptions::PyRuntimeError::new_err(error.to_string()))
 }
 
+/// Download Chai-1's official example MSAs under `process_executables` if they are not already
+/// there, and return the directory holding them.
+#[pyfunction]
+fn chai1_example_msas(py: Python<'_>, process_executables: PathBuf) -> PyResult<PathBuf> {
+    py.detach(move || {
+        // Silent: this runs inside a tool request, where installer progress lines are just noise.
+        RustInstaller::for_process_executables(process_executables)?
+            .with_reporter(|_| {})
+            .ensure_chai1_example_msas()
+    })
+    .map_err(install_error)
+}
+
 #[pymodule]
 fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     metadata::register(m)?;
     m.add_function(wrap_pyfunction!(adapter_package_path, m)?)?;
+    m.add_function(wrap_pyfunction!(chai1_example_msas, m)?)?;
     run::register(m)?;
     m.add_class::<PyTool>()?;
     m.add_class::<PyStatus>()?;
