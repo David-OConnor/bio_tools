@@ -22,6 +22,7 @@ use crate::{run::CommandSpec, status};
 mod alphafold3;
 mod boltz2;
 mod boltzgen;
+mod chai1;
 mod common;
 mod conda_tools;
 mod igblast;
@@ -450,6 +451,19 @@ impl Installer {
 
     pub fn tools_root(&self) -> &Path {
         &self.config.layout.tools_root
+    }
+
+    /// Where Chai-1's official example MSAs are kept, whether or not they have been downloaded.
+    /// Pass it to `chai-lab fold --msa-directory`.
+    pub fn chai1_example_msas_dir(&self) -> PathBuf {
+        chai1::directory(self)
+    }
+
+    /// Download Chai-1's official example MSAs if they are not already present, and return the
+    /// directory holding them. Chai-1's install does this too; this is for a first run on an
+    /// installation that predates it.
+    pub fn ensure_chai1_example_msas(&self) -> Result<PathBuf, InstallError> {
+        chai1::ensure_example_msas(self)
     }
 
     /// Install or refresh one tool. Recipes are designed to be safely rerunnable.

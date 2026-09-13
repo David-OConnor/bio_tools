@@ -237,6 +237,7 @@ impl Tool {
     /// assets, which is what [`Installer::uninstall`] needs and no probe can rediscover.
     pub const fn asset_directories(self) -> &'static [&'static str] {
         match self {
+            Self::Chai1 => &["chai1"],
             Self::HighFold => &["HighFold"],
             Self::BindCraft => &["BindCraft"],
             Self::IgBlast => &["igblast"],

@@ -175,7 +175,7 @@
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "Use the two aligned.pqt files bundled from Chai\u2019s official examples. Only suitable for the sequences in the official protein-complex preset.",
+      "help": "Use the two aligned.pqt files from Chai\u2019s official examples, downloaded when Chai-1 is installed or first used. Only suitable for the sequences in the official protein-complex preset.",
       "options": [],
       "rows": null,
       "minimum": null,
