@@ -65,7 +65,7 @@ pipx install bio_tools_app
 
 This installs the prebuilt `bio_tools` executable onto your PATH. `uv tool install bio_tools_app` works too.
 
-Alternatively, download a prebuilt binary from the [Releases page](https://github.com/David-OConnor/bio_tools/releases) and add it to your system PATH, or build it with Cargo:
+Alternatively, download a binary from the [Releases page](https://github.com/David-OConnor/bio_tools/releases) and add it to your system PATH, or build it with Cargo:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
