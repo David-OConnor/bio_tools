@@ -23,9 +23,9 @@
       "name": "sequence_molecules",
       "label": "Molecules",
       "kind": "molecule_builder",
-      "default": "[{\"type\": \"protein\", \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\", \"cyclic\": false, \"modifications\": []}]",
+      "default": "[{\"type\": \"protein\", \"id\": \"A\", \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\", \"cyclic\": false, \"modifications\": []}]",
       "required": true,
-      "help": "One box per entity, in FASTA chain order (A, B, C\u2026). Proteins, DNA, RNA and SMILES ligands are supported. Use the FASTA mode for glycans.",
+      "help": "One box per entity. Its name becomes the name of its FASTA record, which is what restraints refer to it by; left blank, entities are named A, B, C\u2026 in order. Proteins, DNA, RNA and SMILES ligands are supported. Use the FASTA mode for glycans.",
       "options": [
         {
           "value": "protein",
@@ -53,7 +53,7 @@
       "task": "",
       "group": "Input",
       "input_modes": "parameters",
-      "molecule_features": "modifications"
+      "molecule_features": "id,modifications"
     },
     {
       "name": "input_fasta",
@@ -514,7 +514,7 @@
   ],
   "input_modes": {
     "name": "input_mode",
-    "label": "Inputs",
+    "label": "Input mode",
     "default": "parameters",
     "options": [
       {

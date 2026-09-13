@@ -343,7 +343,7 @@
   ],
   "input_modes": {
     "name": "input_mode",
-    "label": "Inputs",
+    "label": "Input mode",
     "default": "parameters",
     "options": [
       {
