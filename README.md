@@ -47,7 +47,7 @@ pip install bio_tools_app --break-system-packages
 bio_tools install boltz2
 bio_tools run open_dde --help
 
-bio_tools list
+bio_tools list-quick
 ```
 Note: This does not break system packages; this just downloads a binary and adds it to the path. That 
 override is required only on certain newer Linux distributions. If you are still nervous about that, you can
