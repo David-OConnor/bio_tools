@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -19,7 +20,7 @@ from . import (
     tool_script,
     torch_device,
 )
-from .environments import environment_python
+from .environments import environment_path, environment_python
 from .field_processing import (
     boolean,
     decimal,
@@ -32,6 +33,24 @@ from .field_processing import (
 from .status_check import CheckResult, ToolStatus, probe_cli
 
 SPEC = catalog_spec("boltz2", fields=tool_fields("boltz2"))
+
+
+def has_cuequivariance_kernels() -> bool:
+    """Whether Boltz's environment has the cuEquivariance kernels it uses by default.
+
+    They come from the `boltz[cuda]` extra, whose wheels are Linux-only; bio_tools
+    installs plain Boltz elsewhere, or when the extra does not resolve. Boltz does
+    not fall back on its own: without them, the first triangle update raises
+    `ModuleNotFoundError: cuequivariance_torch`. Checked on disk rather than by
+    launching the environment's interpreter.
+    """
+
+    root = environment_path("boltz")
+    if os.name == "nt":
+        site_packages = [root / "Lib" / "site-packages"]
+    else:
+        site_packages = list(root.glob("lib/python*/site-packages"))
+    return any((path / "cuequivariance_torch").is_dir() for path in site_packages)
 
 
 def from_boxes(payload: dict[str, Any]) -> str:
@@ -144,6 +163,8 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         command.append("--use_potentials")
     if boolean(payload, "affinity_mw_correction"):
         command.append("--affinity_mw_correction")
+    if not has_cuequivariance_kernels():
+        command.append("--no_kernels")
 
     with tempfile.TemporaryDirectory(prefix="bio-web-boltz2-") as temporary:
         workdir = Path(temporary)

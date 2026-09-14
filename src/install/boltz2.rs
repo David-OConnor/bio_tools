@@ -6,11 +6,13 @@ use super::{
 };
 use crate::tool_definitions::Tool;
 
+const TORCH: &[&str] = &["torch==2.7.1"];
+
 pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
     const SLUG: &str = Tool::Boltz2.slug();
     let backend = installer.select_torch_backend()?;
     installer.create_venv(SLUG, "3.12")?;
-    installer.install_torch(SLUG, &["torch==2.7.1"], backend)?;
+    installer.install_torch(SLUG, TORCH, backend)?;
 
     // cuequivariance wheels from the CUDA extra are Linux-only. Plain Boltz still uses a CUDA
     // Torch build and is therefore a functional fallback, not a CPU-only build.
@@ -27,12 +29,22 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
         installer.pip_install(SLUG, &["boltz~=2.2.1"], PipOptions::default())?;
     }
 
+    // Boltz depends on Torch, so installing it can replace the pinned build with whatever PyPI
+    // serves. On Windows that is a CPU-only wheel, which leaves Boltz (default `--accelerator
+    // gpu`) failing at run time with "No supported gpu backend found". Re-applying the pin is a
+    // no-op when the build survived, and restores it when it did not.
+    installer.install_torch(SLUG, TORCH, backend)?;
+
     let executable = installer.venv_script(SLUG, Tool::Boltz2.console_script());
     let mut verify = Command::new(&executable);
     verify.arg("--help");
     installer.checked(&mut verify)?;
     if backend == TorchBackend::Cuda126 && !installer.torch_cuda_works(SLUG) {
-        installer.note("Warning: Torch cannot reach the GPU; Boltz will run on CPU");
+        return Err(InstallError::InvalidConfiguration(
+            "Boltz-2's Torch cannot reach the GPU, although a CUDA 12.6-compatible NVIDIA driver \
+             was detected; Boltz defaults to the GPU accelerator and would fail at run time"
+                .to_owned(),
+        ));
     }
     installer.note("Boltz model weights download on first use");
     Ok(())
