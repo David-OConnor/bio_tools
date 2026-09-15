@@ -186,7 +186,8 @@ pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
     };
     let detail = output_detail(&output);
     if !output.status.success()
-        && (detail.is_empty()
+        && (tool == Tool::EsmC
+            || detail.is_empty()
             || detail
                 .trim_start()
                 .starts_with("Traceback (most recent call last):"))
@@ -302,6 +303,11 @@ fn alphafold3_command(
 fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     // The executable's name comes from `Tool::console_script`, which is not always the slug; only
     // the probe argument is decided here.
+    if tool == Tool::EsmC {
+        return Some(installer.tool_python_command(tool).args([
+            "-c", "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer",
+        ]));
+    }
     if tool == Tool::EsmFold2 {
         return Some(installer.tool_python_command(tool).args([
             "-c",
@@ -444,6 +450,7 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
             | Tool::Boltz2
             | Tool::Chai1
             | Tool::Protenix
+            | Tool::EsmC
             | Tool::EsmFold2
             | Tool::ImmuneBuilder
             | Tool::BoltzGen

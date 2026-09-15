@@ -14,6 +14,7 @@ SUPPORTED = {
     'rfd3': 'rfdiffusion3', 'proteinmpnn': 'proteinmpnn',
     'ligandmpnn': 'ligandmpnn', 'opendde': 'opendde',
     'boltz2': 'boltz2', 'chai1': 'chai1', 'esmfold2': 'esmfold2',
+    'protenix': 'protenix', 'esmc': 'esmc',
 }
 
 

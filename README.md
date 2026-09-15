@@ -161,6 +161,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+An uninstall removes everything the install put on disk, including the caches a tool downloads
+for itself the first time it runs. Those stay where the tool itself puts them -- `~/common` and
+`~/checkpoint` for Protenix, `~/.cache/opendde` for OpenDDE -- which keeps them on the fast local
+filesystem, and they are also the largest part of an install, so `uninstall` takes them too.
+Uninstalling and reinstalling is therefore the repair for a cache gone bad: a download
+interrupted partway leaves a truncated file that the tool will happily reuse forever, and
+removing it is what makes the next install fetch it properly. Downloads the installer makes
+itself are additionally checked against the size the server publishes, so a short file is
+replaced rather than adopted.
+
 **Python** (equivalent):
 
 ```python

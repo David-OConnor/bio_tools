@@ -12,7 +12,7 @@ use crate::{
     tool_definitions::{
         Tool, abmpnn, aggrescan3d, alphafold3, antibody_annotator, antifold, bindcraft, biophi,
         boltz_adme, boltz2, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat,
-        enzymemap, esmfold2, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
+        enzymemap, esmc, esmfold2, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
         ligandmpnn, mber, netsolp, opendde, orca, pdbbind, placer, proteinmpnn, proteinmpnn_ddg,
         protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn, tlimmuno,
     },
@@ -320,6 +320,7 @@ pub const ALL: &[&CatalogEntry] = &[
     &boltz2::ENTRY,
     &chai1::ENTRY,
     &protenix::ENTRY,
+    &esmc::ENTRY,
     &esmfold2::ENTRY,
     &immunebuilder::ENTRY,
     &highfold::ENTRY,

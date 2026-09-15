@@ -1,10 +1,12 @@
 //! Removal of a tool one of this crate's recipes installed.
 //!
-//! Only what a recipe created is removed: the tool's isolated environment, the checkouts and
-//! binary distributions it unpacked under the tools root, and its installation marker. Shared
+//! What this install put on disk is removed: the tool's isolated environment, the checkouts and
+//! binary distributions it unpacked under the tools root, its installation marker, and the caches
+//! the tool itself downloaded on first use -- model weights and reference data that live wherever
+//! the tool keeps them, and that are usually the largest part of an install. Shared
 //! infrastructure -- the micromamba root, the bootstrapped Conda, the uv cache -- belongs to every
-//! other tool as well and is left alone, as are the multi-gigabyte assets that are expensive to
-//! fetch and are not owned by the tool that happened to download them.
+//! other tool as well and is left alone, as are assets an operator supplied by hand and ones that
+//! several recipes share.
 
 use std::{
     fs,
@@ -47,6 +49,8 @@ pub(super) fn uninstall(
     for path in removable_paths(installer, tool, &mut report) {
         remove(installer, &path, &mut report)?;
     }
+
+    remove_caches(installer, tool, &mut report);
 
     for note in tool.retained_assets() {
         report.kept.push((*note).to_owned());
@@ -97,6 +101,70 @@ fn removable_paths(
             .map(|relative| installer.tools_root().join(relative)),
     );
     paths
+}
+
+/// The caches a tool's own runtime fills outside the installation tree.
+///
+/// These are the tool's own defaults and stay where the tool puts them, which on WSL keeps them
+/// on the Linux filesystem where reads are fast. They are still this install's doing, though,
+/// and they are usually the largest part of it -- ten gigabytes of Protenix weights and CCD
+/// reference data, several more for OpenDDE -- so an uninstall takes them with it. That also
+/// makes uninstall-then-reinstall the repair for a cache gone bad: the download that left a
+/// half-written file behind is not skipped the second time, because there is no longer a file
+/// there to skip.
+fn remove_caches(installer: &Installer, tool: Tool, report: &mut UninstallReport) {
+    match tool {
+        // Protenix fills `common` with reference data and `checkpoint` with weights, both
+        // directly inside its root -- ordinary names that may hold something of the operator's
+        // too, so these go by exact name and the directory only when nothing else is left in it.
+        Tool::Protenix => {
+            let Some(root) = super::python_tools::protenix_cache_root() else {
+                return;
+            };
+            for path in super::python_tools::protenix_cache_files(&root) {
+                remove_file_quietly(installer, &path, report);
+            }
+            let _ = fs::remove_dir(root.join("common"));
+            let _ = fs::remove_dir(root.join("checkpoint"));
+        }
+        // OpenDDE's cache directory is its own and holds nothing else, so all of it goes.
+        Tool::OpenDde => {
+            let Some(cache) = super::opendde::cache_dir(installer) else {
+                return;
+            };
+            if !cache.is_dir() {
+                return;
+            }
+            match fs::remove_dir_all(&cache) {
+                Ok(()) => {
+                    installer.step(format!("Removed {}", cache.display()));
+                    report.removed.push(cache);
+                }
+                Err(error) => report.kept.push(format!(
+                    "{} could not be removed: {error}. It holds this tool's model checkpoint;                      remove it by hand to reclaim the space.",
+                    cache.display()
+                )),
+            }
+        }
+        _ => {}
+    }
+}
+
+fn remove_file_quietly(installer: &Installer, path: &Path, report: &mut UninstallReport) {
+    if !path.is_file() {
+        return;
+    }
+    match fs::remove_file(path) {
+        Ok(()) => {
+            installer.step(format!("Removed {}", path.display()));
+            report.removed.push(path.to_path_buf());
+        }
+        Err(error) => report.kept.push(format!(
+            "{} could not be removed: {error}. It is left over from an install that kept this \
+             tool's downloads in the home directory, and nothing else will use it.",
+            path.display()
+        )),
+    }
 }
 
 fn remove(

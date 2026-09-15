@@ -19,6 +19,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "deepsp" => Some(include_str!("deepsp.json")),
         "deepstabp" => Some(include_str!("deepstabp.json")),
         "dlkcat" => Some(include_str!("dlkcat.json")),
+        "esmc" => Some(include_str!("esmc.json")),
         "esmfold2" => Some(include_str!("esmfold2.json")),
         "enzymemap" => Some(include_str!("enzymemap.json")),
         "genie3" => Some(include_str!("genie3.json")),

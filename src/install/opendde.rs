@@ -75,8 +75,10 @@ fn install_backend(installer: &mut Installer, backend: TorchBackend) -> Result<(
     installer.pip_install(SLUG, &[package], PipOptions::default())
 }
 
-fn prewarm(installer: &Installer, executable: &PathBuf) -> Result<(), InstallError> {
-    let root = installer.config.opendde_root.clone().or_else(|| {
+/// The directory OpenDDE fills with its several-gigabyte checkpoint: the configured root, or the
+/// per-user cache directory it falls back to on its own.
+pub(super) fn cache_dir(installer: &Installer) -> Option<PathBuf> {
+    installer.config.opendde_root.clone().or_else(|| {
         env::var_os(if cfg!(target_os = "windows") {
             "USERPROFILE"
         } else {
@@ -84,7 +86,11 @@ fn prewarm(installer: &Installer, executable: &PathBuf) -> Result<(), InstallErr
         })
         .map(PathBuf::from)
         .map(|home| home.join(".cache").join("opendde"))
-    });
+    })
+}
+
+fn prewarm(installer: &Installer, executable: &PathBuf) -> Result<(), InstallError> {
+    let root = cache_dir(installer);
     if root
         .as_ref()
         .is_some_and(|root| root.join("checkpoint").is_dir())

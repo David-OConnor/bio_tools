@@ -1,4 +1,8 @@
-use std::{fs, path::Path, process::Command};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use super::{
     InstallError, Installer,
@@ -95,6 +99,13 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             Ok(())
         }
         Tool::Protenix => install_protenix(installer),
+        Tool::EsmC => install_recipe(
+            installer,
+            UvRecipe {
+                verify: Some(("python", &["-c", "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer"])),
+                ..UvRecipe::simple(Tool::EsmC.slug(), "3.12", &["esm==3.4.1"], &[])
+            },
+        ),
         Tool::EsmFold2 => install_esmfold(installer),
         Tool::ImmuneBuilder => install_recipe(
             installer,
@@ -399,6 +410,52 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
         "from inspect import signature; from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model; from esm.models.hub import read_safetensors_dir; assert 'dtype' in signature(read_safetensors_dir).parameters",
     ]);
     installer.checked(&mut verify)
+}
+
+/// The directory Protenix fills with its downloads: whatever `PROTENIX_ROOT_DIR` names, and the
+/// home directory when it names nothing, which is Protenix's own default.
+pub(super) fn protenix_cache_root() -> Option<PathBuf> {
+    super::first_env_path(&["PROTENIX_ROOT_DIR"]).or_else(super::home_dir)
+}
+
+/// The model weights and reference data Protenix downloads for itself on first use.
+///
+/// Protenix keeps them under `PROTENIX_ROOT_DIR`, which defaults to the home directory: `common`
+/// for reference data and `checkpoint` for weights, together some ten gigabytes. Listed by exact
+/// name, because both are ordinary directory names that may well hold something of the
+/// operator's too.
+pub(super) fn protenix_cache_files(root: &Path) -> Vec<PathBuf> {
+    const REFERENCE_DATA: &[&str] = &[
+        "components.cif",
+        "components.cif.rdkit_mol.pkl",
+        "clusters-by-entity-40.txt",
+        "obsolete_release_date.csv",
+        "obsolete_to_successor.json",
+        "release_date_cache.json",
+    ];
+    let mut found: Vec<PathBuf> = REFERENCE_DATA
+        .iter()
+        .map(|name| root.join("common").join(name))
+        .filter(|path| path.is_file())
+        .collect();
+    let checkpoints = root.join("checkpoint");
+    if let Ok(entries) = fs::read_dir(&checkpoints) {
+        let mut weights: Vec<PathBuf> = entries
+            .flatten()
+            .map(|entry| entry.path())
+            .filter(|path| {
+                path.is_file()
+                    && path.extension().is_some_and(|extension| extension == "pt")
+                    && path.file_name().is_some_and(|name| {
+                        let name = name.to_string_lossy();
+                        name.starts_with("protenix") || name.starts_with("esm2_t36_3B_UR50D")
+                    })
+            })
+            .collect();
+        weights.sort();
+        found.extend(weights);
+    }
+    found
 }
 
 fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {

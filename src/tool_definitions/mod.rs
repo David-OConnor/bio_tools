@@ -25,6 +25,7 @@ mod deepsp;
 mod deepstabp;
 mod dlkcat;
 mod enzymemap;
+mod esmc;
 mod esmfold2;
 mod genie3;
 mod germinal;
@@ -59,6 +60,7 @@ pub enum Tool {
     Boltz2,
     Chai1,
     Protenix,
+    EsmC,
     EsmFold2,
     ImmuneBuilder,
     HighFold,
@@ -93,12 +95,13 @@ pub enum Tool {
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 35] = [
+    pub const ALL: [Self; 36] = [
         Self::AlphaFold3,
         Self::OpenDde,
         Self::Boltz2,
         Self::Chai1,
         Self::Protenix,
+        Self::EsmC,
         Self::EsmFold2,
         Self::ImmuneBuilder,
         Self::HighFold,
@@ -139,6 +142,7 @@ impl Tool {
             Self::Boltz2 => "boltz2",
             Self::Chai1 => "chai1",
             Self::Protenix => "protenix",
+            Self::EsmC => "esmc",
             Self::EsmFold2 => "esmfold2",
             Self::ImmuneBuilder => "immunebuilder",
             Self::HighFold => "highfold",
@@ -181,7 +185,7 @@ impl Tool {
         match self {
             Self::Boltz2 => "boltz",
             Self::Chai1 => "chai-lab",
-            Self::EsmFold2 => "python",
+            Self::EsmC | Self::EsmFold2 => "python",
             Self::ImmuneBuilder => "ABodyBuilder2",
             Self::AggreScan3d => "aggrescan",
             Self::Mber => "mber-vhh",
@@ -197,6 +201,7 @@ impl Tool {
             Self::Boltz2 => "Boltz-2",
             Self::Chai1 => "Chai-1",
             Self::Protenix => "Protenix-v2",
+            Self::EsmC => "ESMC",
             Self::EsmFold2 => "ESMFold 2",
             Self::ImmuneBuilder => "ImmuneBuilder",
             Self::HighFold => "HighFold",
@@ -289,10 +294,6 @@ impl Tool {
                  gigabytes, are not specific to this tool, and are reused by any recipe that \
                  needs them.",
             ],
-            Self::OpenDde => &[
-                "The OpenDDE model checkpoint under ~/.cache/opendde was kept: it lives outside \
-                 the managed tree and is reused by a later reinstall.",
-            ],
             Self::AlphaFold3 => &[
                 "The AlphaFold 3 model parameters and genetic databases were kept: they are \
                  licensed assets configured by hand, not installed by this recipe.",
@@ -357,6 +358,7 @@ impl FromStr for Tool {
             "boltz" | "boltz2" => Self::Boltz2,
             "chai1" => Self::Chai1,
             "protenix" | "protenixv2" => Self::Protenix,
+            "esmc" | "esmcambrian" => Self::EsmC,
             "esmfold" | "esmfold2" => Self::EsmFold2,
             "immunebuilder" => Self::ImmuneBuilder,
             "highfold" => Self::HighFold,

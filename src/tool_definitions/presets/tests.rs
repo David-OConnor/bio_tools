@@ -126,3 +126,41 @@ fn repeated_references_share_a_file_and_existing_files_survive() {
     assert_eq!(verify_files(&values, &prepared), 2);
     assert_eq!(fs::read_to_string(existing).unwrap(), "user input");
 }
+
+#[test]
+fn protenix_presets_name_known_fields_and_bundled_msas() {
+    fn references(value: &Value, found: &mut Vec<String>) {
+        match value {
+            Value::String(text) if text.starts_with("bio-tools://") => found.push(text.clone()),
+            Value::Object(entries) => entries.values().for_each(|entry| references(entry, found)),
+            Value::Array(entries) => entries.iter().for_each(|entry| references(entry, found)),
+            _ => {}
+        }
+    }
+
+    let contract: Value =
+        serde_json::from_str(super::super::fields::by_slug("protenix").unwrap()).unwrap();
+    let mut known: Vec<&str> = contract["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|field| field["name"].as_str().unwrap())
+        .collect();
+    known.push(contract["input_modes"]["name"].as_str().unwrap());
+
+    let presets: Value = serde_json::from_str(by_slug("protenix").unwrap()).unwrap();
+    let mut bundled = Vec::new();
+    for preset in presets.as_array().unwrap() {
+        for key in preset["values"].as_object().unwrap().keys() {
+            assert!(known.contains(&key.as_str()), "unknown field {key:?}");
+        }
+        let jobs: Value =
+            serde_json::from_str(preset["values"]["input_json"].as_str().unwrap()).unwrap();
+        assert!(!jobs.as_array().unwrap().is_empty());
+        references(&jobs, &mut bundled);
+    }
+    assert_eq!(bundled.len(), 7);
+    for reference in bundled {
+        assert!(input_text("protenix", &reference).unwrap().starts_with('>'));
+    }
+}

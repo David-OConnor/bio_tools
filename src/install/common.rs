@@ -767,18 +767,36 @@ impl Installer {
         }
     }
 
+    /// Fetch `url` to `destination`, keeping a copy that is already complete.
+    ///
+    /// "Complete" is decided against the server rather than against the file merely existing: an
+    /// interrupted download leaves a short file behind, and a recipe that accepts any non-empty
+    /// file adopts that truncation permanently -- every later install sees a file and skips the
+    /// fetch, so reinstalling, the one thing an operator reaches for, repairs nothing. Where the
+    /// server reports a size, a local file that does not match it is refetched. Where it does not
+    /// (some mirrors, and anything chunked), an existing non-empty file is still accepted, since
+    /// there is nothing better to compare it to.
     pub(crate) fn download(&self, url: &str, destination: &Path) -> Result<(), InstallError> {
-        if destination
-            .metadata()
-            .is_ok_and(|metadata| metadata.is_file() && metadata.len() > 0)
-        {
-            self.note(format!("Already have {}", destination.display()));
-            return Ok(());
-        }
         url::Url::parse(url).map_err(|error| InstallError::Download {
             url: url.to_owned(),
             message: error.to_string(),
         })?;
+        if let Ok(metadata) = destination.metadata()
+            && metadata.is_file()
+            && metadata.len() > 0
+        {
+            match self.published_length(url) {
+                Some(expected) if expected != metadata.len() => self.note(format!(
+                    "Replacing {}: {} bytes on disk, {expected} published",
+                    destination.display(),
+                    metadata.len()
+                )),
+                _ => {
+                    self.note(format!("Already have {}", destination.display()));
+                    return Ok(());
+                }
+            }
+        }
         if let Some(parent) = destination.parent() {
             fs::create_dir_all(parent).map_err(|error| {
                 InstallError::io(format!("unable to create {}", parent.display()), error)
@@ -820,6 +838,23 @@ impl Installer {
                 error,
             )
         })
+    }
+
+    /// The size the server reports for `url`, where it reports one.
+    ///
+    /// A HEAD that fails, is refused, or answers without a usable `Content-Length` is not an
+    /// error: it only means this URL cannot be checked, and the caller falls back to trusting
+    /// what is on disk.
+    fn published_length(&self, url: &str) -> Option<u64> {
+        let response = ureq::head(url).call().ok()?;
+        response
+            .headers()
+            .get("content-length")?
+            .to_str()
+            .ok()?
+            .trim()
+            .parse()
+            .ok()
     }
 
     pub(crate) fn clone_or_update(&self, url: &str, target: &Path) -> Result<(), InstallError> {
