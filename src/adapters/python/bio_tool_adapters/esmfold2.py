@@ -33,6 +33,16 @@ RUNNER = Path(__file__).resolve().parent / "tool_scripts" / "esmfold2_inference.
 SPEC = catalog_spec("esmfold2", fields=tool_fields("esmfold2"))
 
 
+def is_a3m_path(msa: str) -> bool:
+    """Whether an `msa` string names an .a3m file rather than a serialized MSA.
+
+    ESMFold2's own serialized form is base64, which has no `.`, so the suffix
+    cannot be mistaken for one. The runner reads the file with `MSA.from_a3m`.
+    """
+
+    return msa.strip().lower().endswith(".a3m")
+
+
 def _input_document(payload: dict[str, Any]) -> tuple[dict[str, Any], str]:
     raw = text(payload, "input_json", max_length=500_000)
     try:
@@ -68,6 +78,15 @@ def _input_document(payload: dict[str, Any]) -> tuple[dict[str, Any], str]:
                 )
         elif not isinstance(entry.get("sequence"), str) or not entry["sequence"]:
             raise ToolInputError(f"Sequence entry {index} needs a sequence.")
+        msa = entry.get("msa")
+        if isinstance(msa, str) and is_a3m_path(msa):
+            path = Path(msa.strip()).resolve()
+            if not path.is_file():
+                raise ToolInputError(
+                    f"Sequence entry {index} MSA {msa.strip()!r} is not a file on "
+                    "the compute node."
+                )
+            entry["msa"] = str(path)
 
     return document, json.dumps(document, indent=2)
 
@@ -122,8 +141,8 @@ def from_boxes(payload: dict[str, Any]) -> str:
                     ) from exc
             if not isinstance(msa, (str, dict)):
                 raise ToolInputError(
-                    f'Molecule "{box.chain}" MSA must be serialized text or a '
-                    "JSON object."
+                    f'Molecule "{box.chain}" MSA must be an .a3m path, serialized '
+                    "text, or a JSON object."
                 )
             entry["msa"] = msa
         sequences.append(entry)

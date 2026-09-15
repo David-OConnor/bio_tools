@@ -169,6 +169,48 @@ def _input_document(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str]
     return document, json.dumps(document, indent=2)
 
 
+def check_msa_paths(
+    document: list[dict[str, Any]], *, use_msa: bool, use_rna_msa: bool
+) -> None:
+    """Refuse MSA paths OpenDDE would quietly not use.
+
+    A path to a missing file makes OpenDDE search the MSA server instead, and
+    paths given while MSAs are off are ignored; either way the run would not
+    use the alignment named here.
+    """
+
+    for job in document:
+        for entry in job.get("sequences") or []:
+            if not isinstance(entry, dict):
+                continue
+            for kind, keys, enabled, switch in (
+                (
+                    "proteinChain",
+                    ("pairedMsaPath", "unpairedMsaPath"),
+                    use_msa,
+                    "use_msa",
+                ),
+                ("rnaSequence", ("unpairedMsaPath",), use_rna_msa, "use_rna_msa"),
+            ):
+                entity = entry.get(kind)
+                if not isinstance(entity, dict):
+                    continue
+                for key in keys:
+                    path = entity.get(key)
+                    if path in (None, ""):
+                        continue
+                    if not enabled:
+                        raise ToolInputError(
+                            f'Job "{job.get("name")}" gives {key} for a {kind}, '
+                            f"but {switch} is off, so OpenDDE would ignore it."
+                        )
+                    if not isinstance(path, str) or not Path(path).is_file():
+                        raise ToolInputError(
+                            f'Job "{job.get("name")}": {key} {path!r} is not a file '
+                            "on the compute node."
+                        )
+
+
 def _seeds(payload: dict[str, Any]) -> str | None:
     raw = text(payload, "seeds", required=False, max_length=200).strip()
     if not raw:
@@ -208,10 +250,11 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     dtype = _choice(payload, "dtype", {"fp32", "bf16"}, "fp32")
     device = _choice(payload, "device", {"auto", "cuda", "cpu"}, "auto")
 
-    use_msa = boolean(payload, "use_msa")
+    use_msa = boolean(payload, "use_msa", True)
     use_rna_msa = boolean(payload, "use_rna_msa")
     if use_rna_msa and not use_msa:
         raise ToolInputError("use_rna_msa requires use_msa to be enabled.")
+    check_msa_paths(document, use_msa=use_msa, use_rna_msa=use_rna_msa)
 
     command = [
         tool_script("opendde", "opendde", "OPENDDE_EXECUTABLE"),
@@ -260,12 +303,22 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         )
         generated = readable_files(output_path)
 
-    return {
+    response = {
         "status": "completed",
         "input": {"json": document},
         "generated_files": generated,
         **result,
     }
+    # OpenDDE logs a failed ColabFold search and folds on with the query alone,
+    # so the run succeeds with none of the MSA it was asked for.
+    log = f"{result.get('stdout') or ''}\n{result.get('stderr') or ''}"
+    if use_msa and "falling back to query-only" in log:
+        response["warnings"] = [
+            "The MSA search did not complete for at least one protein, so OpenDDE "
+            "folded it from its sequence alone. See the run log for the server "
+            "error; the prediction is likely less accurate than with an MSA."
+        ]
+    return response
 
 
 def check_status() -> ToolStatus:

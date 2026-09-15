@@ -23,7 +23,7 @@
       "kind": "molecule_builder",
       "default": "[{\"type\": \"protein\", \"id\": \"A\", \"sequence\": \"MSHHWGYGKHNGPEHWHKDFPIAKGERQSPVDIDTHTAKYDPSLK\", \"modifications\": []}]",
       "required": true,
-      "help": "Add one box per unique ESMFold2 entity. Set its ID (or comma-separated IDs for identical copies), sequence or ligand, zero-indexed residue modifications, and optional JSON-safe protein/RNA MSA value. Ligands may contain one or more comma-separated CCD_ codes.",
+      "help": "Add one box per unique ESMFold2 entity. Set its ID (or comma-separated IDs for identical copies), sequence or ligand, zero-indexed residue modifications, and optional protein/RNA MSA. An MSA is an absolute .a3m path on the compute node, a {\"sequences\": [...]} object whose first row is the query, or ESMFold2's serialized form; left blank, the chain folds from its sequence alone, which is ESMFold2's usual mode. Ligands may contain one or more comma-separated CCD_ codes.",
       "options": [
         {
           "value": "protein",
@@ -113,7 +113,7 @@
       "kind": "textarea",
       "default": "{\n  \"sequences\": [\n    {\n      \"type\": \"protein\",\n      \"id\": \"A\",\n      \"sequence\": \"MSHHWGYGKHNGPEHWHKDFPIAKGERQSPVDIDTHTAKYDPSLK\"\n    }\n  ]\n}",
       "required": true,
-      "help": "JSON representation of ESMFold2's StructurePredictionInput. Sequence entries use type protein, dna, rna, or ligand; polymers take id and sequence, while ligands take id plus either smiles or a ccd list. Native pocket, distogram, covalent-bond, modification, and serialized MSA fields are passed through.",
+      "help": "JSON representation of ESMFold2's StructurePredictionInput. Sequence entries use type protein, dna, rna, or ligand; polymers take id and sequence, while ligands take id plus either smiles or a ccd list. Native pocket, distogram, covalent-bond, modification, and serialized MSA fields are passed through. A protein or RNA msa may also be an absolute .a3m path, which is read with MSA.from_a3m.",
       "options": [],
       "rows": 16,
       "minimum": null,

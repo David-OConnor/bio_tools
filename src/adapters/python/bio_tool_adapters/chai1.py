@@ -310,15 +310,19 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     )
     fasta, sequences, nonpolymers = _read_fasta(str(payload["input_fasta"]))
 
-    use_msa = boolean(payload, "use_msa_server", False)
     use_templates = boolean(payload, "use_templates_server", False)
     msa_directory = str(payload.get("msa_directory") or "").strip()
     use_example_msas = boolean(payload, "use_example_msas", False)
     template_hits_path = str(payload.get("template_hits_path") or "").strip()
-    if sum((bool(use_msa), bool(msa_directory), use_example_msas)) > 1:
+    if msa_directory and use_example_msas:
         raise ToolInputError(
-            "Choose one MSA source: server, local directory, or supplied examples."
+            "Choose one MSA source: a local directory or the supplied examples."
         )
+    # The server is on by default, so MSAs the reader named themselves win
+    # over it rather than conflicting with it.
+    use_msa = boolean(payload, "use_msa_server", True) and not (
+        msa_directory or use_example_msas
+    )
     if use_example_msas:
         # Installing Chai-1 downloads these; an older installation gets them on first use.
         try:

@@ -46,6 +46,7 @@ def main() -> None:
     import torch
     from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model
     from esm.models.hub import read_safetensors_dir
+    from esm.utils.msa import MSA
     from esm.utils.structure.input_builder import (
         deserialize_structure_prediction_input,
     )
@@ -73,7 +74,17 @@ def main() -> None:
     model.set_chunk_size(args.chunk_size or None)
 
     document = json.loads(args.input.read_text(encoding="utf-8"))
+    # An `msa` naming an .a3m file is bio_tools' addition to the JSON-safe form,
+    # which only knows serialized MSAs; read those files in after the rest.
+    a3m_paths: dict[int, str] = {}
+    for index, entry in enumerate(document["sequences"]):
+        msa = entry.get("msa")
+        if isinstance(msa, str) and msa.strip().lower().endswith(".a3m"):
+            a3m_paths[index] = msa.strip()
+            entry["msa"] = None
     prediction_input = deserialize_structure_prediction_input(document)
+    for index, path in a3m_paths.items():
+        prediction_input.sequences[index].msa = MSA.from_a3m(path)
     with torch.inference_mode():
         folded = ESMFold2InputBuilder().fold(
             model,
