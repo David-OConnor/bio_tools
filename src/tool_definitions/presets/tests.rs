@@ -164,3 +164,49 @@ fn protenix_presets_name_known_fields_and_bundled_msas() {
         assert!(input_text("protenix", &reference).unwrap().starts_with('>'));
     }
 }
+
+#[test]
+fn catpred_presets_name_known_fields_and_valid_reactions() {
+    let contract: Value =
+        serde_json::from_str(super::super::fields::by_slug("catpred").unwrap()).unwrap();
+    let mut known: Vec<&str> = contract["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|field| field["name"].as_str().unwrap())
+        .collect();
+    known.push(contract["input_modes"]["name"].as_str().unwrap());
+
+    let presets: Value = serde_json::from_str(by_slug("catpred").unwrap()).unwrap();
+    for preset in presets.as_array().unwrap() {
+        let values = preset["values"].as_object().unwrap();
+        for key in values.keys() {
+            assert!(known.contains(&key.as_str()), "unknown field {key:?}");
+        }
+        // Each preset fills the field its own input mode reads, and every
+        // reaction names an enzyme and at least one substrate or inhibitor.
+        match values["input_mode"].as_str().unwrap() {
+            "parameters" => {
+                let boxes: Value =
+                    serde_json::from_str(values["sequence_molecules"].as_str().unwrap()).unwrap();
+                let kinds: Vec<&str> = boxes
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|entry| entry["type"].as_str().unwrap())
+                    .collect();
+                assert_eq!(kinds.iter().filter(|kind| **kind == "protein").count(), 1);
+                assert!(kinds.contains(&"ligand"));
+            }
+            "text" => {
+                let mut lines = values["input_csv"].as_str().unwrap().lines();
+                let header: Vec<&str> = lines.next().unwrap().split(',').collect();
+                for column in ["SMILES", "sequence", "pdbpath"] {
+                    assert!(header.contains(&column), "missing {column} column");
+                }
+                assert!(lines.all(|row| row.split(',').count() == header.len()));
+            }
+            mode => panic!("a preset cannot fill the {mode} mode"),
+        }
+    }
+}

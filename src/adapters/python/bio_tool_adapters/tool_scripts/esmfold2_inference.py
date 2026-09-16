@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import inspect
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +28,9 @@ def _arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+_ESMC_OFFLOAD_BELOW_BYTES = 32 * 1024**3
+
+
 def _confidence(result: Any, filename: str) -> dict[str, Any]:
     return {
         "file": filename,
@@ -43,6 +47,10 @@ def _confidence(result: Any, filename: str) -> dict[str, Any]:
 def main() -> None:
     args = _arguments()
 
+    # Loading ESMC-6B and then offloading it leaves the CUDA cache fragmented;
+    # set before torch initializes CUDA, and only if the operator has not.
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
     import torch
     from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model
     from esm.models.hub import read_safetensors_dir
@@ -51,7 +59,7 @@ def main() -> None:
         deserialize_structure_prediction_input,
     )
 
-    if "dtype" not in inspect.signature(read_safetensors_dir).parameters:
+    if "key_dtypes" not in inspect.signature(read_safetensors_dir).parameters:
         raise RuntimeError(
             "ESMFold2's low-memory checkpoint loader is not installed. "
             "Reinstall it with `python install_tools.py esmfold2`."
@@ -72,6 +80,12 @@ def main() -> None:
 
     model = EsmFold2Model.from_pretrained("biohub/ESMFold2", **model_options).eval()
     model.set_chunk_size(args.chunk_size or None)
+    if device == "cuda":
+        # ESMC-6B alone takes ~12 GB in bf16 and is only needed for the one-shot
+        # language-model pass, so on smaller GPUs move it to host memory before
+        # the trunk and diffusion run. The model restores it for the next fold.
+        total = torch.cuda.get_device_properties(0).total_memory
+        model._offload_esmc = total < _ESMC_OFFLOAD_BELOW_BYTES
 
     document = json.loads(args.input.read_text(encoding="utf-8"))
     # An `msa` naming an .a3m file is bio_tools' addition to the JSON-safe form,

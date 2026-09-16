@@ -26,6 +26,7 @@ mod chai1;
 mod common;
 mod conda_tools;
 mod igblast;
+mod model_cache;
 mod opendde;
 pub(crate) mod protein_mpnn;
 mod python_tools;
@@ -446,7 +447,10 @@ impl Installer {
             .unwrap_or_default();
         let path = std::env::join_paths(std::iter::once(scripts.clone()).chain(inherited))
             .unwrap_or_else(|_| scripts.into_os_string());
-        command.env("VIRTUAL_ENV", environment).env("PATH", path)
+        command
+            .env("VIRTUAL_ENV", environment)
+            .env("PATH", path)
+            .envs(self.model_cache_environment())
     }
 
     pub fn tools_root(&self) -> &Path {
@@ -483,6 +487,8 @@ impl Installer {
 
         self.current_tool = Some(tool);
         self.emit(InstallEvent::ToolStarted(tool));
+        // Before the recipe: Chai-1's old downloads live inside the environment it recreates.
+        self.adopt_legacy_caches(tool);
         let result = match tool {
             Tool::AlphaFold3 => alphafold3::install(self),
             Tool::OpenDde => opendde::install(self),

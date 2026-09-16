@@ -1,8 +1,272 @@
+diff --git a/esm/models/esmc/checkpoint_layout.py b/esm/models/esmc/checkpoint_layout.py
+index ced4bca..04535aa 100644
+--- a/esm/models/esmc/checkpoint_layout.py
++++ b/esm/models/esmc/checkpoint_layout.py
+@@ -79,26 +79,57 @@ def _split_encoder_prefix(key: str) -> tuple[str, str]:
+     return "", key
+ 
+ 
++def is_fused_part(key: str) -> bool:
++    """Whether ``key`` is a published projection that gets fused on load.
++
++    Loaders keep these off an accelerator until they are fused: each fused
++    weight is larger than any of its parts, so parts freed on the device leave
++    gaps the caching allocator cannot reuse, gigabytes of them for ESMC-6B.
++    """
++    if key.startswith(_ENCODER_PREFIX):
++        key = key[len(_ENCODER_PREFIX) :]
++    match = _PUBLISHED_BLOCK.match(key)
++    return match is not None and any(
++        match.group(2) in leaves for leaves in _FUSED.values()
++    )
++
++
+ def published_to_native_subtree(
+-    raw: dict[str, torch.Tensor], prefix: str
++    raw: dict[str, torch.Tensor], prefix: str, *, consume: bool = False
+ ) -> dict[str, torch.Tensor]:
+     """Translate only the keys under ``prefix``, leaving the rest untouched.
+ 
+     Used when an ESMC encoder is bundled inside a larger checkpoint, so the host
+-    model's own keys can never be caught by the ESMC key patterns.
++    model's own keys can never be caught by the ESMC key patterns. With
++    ``consume``, ``raw`` is emptied; see :func:`published_to_native`.
+     """
+-    inner = {k[len(prefix) :]: v for k, v in raw.items() if k.startswith(prefix)}
+-    out = {k: v for k, v in raw.items() if not k.startswith(prefix)}
+-    out.update({prefix + k: v for k, v in published_to_native(inner).items()})
++    inner: dict[str, torch.Tensor] = {}
++    out: dict[str, torch.Tensor] = {}
++    for key in list(raw):
++        value = raw.pop(key) if consume else raw[key]
++        if key.startswith(prefix):
++            inner[key[len(prefix) :]] = value
++        else:
++            out[key] = value
++    out.update(
++        {prefix + k: v for k, v in published_to_native(inner, consume=True).items()}
++    )
+     return out
+ 
+ 
+-def published_to_native(raw: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
++def published_to_native(
++    raw: dict[str, torch.Tensor], *, consume: bool = False
++) -> dict[str, torch.Tensor]:
+     """Rewrite a published checkpoint onto this implementation's layout.
+ 
+     Concatenates the separate q/k/v and gate/up projections into the fused
+     weights Transformer Engine expects. Keys already in the in-memory layout,
+     and keys belonging to neither vocabulary, are returned unchanged.
++
++    With ``consume``, entries are removed from ``raw`` as they are translated, so
++    each block's parts are released as soon as their fused weight exists. The
++    fused projections are most of an encoder's weights; otherwise they would be
++    held twice until the whole checkpoint had been rewritten.
+     """
+     out: dict[str, torch.Tensor] = {}
+     # (prefix, block index) -> {published leaf: tensor}, gathered so the parts of
+@@ -106,7 +137,8 @@ def published_to_native(raw: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]
+     parts: dict[tuple[str, str], dict[str, torch.Tensor]] = {}
+     part_leaves = {leaf for leaves in _FUSED.values() for leaf in leaves}
+ 
+-    for key, value in raw.items():
++    for key in list(raw):
++        value = raw.pop(key) if consume else raw[key]
+         prefix, rest = _split_encoder_prefix(key)
+         if rest in _ROOT:
+             out[prefix + _ROOT[rest]] = value
+@@ -127,7 +159,8 @@ def published_to_native(raw: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]
+         else:
+             out[key] = value
+ 
+-    for (prefix, index), found in parts.items():
++    for prefix, index in list(parts):
++        found = parts.pop((prefix, index))
+         block = f"{prefix}transformer.blocks.{index}."
+         for fused, leaves in _FUSED.items():
+             present = [leaf for leaf in leaves if leaf in found]
+@@ -138,7 +171,7 @@ def published_to_native(raw: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]
+                     f"block {index} has an incomplete set of projections for "
+                     f"{fused!r}: found {present}, need {list(leaves)}"
+                 )
+-            out[block + fused] = torch.cat([found[leaf] for leaf in leaves], dim=0)
++            out[block + fused] = torch.cat([found.pop(leaf) for leaf in leaves], dim=0)
+     return out
+ 
+ 
+diff --git a/esm/models/esmc/model.py b/esm/models/esmc/model.py
+index 52a546d..f06ec8e 100644
+--- a/esm/models/esmc/model.py
++++ b/esm/models/esmc/model.py
+@@ -17,7 +17,11 @@ import torch.nn as nn
+ from safetensors.torch import save_file
+ from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
+ 
+-from esm.models.esmc.checkpoint_layout import native_to_published, published_to_native
++from esm.models.esmc.checkpoint_layout import (
++    is_fused_part,
++    native_to_published,
++    published_to_native,
++)
+ from esm.models.esmc.config import EsmcConfig
+ from esm.models.esmc.kernels import (
+     FLASH_ATTN_INSTALLED,
+@@ -197,9 +201,13 @@ class EsmcPreTrainedModel(HubPreTrainedModel):
+ 
+     @classmethod
+     def _normalize_checkpoint_layout(
+-        cls, raw: dict[str, torch.Tensor]
++        cls, raw: dict[str, torch.Tensor], *, consume: bool = False
+     ) -> dict[str, torch.Tensor]:
+-        return published_to_native(raw)
++        return published_to_native(raw, consume=consume)
++
++    @classmethod
++    def _stage_on_host(cls, key: str) -> bool:
++        return is_fused_part(key)
+ 
+     def save_pretrained(self, save_directory: str | os.PathLike) -> None:
+         """Write ``config.json`` and ``model.safetensors`` in published layout.
+diff --git a/esm/models/esmfold2/experimental.py b/esm/models/esmfold2/experimental.py
+index 96992c2..a6eba02 100644
+--- a/esm/models/esmfold2/experimental.py
++++ b/esm/models/esmfold2/experimental.py
+@@ -535,14 +535,14 @@ class EsmFold2ExperimentalModel(HubPreTrainedModel):
+ 
+     @classmethod
+     def _normalize_checkpoint_layout(
+-        cls, raw: dict[str, torch.Tensor]
++        cls, raw: dict[str, torch.Tensor], *, consume: bool = False
+     ) -> dict[str, torch.Tensor]:
+         """Translate a bundled ESMC encoder out of the published tensor layout.
+ 
+         Scoped to the ``esmc.`` subtree so the trunk's own keys can never be
+         caught by the encoder's key patterns.
+         """
+-        return published_to_native_subtree(raw, "esmc.")
++        return published_to_native_subtree(raw, "esmc.", consume=consume)
+ 
+     def __init__(self, config: EsmFold2Config) -> None:
+         super().__init__(config)
+diff --git a/esm/models/esmfold2/hf_checkpoint.py b/esm/models/esmfold2/hf_checkpoint.py
+index d103ac1..f5871e6 100644
+--- a/esm/models/esmfold2/hf_checkpoint.py
++++ b/esm/models/esmfold2/hf_checkpoint.py
+@@ -188,11 +188,14 @@ def is_hf_layout(keys: Iterable[str]) -> bool:
+     return hf > native
+ 
+ 
+-def hf_state_dict_to_native(raw: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
++def hf_state_dict_to_native(
++    raw: dict[str, torch.Tensor], *, consume: bool = False
++) -> dict[str, torch.Tensor]:
+     """Rewrite an upstream-port state dict onto this implementation's layout.
+ 
+     Fails rather than dropping: two tensors landing on one name, or a packed
+-    projection missing a part, is a quietly half-loaded model.
++    projection missing a part, is a quietly half-loaded model. With ``consume``,
++    ``raw`` is emptied as it is read, so packed parts are not held twice.
+     """
+     out: dict[str, torch.Tensor] = {}
+     packed: dict[str, tuple[tuple[str, ...], dict[str, torch.Tensor]]] = {}
+@@ -202,7 +205,8 @@ def hf_state_dict_to_native(raw: dict[str, torch.Tensor]) -> dict[str, torch.Ten
+             raise ValueError(f"two checkpoint tensors both map onto {key!r}")
+         out[key] = tensor
+ 
+-    for key, tensor in raw.items():
++    for key in list(raw):
++        tensor = raw.pop(key) if consume else raw[key]
+         if key.startswith(_ESMC_PREFIX):
+             emit(key, tensor)
+             continue
+@@ -223,13 +227,14 @@ def hf_state_dict_to_native(raw: dict[str, torch.Tensor]) -> dict[str, torch.Ten
+         else:
+             emit(native, tensor)
+ 
+-    for native, (order, parts) in packed.items():
++    for native in list(packed):
++        order, parts = packed.pop(native)
+         if set(parts) != set(order):
+             raise ValueError(
+                 f"{native!r} is missing parts: {sorted(set(order) - set(parts))}"
+             )
+-        emit(native, torch.cat([parts[p] for p in order], dim=0))
+-    return published_to_native_subtree(out, _ESMC_PREFIX)
++        emit(native, torch.cat([parts.pop(p) for p in order], dim=0))
++    return published_to_native_subtree(out, _ESMC_PREFIX, consume=True)
+ 
+ 
+ def drop_undeclared(config_class, values: dict) -> dict:
+diff --git a/esm/models/esmfold2/model.py b/esm/models/esmfold2/model.py
+index c09e60a..5bafbe0 100644
+--- a/esm/models/esmfold2/model.py
++++ b/esm/models/esmfold2/model.py
+@@ -32,7 +32,10 @@ except ImportError:
+     TE_AVAILABLE = False
+ 
+ from esm.models.esmc import EsmcModel
+-from esm.models.esmc.checkpoint_layout import published_to_native_subtree
++from esm.models.esmc.checkpoint_layout import (
++    is_fused_part,
++    published_to_native_subtree,
++)
+ from esm.models.esmfold2.config import EsmFold2Config, default_module_flags
+ from esm.models.esmfold2.hf_checkpoint import hf_state_dict_to_native, is_hf_layout
+ from esm.models.esmfold2.layers import (
+@@ -580,7 +583,7 @@ class EsmFold2Model(HubPreTrainedModel):
+ 
+     @classmethod
+     def _normalize_checkpoint_layout(
+-        cls, raw: dict[str, torch.Tensor]
++        cls, raw: dict[str, torch.Tensor], *, consume: bool = False
+     ) -> dict[str, torch.Tensor]:
+         """Translate a checkpoint out of the layout it was published in.
+ 
+@@ -591,8 +594,12 @@ class EsmFold2Model(HubPreTrainedModel):
+         remap that loses a tensor still fails the load.
+         """
+         if is_hf_layout(raw):
+-            return hf_state_dict_to_native(raw)
+-        return published_to_native_subtree(raw, "esmc.")
++            return hf_state_dict_to_native(raw, consume=consume)
++        return published_to_native_subtree(raw, "esmc.", consume=consume)
++
++    @classmethod
++    def _stage_on_host(cls, key: str) -> bool:
++        return key.startswith("esmc.") and is_fused_part(key)
+ 
+     def __init__(self, config: EsmFold2Config) -> None:
+         super().__init__(config)
+@@ -758,7 +765,15 @@ class EsmFold2Model(HubPreTrainedModel):
+                     device=device,
+                     dtype=dtype,
+                 )
+-        model = cls._load_pretrained(local_dir, config, device=device, dtype=dtype)
++        # A bundled backbone is cast to ``esmc_precision`` right after loading,
++        # so read it at that width: ESMC-6B is ~24 GB in the published fp32 and
++        # would otherwise have to fit on the device at full width first.
++        key_dtypes = None
++        if dtype is None and config.esmc_config is not None and esmc_precision != "fp32":
++            key_dtypes = {"esmc.": torch.bfloat16}
++        model = cls._load_pretrained(
++            local_dir, config, device=device, dtype=dtype, key_dtypes=key_dtypes
++        )
+         # A bundled backbone came in with the trunk; only the separate-repo
+         # arrangement needs a second fetch.
+         if load_esmc and config.esmc_config is None:
 diff --git a/esm/models/hub.py b/esm/models/hub.py
-index 7452ac0..ae2ea9a 100644
+index 7452ac0..2e5647e 100644
 --- a/esm/models/hub.py
 +++ b/esm/models/hub.py
-@@ -16,7 +16,7 @@ from typing import ClassVar, Self
+@@ -10,13 +10,14 @@ each family's key policy, which subclasses control through
+ import json
+ import os
+ import re
++from collections.abc import Callable, Mapping
+ from pathlib import Path
+ from typing import ClassVar, Self
+ 
  import torch
  import torch.nn as nn
  from accelerate import init_empty_weights
@@ -11,7 +275,7 @@ index 7452ac0..ae2ea9a 100644
  
  CONFIG_NAME = "config.json"
  _SAFETENSORS_INDEX = "model.safetensors.index.json"
-@@ -33,24 +33,45 @@ def drop_te_extra_state(
+@@ -33,24 +34,67 @@ def drop_te_extra_state(
              del state_dict[key]
  
  
@@ -22,12 +286,21 @@ index 7452ac0..ae2ea9a 100644
 +    *,
 +    device: torch.device | str = "cpu",
 +    dtype: torch.dtype | None = None,
++    key_dtypes: Mapping[str, torch.dtype] | None = None,
++    stage_on_host: Callable[[str], bool] | None = None,
 +) -> dict[str, torch.Tensor]:
 +    """Read a checkpoint directly into its requested placement and precision.
 +
 +    ``safe_open`` materializes one tensor at a time. Moving and narrowing that
 +    tensor before opening the next one avoids retaining an entire fp32 shard in
 +    host memory while a large model is destined for bf16 CUDA inference.
++
++    ``key_dtypes`` maps key prefixes to a precision that overrides ``dtype`` for
++    the keys under them, so a submodule that is cast after loading anyway (a
++    bundled bf16 ESMC encoder, say) never occupies memory at full width.
++
++    Keys for which ``stage_on_host`` is true stay on the CPU whatever ``device``
++    is, for tensors that are repacked before they are used.
 +    """
      directory = Path(directory)
      index = directory / _SAFETENSORS_INDEX
@@ -58,30 +331,91 @@ index 7452ac0..ae2ea9a 100644
 +    target = torch.device(device)
 +    state_dict: dict[str, torch.Tensor] = {}
 +    for checkpoint in files:
-+        with safe_open(str(checkpoint), framework="pt", device=str(target)) as tensors:
++        # Read on the host and narrow there, so the device only ever allocates
++        # each tensor at its final width. Casting on an accelerator would leave
++        # the caching allocator holding fragments of every freed fp32 original.
++        with safe_open(str(checkpoint), framework="pt", device="cpu") as tensors:
 +            for key in tensors.keys():
 +                tensor = tensors.get_tensor(key)
-+                if dtype is not None and (
++                target_dtype = next(
++                    (d for p, d in (key_dtypes or {}).items() if key.startswith(p)),
++                    dtype,
++                )
++                if target_dtype is None or not (
 +                    tensor.is_floating_point() or tensor.is_complex()
 +                ):
-+                    tensor = tensor.to(dtype=dtype)
-+                state_dict[key] = tensor
++                    target_dtype = tensor.dtype
++                placement = (
++                    torch.device("cpu")
++                    if stage_on_host is not None and stage_on_host(key)
++                    else target
++                )
++                state_dict[key] = tensor.to(device=placement, dtype=target_dtype)
++                del tensor
 +    return state_dict
  
  
  def resolve_model_dir(
-@@ -165,7 +186,9 @@ class HubPreTrainedModel(nn.Module):
+@@ -134,7 +178,7 @@ class HubPreTrainedModel(nn.Module):
+ 
+     @classmethod
+     def _normalize_checkpoint_layout(
+-        cls, raw: dict[str, torch.Tensor]
++        cls, raw: dict[str, torch.Tensor], *, consume: bool = False
+     ) -> dict[str, torch.Tensor]:
+         """Translate a checkpoint out of the published tensor layout.
+ 
+@@ -142,9 +186,19 @@ class HubPreTrainedModel(nn.Module):
+         are packed differently from its published ones (ESMC fuses q/k/v and
+         gate/up for Transformer Engine) is still held to the same
+         nothing-dropped guarantee. The default is the identity.
++
++        With ``consume`` an override may empty ``raw`` as it goes, so a tensor
++        replaced by a repacked copy is freed rather than held twice.
+         """
+         return raw
+ 
++    @classmethod
++    def _stage_on_host(cls, key: str) -> bool:
++        """Whether checkpoint ``key`` is kept on the CPU until its layout is
++        normalized. Families whose normalization concatenates tensors stage the
++        parts, so an accelerator never holds both them and the result."""
++        return False
++
+     @classmethod
+     def _load_pretrained(
+         cls,
+@@ -153,6 +207,7 @@ class HubPreTrainedModel(nn.Module):
+         *,
+         device: torch.device | str = "cpu",
+         dtype: torch.dtype | None = None,
++        key_dtypes: Mapping[str, torch.dtype] | None = None,
+         strict_keys: bool = True,
+     ) -> Self:
+         """Instantiate ``cls(config)`` and load the checkpoint in ``local_dir``.
+@@ -165,7 +220,20 @@ class HubPreTrainedModel(nn.Module):
          with init_empty_weights():
              model = cls(config)
  
 -        raw = cls._normalize_checkpoint_layout(read_safetensors_dir(local_dir))
++        target = torch.device(device)
 +        raw = cls._normalize_checkpoint_layout(
-+            read_safetensors_dir(local_dir, device=device, dtype=dtype)
++            read_safetensors_dir(
++                local_dir,
++                device=target,
++                dtype=dtype,
++                key_dtypes=key_dtypes,
++                stage_on_host=None if target.type == "cpu" else cls._stage_on_host,
++            ),
++            consume=True,
 +        )
++        for key in list(raw):
++            if raw[key].device.type == "cpu" and target.type != "cpu":
++                raw[key] = raw[key].to(target)
          adapted = cls._adapt_checkpoint_keys(raw, set(model.state_dict().keys()))
          incompatible = model.load_state_dict(adapted, strict=False, assign=True)
  
-@@ -199,7 +222,7 @@ class HubPreTrainedModel(nn.Module):
+@@ -199,7 +267,7 @@ class HubPreTrainedModel(nn.Module):
                  f"  checkpoint entries that reached nothing: {dropped}"
              )
  

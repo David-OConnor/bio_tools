@@ -357,7 +357,7 @@ impl Installer {
             .join(executable_name("uv"));
 
         let fallback =
-            home_dir().map(|home| home.join(".local").join("bin").join(executable_name("uv")));
+            super::home_dir().map(|home| home.join(".local").join("bin").join(executable_name("uv")));
 
         let candidates = self
             .config
@@ -599,21 +599,25 @@ impl Installer {
         if let Some(root) = &self.config.conda_root {
             return root.clone();
         }
-        let environments = &self.config.layout.environments_root;
-        if is_wsl_windows_mount(environments)
-            && let Some(home) = home_dir()
+        // Miniconda and a number of Conda packages contain Unix symlinks, which DrvFS/9P mounts
+        // without WSL metadata reject, so installing under /mnt/c fails partway through.
+        self.native_data_dir("conda", &self.config.layout.environments_root)
+    }
+
+    /// `root/kind`, unless `root` is a WSL mount of a Windows drive: then a stable directory on
+    /// the native filesystem, one per layout so separate applications never collide. DrvFS is
+    /// slow for large data and rejects the Unix symlinks Conda and the Hugging Face cache use.
+    pub(crate) fn native_data_dir(&self, kind: &str, root: &Path) -> PathBuf {
+        if is_wsl_windows_mount(root)
+            && let Some(home) = super::home_dir()
         {
-            // Miniconda and a number of Conda packages contain Unix symlinks. DrvFS/9P mounts
-            // without WSL metadata reject those links, so installing under /mnt/c fails partway
-            // through extraction. A stable layout-specific directory avoids both that failure
-            // and named-environment collisions between separate applications.
             return home
                 .join(".cache")
                 .join("bio_tools")
-                .join("conda")
-                .join(stable_path_id(environments));
+                .join(kind)
+                .join(stable_path_id(root));
         }
-        environments.join("conda")
+        root.join(kind)
     }
 
     pub(crate) fn conda_executable_path(&self) -> PathBuf {
@@ -1104,15 +1108,6 @@ fn conda_executable_in(root: &Path) -> PathBuf {
         "bin"
     })
     .join(executable_name("conda"))
-}
-
-fn home_dir() -> Option<PathBuf> {
-    env::var_os(if cfg!(target_os = "windows") {
-        "USERPROFILE"
-    } else {
-        "HOME"
-    })
-    .map(PathBuf::from)
 }
 
 fn is_wsl_windows_mount(path: &Path) -> bool {

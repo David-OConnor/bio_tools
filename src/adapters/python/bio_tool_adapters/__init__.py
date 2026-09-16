@@ -18,6 +18,7 @@ import logging
 import os
 import shutil
 from contextvars import ContextVar
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -292,7 +293,12 @@ def run_command(
     env: dict[str, str] | None = None,
     artifacts: Iterable[Path] | None = None,
 ) -> dict[str, Any]:
-    """Execute and durably audit a shell-free command through bio_tools."""
+    """Execute and durably audit a shell-free command through bio_tools.
+
+    Every tool is pointed at the installer's shared model cache, so weights one
+    tool downloaded are there for the next and nothing lands in the home
+    directory; an adapter's own `env` still wins.
+    """
 
     try:
         completed = bio_tools.CommandSpec(
@@ -300,7 +306,7 @@ def run_command(
             cwd=cwd,
             timeout=timeout,
             stdin=stdin,
-            env=env,
+            env={**model_cache_environment(), **(env or {})},
             check=True,
             output_limit=100_000,
             run_log_dir=RUN_LOGS,
@@ -316,6 +322,20 @@ def run_command(
         "stdout": completed.stdout,
         "stderr": completed.stderr,
         "run_log_dir": str(completed.run_log_dir),
+    }
+
+
+@lru_cache(maxsize=1)
+def model_cache_environment() -> dict[str, str]:
+    """Where each tool downloads its weights: `bio_tools`' one managed cache.
+
+    Cached because every command asks, and the answer is this installation's
+    layout: resolving it also creates the directories.
+    """
+
+    return {
+        name: str(path)
+        for name, path in bio_tools.model_cache_environment(PROCESS_EXECUTABLES).items()
     }
 
 

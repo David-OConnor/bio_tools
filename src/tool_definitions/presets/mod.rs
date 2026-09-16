@@ -139,6 +139,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
         "chai1" => Some(include_str!("chai1.json")),
         "boltz2" => Some(include_str!("boltz2.json")),
+        "catpred" => Some(include_str!("catpred.json")),
         "esmc" => Some(include_str!("esmc.json")),
         "esmfold2" => Some(include_str!("esmfold2.json")),
         "ligandmpnn" => Some(include_str!("ligandmpnn.json")),

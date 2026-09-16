@@ -36,6 +36,11 @@ pub(crate) fn record_install(installer: &Installer, tool: Tool) -> Result<(), In
     })
 }
 
+/// Whether this crate's recipe recorded `tool` as installed.
+pub(crate) fn is_recorded(installer: &Installer, tool: Tool) -> bool {
+    marker_path(installer, tool).is_file()
+}
+
 pub(crate) fn forget_install(installer: &Installer, tool: Tool) -> Result<(), InstallError> {
     let marker = marker_path(installer, tool);
     match fs::remove_file(&marker) {
@@ -308,6 +313,15 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
             "-c", "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer",
         ]));
     }
+    if tool == Tool::CatPred {
+        // The prediction pipeline rather than the package: it is what the
+        // adapter calls, and it imports the RDKit and pandas stack a working
+        // install needs, none of which importing `catpred` alone would touch.
+        return Some(installer.tool_python_command(tool).args([
+            "-c",
+            "from catpred.inference import PredictionRequest, run_inprocess_prediction_pipeline",
+        ]));
+    }
     if tool == Tool::EsmFold2 {
         return Some(installer.tool_python_command(tool).args([
             "-c",
@@ -410,7 +424,10 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
             "DLKcat/DeeplearningApproach/Code/example/prediction_for_input.py",
             "DLKcat runner",
         )],
-        Tool::CatPred => &[("CatPred/predict.py", "CatPred runner")],
+        Tool::CatPred => &[(
+            "CatPred/capsule_data/data/pretrained",
+            "CatPred checkpoint archive",
+        )],
         Tool::Placer => &[("PLACER/run_PLACER.py", "PLACER runner")],
         Tool::HighFold => &[
             ("HighFold", "HighFold checkout"),

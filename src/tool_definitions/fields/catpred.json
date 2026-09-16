@@ -4,37 +4,38 @@
       "name": "job_name",
       "label": "Job name",
       "kind": "text",
-      "default": "catpred-demo",
+      "default": "catpred-job",
       "required": false,
-      "help": "",
+      "help": "Names the output directory and the predictions CSV inside it.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 80,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Input"
     },
     {
       "name": "parameter",
-      "label": "Parameter",
+      "label": "Kinetic parameter",
       "kind": "select",
       "default": "kcat",
       "required": false,
-      "help": "",
+      "help": "One ensemble per parameter, each a separate model: a run predicts one of them. kcat is predicted for the reaction's whole substrate set, Km for a single substrate, and Ki for a single inhibitor.",
       "options": [
         {
           "value": "kcat",
-          "label": "kcat (turnover number)"
+          "label": "kcat \u2014 turnover number (s\u207b\u00b9)"
         },
         {
           "value": "km",
-          "label": "Km (Michaelis constant)"
+          "label": "Km \u2014 Michaelis constant (mM)"
         },
         {
           "value": "ki",
-          "label": "Ki (inhibition constant)"
+          "label": "Ki \u2014 inhibition constant (mM)"
         }
       ],
       "rows": null,
@@ -43,88 +44,122 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Input"
     },
     {
-      "name": "protein_sequence",
-      "label": "Enzyme sequence",
-      "kind": "textarea",
-      "default": "MSEPAQKKQKVSNGGGSSNKRAADSLADQLYGKSAAAAHTPPAKKAKTETIAAPTFTTSGLDKLDLSNIDSSAWKQLAEEDLASLYGDLDSHRLDQPFPSAAAPVAKKRVSFTDSAAAA",
+      "name": "sequence_molecules",
+      "label": "Enzyme and substrates",
+      "kind": "molecule_builder",
+      "default": "[{\"type\": \"protein\", \"id\": \"GCK_HUMAN\", \"sequence\": \"MLDDRARMEAAKKEKVEQILAEFQLQEEDLKKVMRRMQKEMDRGLRLETHEEASVKMLPTYVRSTPEGSEVGDFLSLDLGGTNFRVMLVKVGEGEEGQWSVKTKHQMYSIPEDAMTGTAEMLFDYISECISDFLDKHQMKHKKLPLGFTFSFPVRHEDIDKGILLNWTKGFKASGAEGNNVVGLLRDAIKRRGDFEMDVVAMVNDTVATMISCYYEDHQCEVGMIVGTGCNACYMEEMQNVELVEGDEGRMCVNTEWGAFGDSGELDEFLLEYDRLVDESSANPGQQLYEKLIGGKYMGELVRLVLLRLVDENLLFHGEASEQLRTRGAFETRFVSQVESDTGDRKQIYNILSTLGLRPSTTDCDIVRRACESVSTRAAHMCSAGLAGVINRMRESRSEDVMRITVGVDGSVYKLHPSFKERFHASVRRLTPSCEITFIESEEGSGRGAALVSAVACKKACMLGQ\"}, {\"type\": \"ligand\", \"id\": \"D-glucose\", \"ligand\": \"C(C1C(C(C(C(O1)O)O)O)O)O\"}, {\"type\": \"ligand\", \"id\": \"ATP\", \"ligand\": \"C1=NC(=C2C(=N1)N(C=N2)C3C(C(C(O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N\"}]",
       "required": true,
-      "help": "",
-      "options": [],
-      "rows": 6,
+      "help": "One enzyme box and one box per substrate, which is one reaction. The enzyme's ID names its sequence in the results and is what CatPred caches its embedding under; a substrate's ID is an optional label. For kcat the substrates are joined with \".\", as CatPred's own CSV writes a reaction; Km and Ki take a single ligand. Enter a CSV to score several reactions in one run.",
+      "options": [
+        {
+          "value": "protein",
+          "label": "Enzyme"
+        },
+        {
+          "value": "ligand",
+          "label": "Substrate or inhibitor"
+        }
+      ],
+      "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters",
+      "molecule_features": "id,sequence_id,smiles_only"
     },
     {
-      "name": "substrate_smiles",
-      "label": "Substrate SMILES",
+      "name": "input_csv",
+      "label": "Reactions (CatPred CSV)",
       "kind": "textarea",
-      "default": "OCC1OC(O)C(O)C(O)C1O",
+      "default": "SMILES,sequence,pdbpath,Substrate\nC(C1C(C(C(C(O1)O)O)O)O)O.C1=NC(=C2C(=N1)N(C=N2)C3C(C(C(O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N,MLDDRARMEAAKKEKVEQILAEFQLQEEDLKKVMRRMQKEMDRGLRLETHEEASVKMLPTYVRSTPEGSEVGDFLSLDLGGTNFRVMLVKVGEGEEGQWSVKTKHQMYSIPEDAMTGTAEMLFDYISECISDFLDKHQMKHKKLPLGFTFSFPVRHEDIDKGILLNWTKGFKASGAEGNNVVGLLRDAIKRRGDFEMDVVAMVNDTVATMISCYYEDHQCEVGMIVGTGCNACYMEEMQNVELVEGDEGRMCVNTEWGAFGDSGELDEFLLEYDRLVDESSANPGQQLYEKLIGGKYMGELVRLVLLRLVDENLLFHGEASEQLRTRGAFETRFVSQVESDTGDRKQIYNILSTLGLRPSTTDCDIVRRACESVSTRAAHMCSAGLAGVINRMRESRSEDVMRITVGVDGSVYKLHPSFKERFHASVRRLTPSCEITFIESEEGSGRGAALVSAVACKKACMLGQ,GCK_HUMAN,D-glucose + ATP\n",
       "required": true,
-      "help": "For a Ki prediction this is the inhibitor rather than the substrate.",
+      "help": "CatPred's own input format: a header with SMILES, sequence and pdbpath, then one row per reaction (up to 200). pdbpath is an identifier, not a file, and must name exactly one sequence across the file; left blank, rows are numbered seq_001 onward. Any extra column, such as the demo files' Substrate, is carried through to the predictions.",
       "options": [],
-      "rows": 2,
+      "rows": 10,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 2000000,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Input",
+      "input_modes": "text"
     },
     {
-      "name": "ec_number",
-      "label": "EC number (optional)",
-      "kind": "text",
+      "name": "inputs_file",
+      "label": "Reactions file",
+      "kind": "file",
       "default": "",
       "required": false,
-      "help": "For example 2.7.1.1. Used as a feature where the model has one.",
-      "options": [],
-      "rows": null,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": 20,
-      "accept": "",
-      "task": ""
-    },
-    {
-      "name": "organism",
-      "label": "Organism (optional)",
-      "kind": "text",
-      "default": "",
-      "required": false,
-      "help": "For example Escherichia coli.",
-      "options": [],
-      "rows": null,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": 200,
-      "accept": "",
-      "task": ""
-    },
-    {
-      "name": "include_uncertainty",
-      "label": "Return the predicted uncertainty",
-      "kind": "checkbox",
-      "default": true,
-      "required": false,
-      "help": "Lower predicted variance goes with higher accuracy, so this is worth keeping on.",
+      "help": "Upload a CatPred CSV with SMILES, sequence and pdbpath columns. The file contents are sent to the compute node.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
+      "accept": ".csv,.txt",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "name": "device",
+      "label": "Device",
+      "kind": "select",
+      "default": "auto",
+      "required": false,
+      "help": "Auto uses CUDA when available, otherwise CPU. An explicitly requested unavailable CUDA device fails clearly. Each row costs one ESM-2 embedding and ten model evaluations; CPU runs are slow but supported.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "cuda",
+          "label": "CUDA"
+        },
+        {
+          "value": "cpu",
+          "label": "CPU"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Runtime"
     }
   ],
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "parameters",
+    "options": [
+      {
+        "value": "parameters",
+        "label": "Set parameters here"
+      },
+      {
+        "value": "text",
+        "label": "Enter CatPred CSV"
+      },
+      {
+        "value": "upload",
+        "label": "Upload CatPred CSV"
+      }
+    ]
+  },
   "tasks": []
 }

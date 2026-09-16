@@ -1,4 +1,4 @@
-use std::{env, fs, path::PathBuf, process::Command};
+use std::{fs, path::PathBuf, process::Command};
 
 use super::{
     InstallError, Installer,
@@ -75,24 +75,9 @@ fn install_backend(installer: &mut Installer, backend: TorchBackend) -> Result<(
     installer.pip_install(SLUG, &[package], PipOptions::default())
 }
 
-/// The directory OpenDDE fills with its several-gigabyte checkpoint: the configured root, or the
-/// per-user cache directory it falls back to on its own.
-pub(super) fn cache_dir(installer: &Installer) -> Option<PathBuf> {
-    installer.config.opendde_root.clone().or_else(|| {
-        env::var_os(if cfg!(target_os = "windows") {
-            "USERPROFILE"
-        } else {
-            "HOME"
-        })
-        .map(PathBuf::from)
-        .map(|home| home.join(".cache").join("opendde"))
-    })
-}
-
 fn prewarm(installer: &Installer, executable: &PathBuf) -> Result<(), InstallError> {
-    let root = cache_dir(installer);
-    if root
-        .as_ref()
+    if installer
+        .tool_cache_dir(Tool::OpenDde)
         .is_some_and(|root| root.join("checkpoint").is_dir())
     {
         installer.note("OpenDDE model data is already present");
@@ -132,7 +117,8 @@ fn prewarm(installer: &Installer, executable: &PathBuf) -> Result<(), InstallErr
             "--cycle",
             "1",
         ])
-        .current_dir(scratch.path());
+        .current_dir(scratch.path())
+        .envs(installer.model_cache_environment());
     if installer.succeeds(&mut command) {
         installer.note("OpenDDE model data cached; the first prediction can start immediately");
     } else {

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import copy
 import json
-import os
 import re
 import tempfile
 from pathlib import Path
@@ -21,6 +20,7 @@ from . import (
     ToolInputError,
     ToolUnavailable,
     catalog_spec,
+    model_cache_environment,
     readable_files,
     run_command,
     text,
@@ -543,7 +543,7 @@ _REFERENCE_DATA = {
 def _reference_data_problem() -> str | None:
     """What is wrong with the CCD reference data, if anything."""
 
-    root = Path(os.environ.get("PROTENIX_ROOT_DIR") or Path.home()) / "common"
+    root = Path(model_cache_environment()["PROTENIX_ROOT_DIR"]) / "common"
     for name, minimum in _REFERENCE_DATA.items():
         path = root / name
         if not path.is_file():
