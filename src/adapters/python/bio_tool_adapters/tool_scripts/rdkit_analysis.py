@@ -18,6 +18,7 @@ import argparse
 import csv
 import json
 import re
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
@@ -65,8 +66,12 @@ def _import_rdkit() -> dict[str, Any]:
         from rdkit.Chem.MolStandardize import rdMolStandardize
         from rdkit.Chem.Scaffolds import MurckoScaffold
     except ImportError as exc:
+        # Naming the interpreter matters: the usual cause is the parent having
+        # launched the wrong one, and the message is the only place the two
+        # can be compared.
         raise RuntimeError(
-            "RDKit is not installed in the interpreter this ran under."
+            f"RDKit is not installed in {sys.executable} (prefix {sys.prefix}), "
+            "which is the interpreter this analysis was launched with."
         ) from exc
 
     # RDKit logs a parse failure to stderr; this adapter reports it on the row

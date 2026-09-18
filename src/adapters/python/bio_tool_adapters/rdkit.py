@@ -41,7 +41,7 @@ from . import (
     tool_tasks,
 )
 from .field_processing import boolean, choice, document_input, integer, safe_name
-from .status_check import CheckResult, ToolStatus
+from .status_check import CheckResult, ToolStatus, probe_command
 
 SPEC = catalog_spec(
     "rdkit",
@@ -76,14 +76,26 @@ def interpreter() -> str:
     RDKit is a dependency of the application rather than a tool with an
     environment of its own, so the interpreter already running has it. An
     operator who keeps RDKit somewhere else names it with RDKIT_PYTHON.
+
+    Never `.resolve()`: a uv venv puts a symlink to a shared base interpreter
+    at bin/python, and that base interpreter has no pyvenv.cfg of its own.
+    Invoking it by its resolved target makes CPython's site init treat it as a
+    bare interpreter with none of this venv's packages on sys.path, so the
+    `import rdkit` that works in this process fails in the child. Both paths
+    here are already absolute -- `sys.executable` always, and RDKIT_PYTHON
+    because it is rejected below if it is not.
     """
 
     configured = os.getenv("RDKIT_PYTHON")
     if configured:
-        if not Path(configured).is_file():
-            raise ToolUnavailable(f"RDKIT_PYTHON is not a file: {configured}")
-        return str(Path(configured).resolve())
-    return str(Path(sys.executable).resolve())
+        path = Path(configured)
+        if not path.is_absolute() or not path.is_file():
+            raise ToolUnavailable(
+                f"RDKIT_PYTHON must be the absolute path of a Python interpreter: "
+                f"{configured}"
+            )
+        return str(path)
+    return sys.executable
 
 
 def _from_boxes(payload: dict[str, Any]) -> str:
@@ -223,27 +235,50 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# What the status probe asks the interpreter a run would use. Importing RDKit
+# in *this* process would answer a different question, and answer it wrongly:
+# a run is a child process, and a parent that can import RDKit is no evidence
+# that the child can.
+_PROBE = (
+    "import sys\n"
+    "from rdkit import Chem\n"
+    "import rdkit\n"
+    "inchi = 'yes'\n"
+    "try:\n"
+    "    inchi = 'yes' if Chem.MolToInchiKey(Chem.MolFromSmiles('CCO')) else 'no'\n"
+    "except Exception:\n"
+    "    inchi = 'no'\n"
+    "print(rdkit.__version__, inchi)\n"
+)
+
+
 def check_status() -> ToolStatus:
     try:
-        import rdkit
-    except ImportError as exc:
-        return ToolStatus(
-            CheckResult.NOT_INSTALLED,
-            f"RDKit is not installed in this Python environment: {exc}",
-        )
+        python = interpreter()
+    except ToolUnavailable as exc:
+        return ToolStatus(CheckResult.NOT_INSTALLED, str(exc))
     if not RUNNER.is_file():
         return ToolStatus(
             CheckResult.ERROR, f"The RDKit analysis script is missing: {RUNNER}"
         )
-    version = getattr(rdkit, "__version__", None)
-    detail = f"Imported rdkit {version}" if version else "Imported rdkit"
+
+    code, output = probe_command([python, "-c", _PROBE])
+    if code is None:
+        return ToolStatus(
+            CheckResult.NOT_INSTALLED, f"Could not run {python}: {output}"
+        )
+    if code != 0:
+        return ToolStatus(
+            CheckResult.NOT_INSTALLED,
+            f"RDKit is not importable in {python}, which is the interpreter a run "
+            f"uses: {(output or '').strip()[-200:]}",
+        )
+
+    parts = (output or "").split()
+    version = parts[0] if parts else "?"
+    detail = f"Imported rdkit {version} in {python}"
     # InChI is a build option and the form offers it, so the status says
     # whether this build can answer for it.
-    try:
-        from rdkit import Chem
-
-        if not Chem.MolToInchiKey(Chem.MolFromSmiles("CCO")):
-            raise RuntimeError("empty InChIKey")
-    except (AttributeError, RuntimeError, ValueError):
+    if len(parts) > 1 and parts[1] == "no":
         detail = f"{detail}; this build has no InChI support"
     return ToolStatus(CheckResult.PASS, detail)
