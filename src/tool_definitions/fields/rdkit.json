@@ -1,24 +1,96 @@
 {
   "fields": [
     {
-      "name": "operation",
-      "label": "Operation",
-      "kind": "select",
-      "default": "descriptors",
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "rdkit-demo",
       "required": false,
-      "help": "",
+      "help": "Names the table this run leaves: <job name>.csv.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 80,
+      "accept": "",
+      "task": "",
+      "group": "Input"
+    },
+    {
+      "name": "smiles",
+      "label": "Molecules",
+      "kind": "textarea",
+      "default": "CC(=O)OC1=CC=CC=C1C(=O)O aspirin\nCN1C=NC2=C1C(=O)N(C)C(=O)N2C caffeine\nCC(C)Cc1ccc(cc1)C(C)C(=O)O ibuprofen\nCC(=O)Nc1ccc(O)cc1 paracetamol\n",
+      "required": true,
+      "help": "One molecule per line, in the format RDKit's SmilesMolSupplier reads: a SMILES string, then optionally whitespace and a name. Lines beginning with # are ignored. Up to 5000 molecules and 200,000 characters per run.",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 200000,
+      "accept": "",
+      "task": "molecule",
+      "group": "Input",
+      "input_modes": "text",
+      "help_note": "A molecule RDKit cannot parse is reported as a row with an error rather than failing the run, so one bad line in a list does not lose the rest."
+    },
+    {
+      "name": "reaction_smiles",
+      "label": "Reactions",
+      "kind": "textarea",
+      "default": "[CH3:1][C:2](=[O:3])[O:4][CH3:5].[OH2:6]>>[CH3:1][C:2](=[O:3])[OH:6].[OH:4][CH3:5] methyl-acetate-hydrolysis\n",
+      "required": true,
+      "help": "One reaction per line as reactants>>products, or reactants>agents>products, then optionally whitespace and a name. Atom maps are required for reliable bond-edit extraction: every atom should be mapped exactly once per side. Up to 1000 reactions per run.",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 200000,
+      "accept": "",
+      "task": "reaction",
+      "group": "Input",
+      "input_modes": "text"
+    },
+    {
+      "name": "inputs_file",
+      "label": "Molecule or reaction file",
+      "kind": "file",
+      "default": "",
+      "required": false,
+      "help": "Upload a SMILES list (.smi, .txt, .csv) or an SD file (.sdf, .mol); an SD file is recognised by its own connection table and read with RDKit's SDMolSupplier, keeping the _Name field as each molecule's name. For the reaction task, upload one reaction SMILES per line.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".smi,.smiles,.csv,.txt,.sdf,.mol,.rxn",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "name": "descriptor_set",
+      "label": "Descriptors",
+      "kind": "select",
+      "default": "common",
+      "required": false,
+      "help": "The common set is formula, molecular weight and exact mass, cLogP, TPSA, hydrogen-bond donors and acceptors, rotatable bonds, rings, aromatic rings, heavy atoms, fraction of sp3 carbons, formal charge and the number of Lipinski rule-of-five violations. Every descriptor is RDKit's own Descriptors.CalcMolDescriptors, which is upwards of two hundred columns.",
       "options": [
         {
-          "value": "descriptors",
-          "label": "Descriptors"
+          "value": "common",
+          "label": "Common set (the properties most analyses start from)"
         },
         {
-          "value": "canonicalize",
-          "label": "Canonical SMILES"
+          "value": "all",
+          "label": "Every RDKit descriptor (Descriptors.CalcMolDescriptors)"
         },
         {
-          "value": "standardize",
-          "label": "Standardize and parent forms"
+          "value": "none",
+          "label": "None"
         }
       ],
       "rows": null,
@@ -27,31 +99,16 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": "molecule"
+      "task": "molecule",
+      "group": "Molecule properties"
     },
     {
-      "name": "smiles",
-      "label": "SMILES",
-      "kind": "textarea",
-      "default": "CC(=O)OC1=CC=CC=C1C(=O)O",
-      "required": true,
-      "help": "One molecule in SMILES notation; the example is aspirin.",
-      "options": [],
-      "rows": 5,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": "molecule"
-    },
-    {
-      "name": "include_inchi",
-      "label": "Include InChI",
+      "name": "standardize",
+      "label": "Standardized parent forms",
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "Include InChI and InChIKey when the RDKit build supports them.",
+      "help": "Adds the four rdMolStandardize parents as columns: cleanup, fragment parent (the largest fragment), charge parent (neutralized) and tautomer parent. Useful as search keys; keep the original charged, stereospecific molecule for anything that has to account for mass or charge.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -59,25 +116,288 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": "molecule"
+      "task": "molecule",
+      "group": "Molecule properties"
     },
     {
-      "name": "reaction_smiles",
-      "label": "Atom-mapped reaction SMILES",
-      "kind": "textarea",
-      "default": "[CH3:1][C:2](=[O:3])[O:4][CH3:5].[OH2:6]>>[CH3:1][C:2](=[O:3])[OH:6].[OH:4][CH3:5]",
-      "required": true,
-      "help": "Reactants>>products (or reactants>agents>products). Atom maps are required for reliable bond-edit extraction; every atom should normally be mapped exactly once per side.",
+      "name": "include_inchi",
+      "label": "InChI and InChIKey",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Adds InChI and InChIKey columns, when the RDKit build includes InChI support. The InChIKey is the usual key for matching a molecule across databases.",
       "options": [],
-      "rows": 7,
+      "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": "reaction"
+      "task": "molecule",
+      "group": "Molecule properties"
+    },
+    {
+      "name": "hashes",
+      "label": "Molecule hash strings",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Adds the rdMolHash strings from the Cookbook's molecule-hash recipe: canonical SMILES, the tautomer-insensitive HetAtomTautomer hash, the Murcko scaffold hash, the anonymous graph and the net charge. Two molecules that agree on a hash are the same under that hash's notion of sameness.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Molecule properties"
+    },
+    {
+      "name": "murcko_scaffold",
+      "label": "Murcko scaffold",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Adds the Bemis-Murcko scaffold (the ring systems and the linkers between them, with side chains removed) and its generic form, where every atom becomes carbon and every bond single.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "ring_analysis",
+      "label": "Rings and aromaticity",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Adds the number of rings in the symmetrized smallest set of smallest rings, the number of ring systems (fused rings counted once), the number of aromatic rings and the number of aromatic atoms.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "stereo",
+      "label": "Stereochemistry",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Adds the stereocentres and stereo bonds RDKit's FindPotentialStereo finds, and how many of them are unspecified in the input -- which is what says whether a SMILES string names one stereoisomer or a family of them.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "substructure_smarts",
+      "label": "Substructure query (SMARTS)",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "A SMARTS pattern matched against every molecule, as in the Cookbook's functional-group recipes: for example [NX1]#[CX2] for a nitrile or [CX3](=O)[OX2H1] for a carboxylic acid. Adds the number of matches and the atom indices of the first one. Leave empty to skip.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 2000,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "find_mcs",
+      "label": "Maximum common substructure",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Runs rdFMCS.FindMCS across every molecule that parsed and reports the largest substructure they all share, as SMARTS, with its atom and bond counts. This is one answer for the whole set rather than a column, so it is reported in the run's JSON rather than the table. Needs at least two molecules.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "mcs_timeout",
+      "label": "MCS timeout (seconds)",
+      "kind": "number",
+      "default": 20,
+      "required": false,
+      "help": "rdFMCS.FindMCS's own timeout. A search that runs out of time still returns the largest substructure it had found, flagged as having timed out.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 600,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "fingerprint",
+      "label": "Fingerprint",
+      "kind": "select",
+      "default": "none",
+      "required": false,
+      "help": "Adds a fingerprint column as a bit string, through rdFingerprintGenerator. Morgan with radius 2 is the usual ECFP4 analogue. MACCS keys are a fixed 166-bit set and ignore the size and radius below.",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "morgan",
+          "label": "Morgan (circular, ECFP-like)"
+        },
+        {
+          "value": "rdkit",
+          "label": "RDKit topological"
+        },
+        {
+          "value": "atom_pair",
+          "label": "Atom pair"
+        },
+        {
+          "value": "topological_torsion",
+          "label": "Topological torsion"
+        },
+        {
+          "value": "maccs",
+          "label": "MACCS keys (166 bits)"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "fingerprint_bits",
+      "label": "Fingerprint size (bits)",
+      "kind": "number",
+      "default": 2048,
+      "required": false,
+      "help": "The folded length of the fingerprint. Ignored for MACCS keys.",
+      "options": [],
+      "rows": null,
+      "minimum": 32,
+      "maximum": 16384,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "fingerprint_radius",
+      "label": "Morgan radius",
+      "kind": "number",
+      "default": 2,
+      "required": false,
+      "help": "How far from each atom the Morgan environment reaches. Radius 2 corresponds to ECFP4. Used only by the Morgan fingerprint.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 6,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "molecule",
+      "group": "Structure and substructure"
+    },
+    {
+      "name": "reaction_participants",
+      "label": "Per-participant summaries",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Reports each reactant, agent and product on its own: canonical SMILES, formula, formal charge, and how many of its atoms carry a map number.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "reaction",
+      "group": "Reaction analysis"
+    },
+    {
+      "name": "reaction_balance",
+      "label": "Element and charge balance",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Counts every element, implicit hydrogens included, and the formal charge on each side, and reports the difference. Agents are excluded from the count, as they are from the bond edits.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "reaction",
+      "group": "Reaction analysis"
+    },
+    {
+      "name": "reaction_bond_edits",
+      "label": "Bonds formed, broken and changed",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Compares the mapped bonds on each side and reports the bonds formed, the bonds broken, the bonds whose order changed, and the atom maps making up the reaction centre. Only reliable when the atom mapping is complete, which is reported alongside it.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "reaction",
+      "group": "Reaction analysis"
     }
   ],
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "text",
+    "options": [
+      {
+        "value": "text",
+        "label": "Enter SMILES"
+      },
+      {
+        "value": "upload",
+        "label": "Upload a file"
+      }
+    ]
+  },
   "tasks": [
     {
       "value": "molecule",
@@ -87,5 +407,40 @@
       "value": "reaction",
       "label": "Reaction"
     }
-  ]
+  ],
+  "task_group": "Input",
+  "field_groups": [
+    {
+      "label": "Input",
+      "docs_url": "https://www.rdkit.org/docs/GettingStartedInPython.html"
+    },
+    {
+      "label": "Molecule properties",
+      "docs_url": "https://www.rdkit.org/docs/source/rdkit.Chem.Descriptors.html"
+    },
+    {
+      "label": "Structure and substructure",
+      "docs_url": "https://www.rdkit.org/docs/Cookbook.html"
+    },
+    {
+      "label": "Reaction analysis",
+      "docs_url": "https://www.rdkit.org/docs/RDKit_Book.html#chemical-reaction-handling"
+    }
+  ],
+  "references": {
+    "getting_started": "https://www.rdkit.org/docs/GettingStartedInPython.html",
+    "cookbook": "https://www.rdkit.org/docs/Cookbook.html",
+    "descriptors": "https://www.rdkit.org/docs/source/rdkit.Chem.Descriptors.html",
+    "fingerprint_generators": "https://www.rdkit.org/docs/source/rdkit.Chem.rdFingerprintGenerator.html",
+    "standardization": "https://www.rdkit.org/docs/source/rdkit.Chem.MolStandardize.rdMolStandardize.html",
+    "reaction_handling": "https://www.rdkit.org/docs/RDKit_Book.html#chemical-reaction-handling",
+    "smarts_syntax": "https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html"
+  },
+  "web_adaptations": {
+    "input": "RDKit is a library, not a command line: these fields name the readers and calculations a run applies. SMILES text is read the way SmilesMolSupplier reads a .smi file, and an uploaded SD file the way SDMolSupplier reads one.",
+    "output": "Every run writes one CSV, a row per molecule or reaction, which is the file offered at the top of the results page. The same values, plus the nested detail a CSV cell cannot hold (a reaction's bond edits, the maximum common substructure), are in the run's JSON.",
+    "drawing": "The Cookbook's drawing recipes are not offered: they produce images for a notebook, and this form produces a table and a JSON answer.",
+    "conformers": "Conformer generation (EmbedMolecule, ETKDG) is not offered here. For 3D coordinates, use one of the structure prediction or docking tools in the catalog."
+  },
+  "_comment": "Field labels, help and defaults follow RDKit's own documentation: https://www.rdkit.org/docs/GettingStartedInPython.html and https://www.rdkit.org/docs/Cookbook.html . RDKit is BSD 3-Clause."
 }

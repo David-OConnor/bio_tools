@@ -4,7 +4,6 @@
 pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
         "abmpnn" => Some(include_str!("abmpnn.json")),
-        "aggrescan3d" => Some(include_str!("aggrescan3d.json")),
         "alphafold3" => Some(include_str!("alphafold3.json")),
         "antibody_annotator" => Some(include_str!("antibody_annotator.json")),
         "antifold" => Some(include_str!("antifold.json")),

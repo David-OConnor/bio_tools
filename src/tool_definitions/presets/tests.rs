@@ -210,3 +210,155 @@ fn catpred_presets_name_known_fields_and_valid_reactions() {
         }
     }
 }
+
+#[test]
+fn igblast_presets_name_known_fields_and_valid_queries() {
+    let contract: Value =
+        serde_json::from_str(super::super::fields::by_slug("igblast").unwrap()).unwrap();
+    let mut known: Vec<&str> = contract["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|field| field["name"].as_str().unwrap())
+        .collect();
+    known.push(contract["input_modes"]["name"].as_str().unwrap());
+
+    let presets: Value = serde_json::from_str(by_slug("igblast").unwrap()).unwrap();
+    let entries = presets.as_array().unwrap();
+    assert!(entries.len() >= 4);
+    for preset in entries {
+        let values = preset["values"].as_object().unwrap();
+        for key in values.keys() {
+            assert!(known.contains(&key.as_str()), "unknown field {key:?}");
+        }
+        assert!(
+            preset["source_url"]
+                .as_str()
+                .unwrap()
+                .starts_with("https://")
+        );
+
+        // Every preset fills the field its own input mode reads, with FASTA
+        // records whose letters match the program it selects.
+        assert_eq!(values["input_mode"].as_str().unwrap(), "text");
+        let query = values["input_fasta"].as_str().unwrap();
+        assert!(
+            query.starts_with('>'),
+            "a preset query needs a FASTA header"
+        );
+        let protein = values["sequence_type"].as_str().unwrap() == "protein";
+        let residues: String = query
+            .lines()
+            .filter(|line| !line.starts_with('>'))
+            .flat_map(str::chars)
+            .collect();
+        assert!(!residues.is_empty());
+        let nucleotides = residues.chars().all(|base| "ACGTN".contains(base));
+        assert_eq!(
+            protein, !nucleotides,
+            "{}: the query letters and the program disagree",
+            preset["id"]
+        );
+        // A protein query reaches igblastp, which takes no D, J or C database
+        // and writes no AIRR table.
+        if protein {
+            assert_eq!(values["write_airr"], false);
+            assert_eq!(values["num_clonotype"], 0);
+        }
+        // Whatever the preset asks for, a run of it produces something.
+        assert!(
+            values["write_airr"] == true || !values["report_format"].as_str().unwrap().is_empty()
+        );
+    }
+
+    // The catalog's own defaults survive, and an override still wins.
+    let overrides = serde_json::json!({"organism": "mouse", "num_threads": 1});
+    let filled = payload("igblast", "human_igh_airr", overrides.as_object().unwrap()).unwrap();
+    assert_eq!(filled["organism"], "mouse");
+    assert_eq!(filled["num_threads"], 1);
+    assert_eq!(filled["domain_system"], "imgt");
+    assert_eq!(filled["min_d_match"], 5);
+    assert_eq!(filled["germline_db_v"], "auto");
+    assert!(payload("igblast", "does-not-exist", &Map::new()).is_err());
+}
+
+#[test]
+fn rdkit_presets_name_known_fields_and_cover_both_tasks() {
+    let contract: Value =
+        serde_json::from_str(super::super::fields::by_slug("rdkit").unwrap()).unwrap();
+    let mut known: Vec<&str> = contract["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|field| field["name"].as_str().unwrap())
+        .collect();
+    known.push(contract["input_modes"]["name"].as_str().unwrap());
+    // A preset says which task it is for, so choosing one switches the form.
+    known.push("task");
+
+    let tasks: Vec<&str> = contract["tasks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|task| task["value"].as_str().unwrap())
+        .collect();
+
+    let presets: Value = serde_json::from_str(by_slug("rdkit").unwrap()).unwrap();
+    let entries = presets.as_array().unwrap();
+    assert!(entries.len() >= 4);
+    let mut covered: Vec<&str> = Vec::new();
+    for preset in entries {
+        let values = preset["values"].as_object().unwrap();
+        for key in values.keys() {
+            assert!(known.contains(&key.as_str()), "unknown field {key:?}");
+        }
+        assert!(
+            preset["source_url"]
+                .as_str()
+                .unwrap()
+                .starts_with("https://www.rdkit.org/docs/")
+        );
+        let task = values["task"].as_str().unwrap();
+        assert!(tasks.contains(&task), "unknown task {task:?}");
+        if !covered.contains(&task) {
+            covered.push(task);
+        }
+        assert_eq!(values["input_mode"].as_str().unwrap(), "text");
+
+        // Every preset fills the field its own task reads, with input the task
+        // can actually be given.
+        if task == "molecule" {
+            let molecules: Vec<&str> = values["smiles"]
+                .as_str()
+                .unwrap()
+                .lines()
+                .filter(|line| !line.trim().is_empty())
+                .collect();
+            assert!(!molecules.is_empty());
+            assert!(molecules.iter().all(|line| !line.contains(">>")));
+        } else {
+            let reactions: Vec<&str> = values["reaction_smiles"]
+                .as_str()
+                .unwrap()
+                .lines()
+                .filter(|line| !line.trim().is_empty())
+                .collect();
+            assert!(!reactions.is_empty());
+            // Atom maps are what the bond-edit extraction needs, and every
+            // reaction preset is meant to demonstrate it.
+            assert!(reactions.iter().all(|line| line.contains(">>")));
+            assert!(reactions.iter().all(|line| line.contains(":1]")));
+        }
+    }
+    assert_eq!(covered.len(), tasks.len(), "a task has no preset");
+
+    // The catalog's own defaults survive, and an override still wins.
+    let overrides = serde_json::json!({"fingerprint": "maccs", "descriptor_set": "all"});
+    let filled = payload("rdkit", "descriptors", overrides.as_object().unwrap()).unwrap();
+    assert_eq!(filled["fingerprint"], "maccs");
+    assert_eq!(filled["descriptor_set"], "all");
+    assert_eq!(filled["include_inchi"], true);
+    assert_eq!(filled["mcs_timeout"], 20);
+    assert_eq!(filled["fingerprint_radius"], 2);
+    assert!(payload("rdkit", "does-not-exist", &Map::new()).is_err());
+}

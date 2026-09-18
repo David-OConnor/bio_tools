@@ -9,7 +9,6 @@ pub mod fields;
 pub mod presets;
 
 mod abmpnn;
-mod aggrescan3d;
 mod alphafold3;
 mod antibody_annotator;
 mod antifold;
@@ -84,7 +83,6 @@ pub enum Tool {
     TlImmuno2,
     NetSolP,
     DeepStabP,
-    AggreScan3d,
     DlkCat,
     CatPred,
     Anarcii,
@@ -95,7 +93,7 @@ pub enum Tool {
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 36] = [
+    pub const ALL: [Self; 35] = [
         Self::AlphaFold3,
         Self::OpenDde,
         Self::Boltz2,
@@ -122,7 +120,6 @@ impl Tool {
         Self::TlImmuno2,
         Self::NetSolP,
         Self::DeepStabP,
-        Self::AggreScan3d,
         Self::DlkCat,
         Self::CatPred,
         Self::IgBlast,
@@ -166,7 +163,6 @@ impl Tool {
             Self::TlImmuno2 => "tlimmuno2",
             Self::NetSolP => "netsolp",
             Self::DeepStabP => "deepstabp",
-            Self::AggreScan3d => "aggrescan3d",
             Self::DlkCat => "dlkcat",
             Self::CatPred => "catpred",
             Self::Anarcii => "anarcii",
@@ -187,7 +183,6 @@ impl Tool {
             Self::Chai1 => "chai-lab",
             Self::EsmC | Self::EsmFold2 => "python",
             Self::ImmuneBuilder => "ABodyBuilder2",
-            Self::AggreScan3d => "aggrescan",
             Self::Mber => "mber-vhh",
             _ => self.slug(),
         }
@@ -225,7 +220,6 @@ impl Tool {
             Self::TlImmuno2 => "TLimmuno2",
             Self::NetSolP => "NetSolP",
             Self::DeepStabP => "DeepSTABp",
-            Self::AggreScan3d => "AggreScan3D",
             Self::DlkCat => "DLKcat",
             Self::CatPred => "CatPred",
             Self::Anarcii => "ANARCII",
@@ -321,7 +315,6 @@ impl Tool {
                     | Self::Mber
                     | Self::IgDesign
                     | Self::Genie3
-                    | Self::AggreScan3d
                     | Self::CatPred
                     | Self::Placer
                     | Self::Gromacs
@@ -382,7 +375,6 @@ impl FromStr for Tool {
             "tlimmuno" | "tlimmuno2" => Self::TlImmuno2,
             "netsolp" => Self::NetSolP,
             "deepstabp" => Self::DeepStabP,
-            "aggrescan3d" => Self::AggreScan3d,
             "dlkcat" => Self::DlkCat,
             "catpred" => Self::CatPred,
             "anarcii" | "antibodyannotator" => Self::Anarcii,

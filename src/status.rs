@@ -338,7 +338,6 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         | Tool::BioPhi
         | Tool::ProteinMpnnDdg
         | Tool::Anarcii
-        | Tool::AggreScan3d
         | Tool::Mber => &["--help"],
         Tool::IgBlast => {
             let executable = installer.tools_root().join("igblast/bin/igblastn");
@@ -392,7 +391,12 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
             "BindCraft/params/params_model_5_ptm.npz",
             "BindCraft weights",
         )],
-        Tool::IgBlast => &[("igblast/internal_data", "IgBLAST internal data")],
+        Tool::IgBlast => &[
+            ("igblast/internal_data", "IgBLAST internal data"),
+            // The J coding frames, without which CDR3's end and FWR4 go unannotated.
+            ("igblast/optional_file", "IgBLAST auxiliary data"),
+            ("igblast/germline_db", "IgBLAST germline databases"),
+        ],
         Tool::ProteinMpnn => &[
             ("ProteinMPNN/protein_mpnn_run.py", "ProteinMPNN runner"),
             (

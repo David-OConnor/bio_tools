@@ -1,36 +1,37 @@
 {
   "fields": [
     {
-      "name": "query_name",
-      "label": "Query name",
+      "name": "job_name",
+      "label": "Job name",
       "kind": "text",
-      "default": "antibody-query",
+      "default": "igblast-demo",
       "required": false,
-      "help": "",
+      "help": "Names the files this run leaves: <job name>.airr.tsv, <job name>.igblast.txt and <job name>.clonotypes.txt.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 80,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Query"
     },
     {
       "name": "sequence_type",
-      "label": "Sequence type",
+      "label": "Query type",
       "kind": "select",
       "default": "nucleotide",
       "required": false,
-      "help": "",
+      "help": "igblastn aligns a rearranged nucleotide sequence against V, D and J germline genes and can also call the constant region. igblastp aligns a translated V domain against germline V genes only: D, J, C, the junction and the AIRR table do not apply to it.",
       "options": [
         {
           "value": "nucleotide",
-          "label": "Nucleotide"
+          "label": "Nucleotide (igblastn)"
         },
         {
           "value": "protein",
-          "label": "Protein"
+          "label": "Protein (igblastp)"
         }
       ],
       "rows": null,
@@ -39,23 +40,46 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Query",
+      "help_note": "One field chooses the program, because IgBLAST ships the two as separate executables."
     },
     {
-      "name": "sequence",
-      "label": "Sequence",
+      "name": "input_fasta",
+      "label": "Query sequence or FASTA",
       "kind": "textarea",
-      "default": "CAGGTGCAGCTGGTGCAGTCTGGGGGAGGCTTGGTACAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCT",
+      "default": ">Y14934.1 Homo sapiens mRNA for IgG1 rheumatoid factor immunoglobulin heavy chain\nGGGGGAGGCCTGGTCAAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCCCCTTCAGTA\nACTACACCATGCACTGGGTCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTCTCATCCATTACTAGTAG\nTAGTAGTTACAGATATTACGCAGACTCAGTGGAGGGCCGATTCACCATCTCCAGAGACAACGCCAAGAAC\nTCACTGTATCTGCAAATGAACAGCCTGAGAGCCGAGGACACGGCTGTGTATTTCTGTGTGAGAGATCGGG\nGCTATGATAGTAGTGGTTATTACGGAAATCTTGACTGCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTC\nA\n",
       "required": true,
-      "help": "",
+      "help": "One bare sequence (line wrapping allowed) or FASTA records with unique headers; every record is annotated independently. Nucleotide queries accept A, C, G, T, U and the IUPAC ambiguity letters; protein queries accept the amino-acid letters. Up to 5000 records and 400,000 characters per run.",
       "options": [],
-      "rows": 8,
+      "rows": 10,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 400000,
+      "accept": "",
+      "task": "",
+      "group": "Query",
+      "input_modes": "text",
+      "help_note": "IgBLAST's -query takes a file; what you enter here is written to query.fasta inside the isolated run directory. A designed sequence from an earlier ProteinMPNN, LigandMPNN, AbMPNN or AntiFold run can be dropped in whole from the picker above; those write amino acids, so set the query type to protein."
+    },
+    {
+      "name": "inputs_file",
+      "label": "Query file",
+      "kind": "file",
+      "default": "",
+      "required": false,
+      "help": "Upload a FASTA file, or a plain-text sequence. The file's text is sent to the compute node and used exactly as if it had been typed above.",
+      "options": [],
+      "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
-      "accept": "",
-      "task": ""
+      "accept": ".fasta,.fa,.fna,.faa,.fas,.seq,.txt",
+      "task": "",
+      "group": "Query",
+      "input_modes": "upload"
     },
     {
       "name": "organism",
@@ -63,7 +87,7 @@
       "kind": "select",
       "default": "human",
       "required": false,
-      "help": "Selects the internal annotation data; match it to the databases below.",
+      "help": "IgBLAST's -organism. Chooses the internal annotation data that places the framework and CDR boundaries, so it has to match the germline databases below. Ig is supported for human, mouse, rat, rabbit and rhesus monkey; TCR only for human and mouse.",
       "options": [
         {
           "value": "human",
@@ -92,107 +116,46 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Germline databases"
+    },
+    {
+      "name": "ig_seqtype",
+      "label": "Receptor type",
+      "kind": "select",
+      "default": "Ig",
+      "required": false,
+      "help": "IgBLAST's -ig_seqtype. TCR needs TCR germline databases, which NCBI does not distribute prebuilt: build them from IMGT with bin/edit_imgt_file.pl and bin/makeblastdb, and point IGBLAST_GERMLINE_ROOT at them.",
+      "options": [
+        {
+          "value": "Ig",
+          "label": "Immunoglobulin (Ig)"
+        },
+        {
+          "value": "TCR",
+          "label": "T cell receptor (TCR)"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Germline databases"
     },
     {
       "name": "germline_db_v",
       "label": "Germline V database",
       "kind": "select",
-      "default": "airr_c_129S1_SvImJ.V",
+      "default": "auto",
       "required": false,
-      "help": "BLAST databases found under the configured germline root.",
+      "help": "IgBLAST's -germline_db_V. Automatic picks NCBI's recommended prebuilt set for the organism above: the AIRR-C set for human, NCBI's own set for mouse and rhesus monkey. Any BLAST database installed under the germline root can be chosen instead.",
       "options": [
         {
-          "value": "airr_c_129S1_SvImJ.V",
-          "label": "airr_c_129S1_SvImJ.V"
-        },
-        {
-          "value": "airr_c_AKR_J.V",
-          "label": "airr_c_AKR_J.V"
-        },
-        {
-          "value": "airr_c_A_J.V",
-          "label": "airr_c_A_J.V"
-        },
-        {
-          "value": "airr_c_BALB_c_ByJ.V",
-          "label": "airr_c_BALB_c_ByJ.V"
-        },
-        {
-          "value": "airr_c_C3H_HeJ.V",
-          "label": "airr_c_C3H_HeJ.V"
-        },
-        {
-          "value": "airr_c_C57BL_6.V",
-          "label": "airr_c_C57BL_6.V"
-        },
-        {
-          "value": "airr_c_C57BL_6J.V",
-          "label": "airr_c_C57BL_6J.V"
-        },
-        {
-          "value": "airr_c_CAST_EiJ.V",
-          "label": "airr_c_CAST_EiJ.V"
-        },
-        {
-          "value": "airr_c_CBA_J.V",
-          "label": "airr_c_CBA_J.V"
-        },
-        {
-          "value": "airr_c_DBA_1J.V",
-          "label": "airr_c_DBA_1J.V"
-        },
-        {
-          "value": "airr_c_DBA_2J.V",
-          "label": "airr_c_DBA_2J.V"
-        },
-        {
-          "value": "airr_c_LEWES_EiJ.V",
-          "label": "airr_c_LEWES_EiJ.V"
-        },
-        {
-          "value": "airr_c_MRL_MpJ.V",
-          "label": "airr_c_MRL_MpJ.V"
-        },
-        {
-          "value": "airr_c_MSM_MsJI.V",
-          "label": "airr_c_MSM_MsJI.V"
-        },
-        {
-          "value": "airr_c_NOD_ShiLtJ.V",
-          "label": "airr_c_NOD_ShiLtJ.V"
-        },
-        {
-          "value": "airr_c_NOR_LtJ.V",
-          "label": "airr_c_NOR_LtJ.V"
-        },
-        {
-          "value": "airr_c_NZB_BlNJ.V",
-          "label": "airr_c_NZB_BlNJ.V"
-        },
-        {
-          "value": "airr_c_PWD_PhJ.V",
-          "label": "airr_c_PWD_PhJ.V"
-        },
-        {
-          "value": "airr_c_SJL_J.V",
-          "label": "airr_c_SJL_J.V"
-        },
-        {
-          "value": "airr_c_balbc.V",
-          "label": "airr_c_balbc.V"
-        },
-        {
-          "value": "airr_c_human_ig.V",
-          "label": "airr_c_human_ig.V"
-        },
-        {
-          "value": "mouse_gl_V",
-          "label": "mouse_gl_V"
-        },
-        {
-          "value": "rhesus_monkey_V",
-          "label": "rhesus_monkey_V"
+          "value": "auto",
+          "label": "Automatic (recommended set for the organism)"
         }
       ],
       "rows": null,
@@ -201,27 +164,24 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Germline databases"
     },
     {
       "name": "germline_db_d",
       "label": "Germline D database",
       "kind": "select",
-      "default": "",
+      "default": "auto",
       "required": false,
-      "help": "BLAST databases found under the configured germline root.",
+      "help": "IgBLAST's -germline_db_D, for nucleotide queries only. Light-chain and TCR alpha/gamma rearrangements have no D segment and IgBLAST simply reports none, so leaving this on Automatic is safe for a mixed repertoire.",
       "options": [
+        {
+          "value": "auto",
+          "label": "Automatic (recommended set for the organism)"
+        },
         {
           "value": "",
           "label": "None"
-        },
-        {
-          "value": "airr_c_human_igh.D",
-          "label": "airr_c_human_igh.D"
-        },
-        {
-          "value": "mouse_gl_D",
-          "label": "mouse_gl_D"
         }
       ],
       "rows": null,
@@ -230,27 +190,24 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Germline databases"
     },
     {
       "name": "germline_db_j",
       "label": "Germline J database",
       "kind": "select",
-      "default": "airr_c_human_ig.J",
+      "default": "auto",
       "required": false,
-      "help": "BLAST databases found under the configured germline root.",
+      "help": "IgBLAST's -germline_db_J, for nucleotide queries only. The auxiliary coding-frame file is keyed to the J genes, so the CDR3 end and FWR4 are only annotated when the two agree.",
       "options": [
         {
-          "value": "airr_c_human_ig.J",
-          "label": "airr_c_human_ig.J"
+          "value": "auto",
+          "label": "Automatic (recommended set for the organism)"
         },
         {
-          "value": "mouse_gl_J",
-          "label": "mouse_gl_J"
-        },
-        {
-          "value": "rhesus_monkey_J",
-          "label": "rhesus_monkey_J"
+          "value": "",
+          "label": "None"
         }
       ],
       "rows": null,
@@ -259,15 +216,43 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Germline databases"
+    },
+    {
+      "name": "c_region_db",
+      "label": "Constant region database",
+      "kind": "select",
+      "default": "auto",
+      "required": false,
+      "help": "IgBLAST's -c_region_db, for nucleotide queries only. Identifies the isotype when the query runs into the constant region. NCBI distributes a prebuilt set for human only, so Automatic leaves it unset for every other organism.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Automatic (recommended set for the organism)"
+        },
+        {
+          "value": "",
+          "label": "None"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Germline databases",
+      "help_note": "A query that stops at the end of the J segment, as most V(D)J amplicons do, has no constant region to call and reports an empty c_call."
     },
     {
       "name": "domain_system",
-      "label": "Domain system",
+      "label": "Domain delineation",
       "kind": "select",
       "default": "imgt",
       "required": false,
-      "help": "",
+      "help": "IgBLAST's -domain_system: which numbering convention the framework and complementarity determining regions are cut at.",
       "options": [
         {
           "value": "imgt",
@@ -284,24 +269,489 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Annotation"
     },
     {
-      "name": "num_alignments",
-      "label": "Alignments to report",
-      "kind": "number",
-      "default": 5,
+      "name": "show_translation",
+      "label": "Show translated alignments",
+      "kind": "checkbox",
+      "default": true,
       "required": false,
-      "help": "",
+      "help": "IgBLAST's -show_translation. Prints the amino-acid translation above the nucleotide alignment in the readable report. Nucleotide queries only.",
       "options": [],
       "rows": null,
-      "minimum": 1.0,
-      "maximum": 100.0,
+      "minimum": null,
+      "maximum": null,
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "extend_align5end",
+      "label": "Extend V alignment at the 5' end",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "IgBLAST's -extend_align5end. Forces the V alignment out to the start of the query, which recovers the first framework residues of a read beginning inside FR1.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "extend_align3end",
+      "label": "Extend J alignment at the 3' end",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "IgBLAST's -extend_align3end. Forces the J alignment out to the end of the query.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "min_v_length",
+      "label": "Minimum V length",
+      "kind": "number",
+      "default": 9,
+      "required": false,
+      "help": "IgBLAST's -min_V_length: shorter V alignments are not reported. Default 9.",
+      "options": [],
+      "rows": null,
+      "minimum": 9,
+      "maximum": 1000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "min_j_length",
+      "label": "Minimum J length",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "IgBLAST's -min_J_length: shorter J alignments are not reported. Default 0, meaning no minimum. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "min_d_match",
+      "label": "Minimum D match",
+      "kind": "number",
+      "default": 5,
+      "required": false,
+      "help": "IgBLAST's -min_D_match: the consecutive nucleotide bases a D gene must match to be called. Raise it to suppress the spurious short D hits a hypermutated junction attracts. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": 5,
+      "maximum": 100,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "v_penalty",
+      "label": "V mismatch penalty",
+      "kind": "number",
+      "default": -1,
+      "required": false,
+      "help": "IgBLAST's -V_penalty. Default -1, which tolerates the somatic hypermutation a matured V segment carries.",
+      "options": [],
+      "rows": null,
+      "minimum": -3,
+      "maximum": -1,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "d_penalty",
+      "label": "D mismatch penalty",
+      "kind": "number",
+      "default": -2,
+      "required": false,
+      "help": "IgBLAST's -D_penalty. Default -2. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": -4,
+      "maximum": -1,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "j_penalty",
+      "label": "J mismatch penalty",
+      "kind": "number",
+      "default": -2,
+      "required": false,
+      "help": "IgBLAST's -J_penalty. Default -2. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": -3,
+      "maximum": -1,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "allow_vdj_overlap",
+      "label": "Allow V(D)J genes to overlap",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "IgBLAST's -allow_vdj_overlap. Active only when the D and J mismatch penalties are set to -4 and -3; a run that asks for it without them is refused rather than silently ignoring the option.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Annotation"
+    },
+    {
+      "name": "write_airr",
+      "label": "Write the AIRR rearrangement table",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Runs IgBLAST with -outfmt 19 and keeps the result as <job name>.airr.tsv: one row per query with the V, D, J and C calls, the junction, every FWR and CDR, and the per-segment alignment coordinates, under the AIRR Rearrangement schema. This is the file offered at the top of the results page. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output"
+    },
+    {
+      "name": "report_format",
+      "label": "Readable report format",
+      "kind": "select",
+      "default": "3",
+      "required": false,
+      "help": "IgBLAST's -outfmt for the readable report kept as <job name>.igblast.txt. Format 3 is IgBLAST's own default and the one its documented examples use.",
+      "options": [
+        {
+          "value": "3",
+          "label": "3 - Flat query-anchored, show identities"
+        },
+        {
+          "value": "4",
+          "label": "4 - Flat query-anchored, no identities"
+        },
+        {
+          "value": "7",
+          "label": "7 - Tabular with comment lines"
+        },
+        {
+          "value": "",
+          "label": "None - write only the AIRR table"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output"
+    },
+    {
+      "name": "num_alignments_v",
+      "label": "V alignments to report",
+      "kind": "number",
+      "default": 3,
+      "required": false,
+      "help": "IgBLAST's -num_alignments_V: germline V genes shown per query in the readable report. Default 3.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 100,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output"
+    },
+    {
+      "name": "num_alignments_d",
+      "label": "D alignments to report",
+      "kind": "number",
+      "default": 3,
+      "required": false,
+      "help": "IgBLAST's -num_alignments_D. Default 3. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 100,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output"
+    },
+    {
+      "name": "num_alignments_j",
+      "label": "J alignments to report",
+      "kind": "number",
+      "default": 3,
+      "required": false,
+      "help": "IgBLAST's -num_alignments_J. Default 3. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 100,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output"
+    },
+    {
+      "name": "num_alignments_c",
+      "label": "C alignments to report",
+      "kind": "number",
+      "default": 2,
+      "required": false,
+      "help": "IgBLAST's -num_alignments_C. Default 2. Only used when a constant region database is selected.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 100,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output"
+    },
+    {
+      "name": "num_clonotype",
+      "label": "Top clonotypes to report",
+      "kind": "number",
+      "default": 100,
+      "required": false,
+      "help": "IgBLAST's -num_clonotype, written to <job name>.clonotypes.txt through -clonotype_out. A clonotype groups the queries sharing their V(D)J calls, productivity and CDR3. Set to 0 to skip the clonotype pass. Nucleotide queries only.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 100000,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output"
+    },
+    {
+      "name": "evalue",
+      "label": "E-value threshold",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "IgBLAST's -evalue. Leave empty for the program's own default: 20 for igblastn, 1 for igblastp.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 32,
+      "accept": "",
+      "task": "",
+      "group": "BLAST search options"
+    },
+    {
+      "name": "word_size",
+      "label": "Word size",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "IgBLAST's -word_size, the length of the best perfect match the word finder seeds on. Leave empty for the program's default; the minimum is 4 for nucleotide queries and 2 for protein.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 8,
+      "accept": "",
+      "task": "",
+      "group": "BLAST search options"
+    },
+    {
+      "name": "gapopen",
+      "label": "Gap open cost",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "IgBLAST's -gapopen. Leave empty for the program's default.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 8,
+      "accept": "",
+      "task": "",
+      "group": "BLAST search options"
+    },
+    {
+      "name": "gapextend",
+      "label": "Gap extend cost",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "IgBLAST's -gapextend. Leave empty for the program's default.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 8,
+      "accept": "",
+      "task": "",
+      "group": "BLAST search options"
+    },
+    {
+      "name": "strand",
+      "label": "Query strand",
+      "kind": "select",
+      "default": "both",
+      "required": false,
+      "help": "IgBLAST's -strand. Default both, which is what lets IgBLAST report a reverse-complemented read and set rev_comp in the AIRR table. Nucleotide queries only.",
+      "options": [
+        {
+          "value": "both",
+          "label": "Both"
+        },
+        {
+          "value": "plus",
+          "label": "Plus"
+        },
+        {
+          "value": "minus",
+          "label": "Minus"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "BLAST search options"
+    },
+    {
+      "name": "num_threads",
+      "label": "Threads",
+      "kind": "number",
+      "default": 4,
+      "required": false,
+      "help": "IgBLAST's -num_threads. Default 4.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 32,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "BLAST search options"
     }
   ],
-  "tasks": []
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "text",
+    "options": [
+      {
+        "value": "text",
+        "label": "Enter sequence or FASTA"
+      },
+      {
+        "value": "upload",
+        "label": "Upload sequence or FASTA"
+      }
+    ]
+  },
+  "tasks": [],
+  "task_group": "",
+  "field_groups": [
+    {
+      "label": "Query",
+      "docs_url": "https://ncbi.github.io/igblast/cook/examples.html"
+    },
+    {
+      "label": "Germline databases",
+      "docs_url": "https://ncbi.github.io/igblast/cook/How-to-set-up.html"
+    },
+    {
+      "label": "Annotation",
+      "docs_url": "https://www.ncbi.nlm.nih.gov/igblast/"
+    },
+    {
+      "label": "Output",
+      "docs_url": "https://docs.airr-community.org/en/stable/datarep/rearrangements.html"
+    },
+    {
+      "label": "BLAST search options",
+      "docs_url": "https://www.ncbi.nlm.nih.gov/igblast/"
+    }
+  ],
+  "references": {
+    "setup_and_databases": "https://ncbi.github.io/igblast/cook/How-to-set-up.html",
+    "official_examples": "https://ncbi.github.io/igblast/cook/examples.html",
+    "web_igblast": "https://www.ncbi.nlm.nih.gov/igblast/",
+    "airr_rearrangement_schema": "https://docs.airr-community.org/en/stable/datarep/rearrangements.html",
+    "release_notes": "https://ncbi.github.io/igblast/rel/Release-notes.html",
+    "database_downloads": "https://ftp.ncbi.nih.gov/blast/executables/igblast/release/database/"
+  },
+  "web_adaptations": {
+    "query": "-query takes a file; the sequence or FASTA entered or uploaded here is written to query.fasta inside the isolated run directory.",
+    "out": "-out is set by the adapter so each output is kept as a named file the results page can offer, rather than being a caller-supplied path.",
+    "clonotype_out": "-clonotype_out is set by the adapter to <job name>.clonotypes.txt whenever the clonotype count is above zero.",
+    "auxiliary_data": "-auxiliary_data is resolved automatically from optional_file/<organism>_gl.aux, which is what annotates the CDR3 end and FWR4. Override with IGBLAST_AUXILIARY_DATA.",
+    "d_frame_data": "-d_frame_data is resolved automatically from optional_file/<organism>_D.frame where the distribution ships one (mouse only).",
+    "germline_db_V, germline_db_D, germline_db_J, c_region_db": "Chosen from the BLAST databases installed under the germline root rather than by server path. Automatic resolves NCBI's recommended prebuilt set for the organism.",
+    "db, remote, entrez_query, sra": "Not offered: each one sends the query sequences to NCBI's servers or fetches from them, which a run on this host does not do.",
+    "focus_on_V_segment": "Not offered: it is effective only for a non-germline database search through -db, which is not offered.",
+    "germline_db_V_seqidlist, germline_db_D_seqidlist, germline_db_J_seqidlist, custom_internal_data": "Not offered through the form: they name files an operator installs beside the databases.",
+    "num_descriptions, line_length, show_gis": "Not offered: they apply to BLAST output formats IgBLAST does not produce."
+  },
+  "_comment": "Field labels, help and defaults are transcribed from `igblastn -help` and `igblastp -help` of the installed NCBI IgBLAST release and from the official documentation at https://ncbi.github.io/igblast/ . IgBLAST is a US Government work in the public domain."
 }

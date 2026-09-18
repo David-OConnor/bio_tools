@@ -10,7 +10,7 @@ use std::fmt;
 use crate::{
     LaunchType, LicenseCategory, ProcessExpense, Spec, SpecData, ToolCategory,
     tool_definitions::{
-        Tool, abmpnn, aggrescan3d, alphafold3, antibody_annotator, antifold, bindcraft, biophi,
+        Tool, abmpnn, alphafold3, antibody_annotator, antifold, bindcraft, biophi,
         boltz_adme, boltz2, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat,
         enzymemap, esmc, esmfold2, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
         ligandmpnn, mber, netsolp, opendde, orca, pdbbind, placer, proteinmpnn, proteinmpnn_ddg,
@@ -88,6 +88,9 @@ pub enum DataType {
     RnaSequence,
     /// A table of scores or predictions, one row per thing scored.
     Csv,
+    /// The same, tab-separated: what the AIRR Rearrangement schema is written
+    /// in, and what the repertoire tooling downstream of it reads.
+    Tsv,
 }
 
 /// The family of [`DataType`], which is what finding the file comes down to.
@@ -104,11 +107,13 @@ pub enum DataCategory {
 
 impl DataCategory {
     /// A word for a job row, where there is room for one: "Structure", "Seq".
+    /// A table is named by [`DataType::label`] instead, since the two
+    /// separators are different files to whatever reads them next.
     pub const fn label(self) -> &'static str {
         match self {
             Self::Structure => "Structure",
             Self::Sequence => "Seq",
-            Self::Table => "CSV",
+            Self::Table => "Table",
         }
     }
 
@@ -118,7 +123,7 @@ impl DataCategory {
         match self {
             Self::Structure => &[".cif", ".mmcif", ".pdb", ".ent"],
             Self::Sequence => &[".fa", ".fasta", ".faa", ".fas"],
-            Self::Table => &[".csv"],
+            Self::Table => &[".csv", ".tsv"],
         }
     }
 }
@@ -139,7 +144,16 @@ impl DataType {
         match self {
             Self::MmCif | Self::Pdb => DataCategory::Structure,
             Self::AaSequence | Self::DnaSequence | Self::RnaSequence => DataCategory::Sequence,
-            Self::Csv => DataCategory::Table,
+            Self::Csv | Self::Tsv => DataCategory::Table,
+        }
+    }
+
+    /// A word for a job row, where there is room for one: "Structure", "CSV".
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Csv => "CSV",
+            Self::Tsv => "TSV",
+            other => other.category().label(),
         }
     }
 
@@ -157,6 +171,7 @@ impl DataType {
                 | (Self::DnaSequence, Self::DnaSequence)
                 | (Self::RnaSequence, Self::RnaSequence)
                 | (Self::Csv, Self::Csv)
+                | (Self::Tsv, Self::Tsv)
         )
     }
 
@@ -169,6 +184,7 @@ impl DataType {
             Self::DnaSequence => "DnaSequence",
             Self::RnaSequence => "RnaSequence",
             Self::Csv => "Csv",
+            Self::Tsv => "Tsv",
         }
     }
 }
@@ -182,6 +198,7 @@ impl fmt::Display for DataType {
             Self::DnaSequence => "DNA sequence",
             Self::RnaSequence => "RNA sequence",
             Self::Csv => "CSV",
+            Self::Tsv => "TSV",
         };
         write!(f, "{s}")
     }
@@ -351,7 +368,6 @@ pub const ALL: &[&CatalogEntry] = &[
     &tlimmuno::ENTRY,
     &netsolp::ENTRY,
     &deepstabp::ENTRY,
-    &aggrescan3d::ENTRY,
     &dlkcat::ENTRY,
     &catpred::ENTRY,
     &antibody_annotator::ENTRY,

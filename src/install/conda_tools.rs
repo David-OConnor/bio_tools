@@ -54,7 +54,6 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::Germinal => install_germinal(installer),
         Tool::Mber => install_mber(installer),
         Tool::Genie3 => install_genie3(installer),
-        Tool::AggreScan3d => install_aggrescan3d(installer),
         _ => Err(InstallError::InvalidConfiguration(format!(
             "{} has no Conda recipe",
             tool.name()
@@ -200,20 +199,6 @@ fn install_antifold(installer: &mut Installer) -> Result<(), InstallError> {
         &["pytorch==2.2.0"],
     )?;
     mamba_pip_install_path(installer, &prefix, &target, &[])
-}
-
-fn install_aggrescan3d(installer: &mut Installer) -> Result<(), InstallError> {
-    let prefix = installer.reset_mamba_environment(Tool::AggreScan3d.slug(), "2.7")?;
-    installer.mamba_run(
-        &prefix,
-        &[
-            "python",
-            "-m",
-            "pip",
-            "install",
-            "git+https://bitbucket.org/lcbio/aggrescan3d.git@master",
-        ],
-    )
 }
 
 fn install_mber(installer: &mut Installer) -> Result<(), InstallError> {

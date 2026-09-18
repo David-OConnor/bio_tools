@@ -248,6 +248,19 @@ fn first_env(names: &[&str]) -> Option<String> {
         .find_map(|name| std::env::var(name).ok().filter(|value| !value.is_empty()))
 }
 
+/// A Triton cache of its own for one tool environment.
+///
+/// Triton keys the helper modules it compiles (`cuda_utils.so`) by their C source and platform,
+/// not by Python version, so environments on different Pythons with the same Triton release load
+/// each other's builds from a shared `~/.triton/cache` and fail with "PY_SSIZE_T_CLEAN macro must
+/// be defined for '#' formats". An operator's own `TRITON_CACHE_DIR` is split the same way. The
+/// Python adapters' `run_command` does the same for the tools they launch.
+fn triton_cache_dir(slug: &str) -> Option<PathBuf> {
+    let base = first_env_path(&["TRITON_CACHE_DIR"])
+        .or_else(|| home_dir().map(|home| home.join(".triton").join("cache")))?;
+    Some(base.join(slug))
+}
+
 fn first_env_path(names: &[&str]) -> Option<PathBuf> {
     first_env(names).map(PathBuf::from)
 }
@@ -447,10 +460,14 @@ impl Installer {
             .unwrap_or_default();
         let path = std::env::join_paths(std::iter::once(scripts.clone()).chain(inherited))
             .unwrap_or_else(|_| scripts.into_os_string());
-        command
+        let command = command
             .env("VIRTUAL_ENV", environment)
             .env("PATH", path)
-            .envs(self.model_cache_environment())
+            .envs(self.model_cache_environment());
+        match triton_cache_dir(tool.slug()) {
+            Some(cache) => command.env("TRITON_CACHE_DIR", cache),
+            None => command,
+        }
     }
 
     pub fn tools_root(&self) -> &Path {
@@ -502,8 +519,7 @@ impl Installer {
             | Tool::AntiFold
             | Tool::Germinal
             | Tool::Mber
-            | Tool::Genie3
-            | Tool::AggreScan3d => conda_tools::install(self, tool),
+            | Tool::Genie3 => conda_tools::install(self, tool),
             _ => python_tools::install(self, tool),
         };
         if result.is_ok() {
