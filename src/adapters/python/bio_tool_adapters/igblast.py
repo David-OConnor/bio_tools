@@ -103,6 +103,50 @@ COLLECTIONS = (
     ("ncbi_human_c_genes", "NCBI human constant region"),
 )
 
+# Every database NCBI's prebuilt archives unpack, by the name it is installed
+# under; see `DATABASE_ARCHIVES` in this project's IgBLAST installer. The
+# pickers offer these whether or not they are discoverable here, because the
+# host that renders the form is not always the host that runs the job: on a
+# split deployment IgBLAST and its databases live on the compute node alone,
+# and a picker built only from what the web node can see offers nothing the
+# run host would accept. What is really installed is still checked, by
+# `_resolve_database`, on the machine that runs the job.
+PREBUILT_DATABASES = (
+    # AIRR-C/OGRDB human IG.
+    "airr_c_human_ig.V",
+    "airr_c_human_igh.D",
+    "airr_c_human_ig.J",
+    # AIRR-C/OGRDB mouse IG: one V set per inbred strain, and no D or J.
+    "airr_c_129S1_SvImJ.V",
+    "airr_c_AKR_J.V",
+    "airr_c_A_J.V",
+    "airr_c_BALB_c_ByJ.V",
+    "airr_c_C3H_HeJ.V",
+    "airr_c_C57BL_6.V",
+    "airr_c_C57BL_6J.V",
+    "airr_c_CAST_EiJ.V",
+    "airr_c_CBA_J.V",
+    "airr_c_DBA_1J.V",
+    "airr_c_DBA_2J.V",
+    "airr_c_LEWES_EiJ.V",
+    "airr_c_MRL_MpJ.V",
+    "airr_c_MSM_MsJI.V",
+    "airr_c_NOD_ShiLtJ.V",
+    "airr_c_NOR_LtJ.V",
+    "airr_c_NZB_BlNJ.V",
+    "airr_c_PWD_PhJ.V",
+    "airr_c_SJL_J.V",
+    "airr_c_balbc.V",
+    # NCBI's own mouse and rhesus monkey IG sets.
+    "mouse_gl_V",
+    "mouse_gl_D",
+    "mouse_gl_J",
+    "rhesus_monkey_V",
+    "rhesus_monkey_J",
+    # Human constant-region genes, for `-c_region_db`.
+    "ncbi_human_c_genes",
+)
+
 AUTOMATIC = "auto"
 NO_DATABASE = ""
 
@@ -148,14 +192,13 @@ def available_databases(sequence_type: str = "nucleotide") -> list[str]:
     return sorted(names)
 
 
-def databases_for(segment: str, sequence_type: str = "nucleotide") -> list[str]:
-    """Installed databases holding `segment`, or all of them for custom names.
+def _by_segment(names: list[str], segment: str) -> list[str]:
+    """Those of `names` holding `segment`, or all of them for custom names.
 
     The constant-region segment is asked for as "C": no naming convention
     marks one, so it is everything the V, D and J conventions do not claim.
     """
 
-    names = available_databases(sequence_type)
     if segment == "C":
         return [name for name in names if not SEGMENT_PATTERN.search(name)] or names
     matching = [
@@ -164,6 +207,12 @@ def databases_for(segment: str, sequence_type: str = "nucleotide") -> list[str]:
         if (match := SEGMENT_PATTERN.search(name)) and match.group(1).upper() == segment
     ]
     return matching or names
+
+
+def databases_for(segment: str, sequence_type: str = "nucleotide") -> list[str]:
+    """Installed databases holding `segment`, as this host sees them."""
+
+    return _by_segment(available_databases(sequence_type), segment)
 
 
 def _collection(name: str) -> str:
@@ -178,21 +227,22 @@ def _collection(name: str) -> str:
 
 
 def _database_options(segment: str, *, optional: bool) -> list[tuple[str, str]]:
-    """The picker for one segment, from the databases discovered on this host.
+    """The picker for one segment: NCBI's prebuilt sets, plus anything here.
 
-    "Automatic" is offered whether or not anything is discoverable here, and is
-    always the first option: on a split deployment the form is rendered by the
-    web node while the run happens on the compute node, which is the host that
-    holds the germline databases. Offering only "No germline databases
-    installed" made the web node post an empty selection that the compute node
-    -- which does have the databases -- then refused as a missing V database.
+    Neither part is conditional on what this host holds. The form is rendered
+    by the web node while the run happens on the compute node, which is the
+    host that has the germline databases, so a picker built from local
+    discovery alone offered a lone "No germline databases installed" -- and a
+    browser, handed a value its select has no option for, silently posts an
+    empty one, which the compute node then refused as a missing V database.
     """
 
     options = [(AUTOMATIC, "Automatic (recommended set for the organism)")]
     if optional:
         options.append((NO_DATABASE, "None"))
+    offered = sorted(set(available_databases()) | set(PREBUILT_DATABASES))
     options.extend(
-        (name, f"{name} ({_collection(name)})") for name in databases_for(segment)
+        (name, f"{name} ({_collection(name)})") for name in _by_segment(offered, segment)
     )
     return options
 
