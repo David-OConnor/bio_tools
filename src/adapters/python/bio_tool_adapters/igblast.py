@@ -178,13 +178,22 @@ def _collection(name: str) -> str:
 
 
 def _database_options(segment: str, *, optional: bool) -> list[tuple[str, str]]:
-    candidates = databases_for(segment)
-    if not candidates:
-        return [(NO_DATABASE, "No germline databases installed")]
+    """The picker for one segment, from the databases discovered on this host.
+
+    "Automatic" is offered whether or not anything is discoverable here, and is
+    always the first option: on a split deployment the form is rendered by the
+    web node while the run happens on the compute node, which is the host that
+    holds the germline databases. Offering only "No germline databases
+    installed" made the web node post an empty selection that the compute node
+    -- which does have the databases -- then refused as a missing V database.
+    """
+
     options = [(AUTOMATIC, "Automatic (recommended set for the organism)")]
     if optional:
         options.append((NO_DATABASE, "None"))
-    options.extend((name, f"{name} ({_collection(name)})") for name in candidates)
+    options.extend(
+        (name, f"{name} ({_collection(name)})") for name in databases_for(segment)
+    )
     return options
 
 
