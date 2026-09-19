@@ -4,7 +4,6 @@
 pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
         "abmpnn" => Some(include_str!("abmpnn.json")),
-        "aggrescan3d" => Some(include_str!("aggrescan3d.json")),
         "alphafold3" => Some(include_str!("alphafold3.json")),
         "antibody_annotator" => Some(include_str!("antibody_annotator.json")),
         "antifold" => Some(include_str!("antifold.json")),
@@ -19,6 +18,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "deepsp" => Some(include_str!("deepsp.json")),
         "deepstabp" => Some(include_str!("deepstabp.json")),
         "dlkcat" => Some(include_str!("dlkcat.json")),
+        "esmc" => Some(include_str!("esmc.json")),
         "esmfold2" => Some(include_str!("esmfold2.json")),
         "enzymemap" => Some(include_str!("enzymemap.json")),
         "genie3" => Some(include_str!("genie3.json")),

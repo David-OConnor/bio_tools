@@ -357,7 +357,7 @@ impl Installer {
             .join(executable_name("uv"));
 
         let fallback =
-            home_dir().map(|home| home.join(".local").join("bin").join(executable_name("uv")));
+            super::home_dir().map(|home| home.join(".local").join("bin").join(executable_name("uv")));
 
         let candidates = self
             .config
@@ -599,21 +599,25 @@ impl Installer {
         if let Some(root) = &self.config.conda_root {
             return root.clone();
         }
-        let environments = &self.config.layout.environments_root;
-        if is_wsl_windows_mount(environments)
-            && let Some(home) = home_dir()
+        // Miniconda and a number of Conda packages contain Unix symlinks, which DrvFS/9P mounts
+        // without WSL metadata reject, so installing under /mnt/c fails partway through.
+        self.native_data_dir("conda", &self.config.layout.environments_root)
+    }
+
+    /// `root/kind`, unless `root` is a WSL mount of a Windows drive: then a stable directory on
+    /// the native filesystem, one per layout so separate applications never collide. DrvFS is
+    /// slow for large data and rejects the Unix symlinks Conda and the Hugging Face cache use.
+    pub(crate) fn native_data_dir(&self, kind: &str, root: &Path) -> PathBuf {
+        if is_wsl_windows_mount(root)
+            && let Some(home) = super::home_dir()
         {
-            // Miniconda and a number of Conda packages contain Unix symlinks. DrvFS/9P mounts
-            // without WSL metadata reject those links, so installing under /mnt/c fails partway
-            // through extraction. A stable layout-specific directory avoids both that failure
-            // and named-environment collisions between separate applications.
             return home
                 .join(".cache")
                 .join("bio_tools")
-                .join("conda")
-                .join(stable_path_id(environments));
+                .join(kind)
+                .join(stable_path_id(root));
         }
-        environments.join("conda")
+        root.join(kind)
     }
 
     pub(crate) fn conda_executable_path(&self) -> PathBuf {
@@ -767,18 +771,36 @@ impl Installer {
         }
     }
 
+    /// Fetch `url` to `destination`, keeping a copy that is already complete.
+    ///
+    /// "Complete" is decided against the server rather than against the file merely existing: an
+    /// interrupted download leaves a short file behind, and a recipe that accepts any non-empty
+    /// file adopts that truncation permanently -- every later install sees a file and skips the
+    /// fetch, so reinstalling, the one thing an operator reaches for, repairs nothing. Where the
+    /// server reports a size, a local file that does not match it is refetched. Where it does not
+    /// (some mirrors, and anything chunked), an existing non-empty file is still accepted, since
+    /// there is nothing better to compare it to.
     pub(crate) fn download(&self, url: &str, destination: &Path) -> Result<(), InstallError> {
-        if destination
-            .metadata()
-            .is_ok_and(|metadata| metadata.is_file() && metadata.len() > 0)
-        {
-            self.note(format!("Already have {}", destination.display()));
-            return Ok(());
-        }
         url::Url::parse(url).map_err(|error| InstallError::Download {
             url: url.to_owned(),
             message: error.to_string(),
         })?;
+        if let Ok(metadata) = destination.metadata()
+            && metadata.is_file()
+            && metadata.len() > 0
+        {
+            match self.published_length(url) {
+                Some(expected) if expected != metadata.len() => self.note(format!(
+                    "Replacing {}: {} bytes on disk, {expected} published",
+                    destination.display(),
+                    metadata.len()
+                )),
+                _ => {
+                    self.note(format!("Already have {}", destination.display()));
+                    return Ok(());
+                }
+            }
+        }
         if let Some(parent) = destination.parent() {
             fs::create_dir_all(parent).map_err(|error| {
                 InstallError::io(format!("unable to create {}", parent.display()), error)
@@ -820,6 +842,23 @@ impl Installer {
                 error,
             )
         })
+    }
+
+    /// The size the server reports for `url`, where it reports one.
+    ///
+    /// A HEAD that fails, is refused, or answers without a usable `Content-Length` is not an
+    /// error: it only means this URL cannot be checked, and the caller falls back to trusting
+    /// what is on disk.
+    fn published_length(&self, url: &str) -> Option<u64> {
+        let response = ureq::head(url).call().ok()?;
+        response
+            .headers()
+            .get("content-length")?
+            .to_str()
+            .ok()?
+            .trim()
+            .parse()
+            .ok()
     }
 
     pub(crate) fn clone_or_update(&self, url: &str, target: &Path) -> Result<(), InstallError> {
@@ -1069,15 +1108,6 @@ fn conda_executable_in(root: &Path) -> PathBuf {
         "bin"
     })
     .join(executable_name("conda"))
-}
-
-fn home_dir() -> Option<PathBuf> {
-    env::var_os(if cfg!(target_os = "windows") {
-        "USERPROFILE"
-    } else {
-        "HOME"
-    })
-    .map(PathBuf::from)
 }
 
 fn is_wsl_windows_mount(path: &Path) -> bool {

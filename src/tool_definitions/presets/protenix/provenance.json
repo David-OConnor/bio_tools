@@ -1,0 +1,53 @@
+{
+  "repository": "https://github.com/bytedance/Protenix",
+  "commit": "4c355be4553512f72453ecbfb65e69f4c35d1413",
+  "input_reference": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/docs/infer_json_format.md",
+  "example_reference": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/inference_demo.sh",
+  "assets": [
+    {
+      "path": "LICENSE",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/LICENSE",
+      "sha256": "add3b0d4449b29559d6f429d84a09a9b363d78fd516b3315a8ed946eb12ad8eb"
+    },
+    {
+      "path": "examples/7r6r/msa/1/non_pairing.a3m",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/examples/7r6r/msa/1/non_pairing.a3m",
+      "sha256": "15388d7ed4fa8dac77770d2887d7234847b5aee1252651917efc5c1dba149066"
+    },
+    {
+      "path": "examples/7r6r/msa/1/pairing.a3m",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/examples/7r6r/msa/1/pairing.a3m",
+      "sha256": "105e7c949a533f488248476e0b13307a2c94fbf138b3859ea8b1ccbdb8e27223"
+    },
+    {
+      "path": "examples/7wux/msa/1/non_pairing.a3m",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/examples/7wux/msa/1/non_pairing.a3m",
+      "sha256": "0aff2182af3f28d02ac526cb391a1faa8f75b18f3e8df8fc9046b2918647017f"
+    },
+    {
+      "path": "examples/7wux/msa/1/pairing.a3m",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/examples/7wux/msa/1/pairing.a3m",
+      "sha256": "1fd47550efdadc57ac7483fedff2fe0a362ad0fbde7bae52a08afe08c1f58912"
+    },
+    {
+      "path": "examples/7wux/msa/2/non_pairing.a3m",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/examples/7wux/msa/2/non_pairing.a3m",
+      "sha256": "9baa25bbffd2cc4b0e36b0bbf1fab43d2fa79d8eefa751455fcb80053f095e6e"
+    },
+    {
+      "path": "examples/7wux/msa/2/pairing.a3m",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/examples/7wux/msa/2/pairing.a3m",
+      "sha256": "e30d005be6ef75972498148f056dbd637892891bedbc36489129855c6390604f"
+    },
+    {
+      "path": "examples/examples_with_rna_msa/9gmw/9gmw_2_all.a3m",
+      "source_url": "https://github.com/bytedance/Protenix/blob/4c355be4553512f72453ecbfb65e69f4c35d1413/examples/examples_with_rna_msa/9gmw/9gmw_2_all.a3m",
+      "sha256": "beb1253df1856aad3c3226735cf1e201f443c58340e86692dcb5af7a1254191c"
+    }
+  ],
+  "adaptations": [
+    "Bundled MSA paths are bio-tools://protenix/ references that the adapter writes into the job directory as absolute paths.",
+    "Preset jobs from example.json use pairedMsaPath and unpairedMsaPath instead of the deprecated msa dictionary.",
+    "Examples whose precomputed MSAs are larger than a few hundred kilobytes omit them, so Protenix searches its MSA server."
+  ]
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "glucokinase_kcat",
+    "label": "Human glucokinase \u00b7 kcat",
+    "description": "CatPred's own /predict example: human glucokinase (GCK, UniProt P35557) turning over D-glucose with ATP, scored as one reaction.",
+    "source_url": "https://github.com/maranasgroup/CatPred#-prediction-",
+    "values": {
+      "job_name": "catpred-gck-kcat",
+      "parameter": "kcat",
+      "input_mode": "parameters",
+      "sequence_molecules": "[{\"type\": \"protein\", \"id\": \"GCK_HUMAN\", \"sequence\": \"MLDDRARMEAAKKEKVEQILAEFQLQEEDLKKVMRRMQKEMDRGLRLETHEEASVKMLPTYVRSTPEGSEVGDFLSLDLGGTNFRVMLVKVGEGEEGQWSVKTKHQMYSIPEDAMTGTAEMLFDYISECISDFLDKHQMKHKKLPLGFTFSFPVRHEDIDKGILLNWTKGFKASGAEGNNVVGLLRDAIKRRGDFEMDVVAMVNDTVATMISCYYEDHQCEVGMIVGTGCNACYMEEMQNVELVEGDEGRMCVNTEWGAFGDSGELDEFLLEYDRLVDESSANPGQQLYEKLIGGKYMGELVRLVLLRLVDENLLFHGEASEQLRTRGAFETRFVSQVESDTGDRKQIYNILSTLGLRPSTTDCDIVRRACESVSTRAAHMCSAGLAGVINRMRESRSEDVMRITVGVDGSVYKLHPSFKERFHASVRRLTPSCEITFIESEEGSGRGAALVSAVACKKACMLGQ\"}, {\"type\": \"ligand\", \"id\": \"D-glucose\", \"ligand\": \"C(C1C(C(C(C(O1)O)O)O)O)O\"}, {\"type\": \"ligand\", \"id\": \"ATP\", \"ligand\": \"C1=NC(=C2C(=N1)N(C=N2)C3C(C(C(O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N\"}]"
+    }
+  },
+  {
+    "id": "glucokinase_km",
+    "label": "Human glucokinase \u00b7 Km for D-glucose",
+    "description": "The same enzyme scored for the Michaelis constant of its primary substrate, which is what a Km prediction takes: one substrate, not the whole reaction.",
+    "source_url": "https://github.com/maranasgroup/CatPred/blob/main/catpred/web/frontend/src/composables/useInputRows.ts",
+    "values": {
+      "job_name": "catpred-gck-km",
+      "parameter": "km",
+      "input_mode": "parameters",
+      "sequence_molecules": "[{\"type\": \"protein\", \"id\": \"GCK_HUMAN\", \"sequence\": \"MLDDRARMEAAKKEKVEQILAEFQLQEEDLKKVMRRMQKEMDRGLRLETHEEASVKMLPTYVRSTPEGSEVGDFLSLDLGGTNFRVMLVKVGEGEEGQWSVKTKHQMYSIPEDAMTGTAEMLFDYISECISDFLDKHQMKHKKLPLGFTFSFPVRHEDIDKGILLNWTKGFKASGAEGNNVVGLLRDAIKRRGDFEMDVVAMVNDTVATMISCYYEDHQCEVGMIVGTGCNACYMEEMQNVELVEGDEGRMCVNTEWGAFGDSGELDEFLLEYDRLVDESSANPGQQLYEKLIGGKYMGELVRLVLLRLVDENLLFHGEASEQLRTRGAFETRFVSQVESDTGDRKQIYNILSTLGLRPSTTDCDIVRRACESVSTRAAHMCSAGLAGVINRMRESRSEDVMRITVGVDGSVYKLHPSFKERFHASVRRLTPSCEITFIESEEGSGRGAALVSAVACKKACMLGQ\"}, {\"type\": \"ligand\", \"id\": \"D-glucose\", \"ligand\": \"C(C1C(C(C(C(O1)O)O)O)O)O\"}]"
+    }
+  },
+  {
+    "id": "ldha_kcat",
+    "label": "Human LDHA \u00b7 kcat",
+    "description": "The second sample reaction in CatPred's web app: human L-lactate dehydrogenase A (UniProt P00338) with pyruvate and NADH.",
+    "source_url": "https://github.com/maranasgroup/CatPred/blob/main/catpred/web/frontend/src/composables/useInputRows.ts",
+    "values": {
+      "job_name": "catpred-ldha-kcat",
+      "parameter": "kcat",
+      "input_mode": "parameters",
+      "sequence_molecules": "[{\"type\": \"protein\", \"id\": \"LDHA_HUMAN\", \"sequence\": \"MATLKDQLIYNLLKEEQTPQNKITVVGVGAVGMACAISILMKDLADELALVDVIEDKLKGEMMDLQHGSLFLRTPKIVSGKDYNVTANSKLVIITAGARQQEGESRLNLVQRNVNIFKFIIPNVVKYSPNCKLLIVSNPVDILTYVAWKISGFPKNRVIGSGCNLDSARFRYLMGERLGVHPLSCHGWVLGEHGDSSVPVWSGMNVAGVSLKTLHPDLGTDKDKEQWKEVHKQVVESAYEVIKLKGYTSWAIGLSVADLAESIMKNLRRVHPVSTMIKGLYGIKDDVFLSVPCILGQNGISDLVKVTLTSEEEARLKKSADTLWGIQKELQF\"}, {\"type\": \"ligand\", \"id\": \"pyruvate\", \"ligand\": \"CC(=O)C(=O)O\"}, {\"type\": \"ligand\", \"id\": \"NADH\", \"ligand\": \"C1C=CN(C=C1C(=O)N)C2C(C(C(O2)COP(=O)(O)OP(=O)(O)OCC3C(C(C(O3)N4C=NC5=C(N=CN=C54)N)O)O)O)O\"}]"
+    }
+  },
+  {
+    "id": "pal_ki",
+    "label": "Phenylalanine ammonia-lyase \u00b7 Ki",
+    "description": "CatPred's Ki demo: phenylalanine ammonia-lyase (UniProt P11544) inhibited by 4-coumaric acid, from demo/batch_ki.csv.",
+    "source_url": "https://github.com/maranasgroup/CatPred/tree/main/demo",
+    "values": {
+      "job_name": "catpred-pal-ki",
+      "parameter": "ki",
+      "input_mode": "parameters",
+      "sequence_molecules": "[{\"type\": \"protein\", \"id\": \"P11544\", \"sequence\": \"MAPSLDSISHSFANGVASAKQAVNGASTNLAVAGSHLPTTQVTQVDIVEKMLAAPTDSTLELDGYSLNLGDVVSAARKGRPVRVKDSDEIRSKIDKSVEFLRSQLSMSVYGVTTGFGGSADTRTEDAISLQKALLEHQLCGVLPSSFDSFRLGRGLENSLPLEVVRGAMTIRVNSLTRGHSAVRLVVLEALTNFLNHGITPIVPLRGTISASGDLSPLSYIAAAISGHPDSKVHVVHEGKEKILYAREAMALFNLEPVVLGPKEGLGLVNGTAVSASMATLALHDAHMLSLLSQSLTAMTVEAMVGHAGSFHPFLHDVTRPHPTQIEVAGNIRKLLEGSRFAVHHEEEVKVKDDEGILRQDRYPLRTSPQWLGPLVSDLIHAHAVLTIEAGQSTTDNPLIDVENKTSHHGGNFQAAAVANTMEKTRLGLAQIGKLNFTQLTEMLNAGMNRGLPSCLAAEDPSLSYHCKGLDIAAAAYTSELGHLANPVTTHVQPAEMANQAVNSLALISARRTTESNDVLSLLLATHLYCVLQAIDLRAIEFEFKKQFGPAIVSLIDQHFGSAMTGSNLRDELVEKVNKTLAKRLEQTNSYDLVPRWHDAFSFAAGTVVEVLSSTSLSLAAVNAWKVAAAESAISLTRQVRETFWSAASTSSPALSYLSPRTQILYAFVREELGVKARRGDVFLGKQEVTIGSNVSKIYEAIKSGRINNVLLKMLA\"}, {\"type\": \"ligand\", \"id\": \"Coumaric-acid\", \"ligand\": \"C1=CC(=CC=C1/C=C/C(=O)O)O\"}]"
+    }
+  },
+  {
+    "id": "batch_kcat_csv",
+    "label": "Two reactions \u00b7 CSV batch",
+    "description": "Both web-app sample reactions in one CatPred CSV, the format demo/batch_kcat.csv uses: one row per reaction, with a sequence ID per unique enzyme.",
+    "source_url": "https://github.com/maranasgroup/CatPred/tree/main/demo",
+    "values": {
+      "job_name": "catpred-batch-kcat",
+      "parameter": "kcat",
+      "input_mode": "text",
+      "input_csv": "SMILES,sequence,pdbpath,Substrate\nC(C1C(C(C(C(O1)O)O)O)O)O.C1=NC(=C2C(=N1)N(C=N2)C3C(C(C(O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N,MLDDRARMEAAKKEKVEQILAEFQLQEEDLKKVMRRMQKEMDRGLRLETHEEASVKMLPTYVRSTPEGSEVGDFLSLDLGGTNFRVMLVKVGEGEEGQWSVKTKHQMYSIPEDAMTGTAEMLFDYISECISDFLDKHQMKHKKLPLGFTFSFPVRHEDIDKGILLNWTKGFKASGAEGNNVVGLLRDAIKRRGDFEMDVVAMVNDTVATMISCYYEDHQCEVGMIVGTGCNACYMEEMQNVELVEGDEGRMCVNTEWGAFGDSGELDEFLLEYDRLVDESSANPGQQLYEKLIGGKYMGELVRLVLLRLVDENLLFHGEASEQLRTRGAFETRFVSQVESDTGDRKQIYNILSTLGLRPSTTDCDIVRRACESVSTRAAHMCSAGLAGVINRMRESRSEDVMRITVGVDGSVYKLHPSFKERFHASVRRLTPSCEITFIESEEGSGRGAALVSAVACKKACMLGQ,GCK_HUMAN,D-glucose + ATP\nCC(=O)C(=O)O.C1C=CN(C=C1C(=O)N)C2C(C(C(O2)COP(=O)(O)OP(=O)(O)OCC3C(C(C(O3)N4C=NC5=C(N=CN=C54)N)O)O)O)O,MATLKDQLIYNLLKEEQTPQNKITVVGVGAVGMACAISILMKDLADELALVDVIEDKLKGEMMDLQHGSLFLRTPKIVSGKDYNVTANSKLVIITAGARQQEGESRLNLVQRNVNIFKFIIPNVVKYSPNCKLLIVSNPVDILTYVAWKISGFPKNRVIGSGCNLDSARFRYLMGERLGVHPLSCHGWVLGEHGDSSVPVWSGMNVAGVSLKTLHPDLGTDKDKEQWKEVHKQVVESAYEVIKLKGYTSWAIGLSVADLAESIMKNLRRVHPVSTMIKGLYGIKDDVFLSVPCILGQNGISDLVKVTLTSEEEARLKKSADTLWGIQKELQF,LDHA_HUMAN,pyruvate + NADH\n"
+    }
+  }
+]

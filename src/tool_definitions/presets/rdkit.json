@@ -1,0 +1,123 @@
+[
+  {
+    "id": "descriptors",
+    "label": "Descriptors · Getting Started molecules",
+    "description": "The molecules RDKit's Getting Started guide reads and draws -- benzoic acid, toluene, cyclobutane, phenol, oxirane, a staurosporine aglycone and sucrose -- through the common descriptor set, with InChIKeys for matching them against a database.",
+    "source_url": "https://www.rdkit.org/docs/GettingStartedInPython.html",
+    "values": {
+      "task": "molecule",
+      "input_mode": "text",
+      "descriptor_set": "common",
+      "standardize": false,
+      "include_inchi": true,
+      "hashes": false,
+      "murcko_scaffold": false,
+      "ring_analysis": true,
+      "stereo": true,
+      "substructure_smarts": "",
+      "find_mcs": false,
+      "fingerprint": "none",
+      "job_name": "rdkit-descriptors",
+      "smiles": "c1ccccc1C(=O)O benzoic-acid\nCc1ccccc1 toluene\nC1CCC1 cyclobutane\nc1ccccc1O phenol\nC1OC1 oxirane\nC1CC2=C3C(=CC=C2)C(=CN3C1)[C@H]4[C@@H](C(=O)NC4=O)C5=CNC6=CC=CC=C65 staurosporine-aglycone\nC([C@@H]1[C@H]([C@@H]([C@H]([C@H](O1)O[C@]2([C@H]([C@@H]([C@H](O2)CO)O)O)CO)O)O)O)O sucrose\n"
+    }
+  },
+  {
+    "id": "murcko_scaffolds",
+    "label": "Murcko scaffolds · Cookbook",
+    "description": "The four molecules the Cookbook's scaffold recipe decomposes, reported with their Bemis-Murcko scaffolds, the generic form of each, and the molecule hashes that say which of them share a framework.",
+    "source_url": "https://www.rdkit.org/docs/Cookbook.html",
+    "values": {
+      "task": "molecule",
+      "input_mode": "text",
+      "descriptor_set": "common",
+      "standardize": false,
+      "include_inchi": false,
+      "hashes": true,
+      "murcko_scaffold": true,
+      "ring_analysis": false,
+      "stereo": false,
+      "substructure_smarts": "",
+      "find_mcs": false,
+      "fingerprint": "none",
+      "job_name": "rdkit-scaffolds",
+      "smiles": "CCC1CC(CCC1=O)C(=O)C1=CC=CC(C)=C1\nCCC1CC(CCC1=O)C(=O)C1=CC=CC=C1\nCC(=C)C(C1=CC=CC=C1)S(=O)CC(N)=O\nCC1=CC(=CC=C1)C(C1CCC(N)CC1)C(F)(F)F\n"
+    }
+  },
+  {
+    "id": "nitrile_substructure",
+    "label": "Substructure search · nitrile SMARTS",
+    "description": "The Cookbook's functional-group recipe: the nitrile pattern [NX1]#[CX2] matched against butyronitrile and benzonitrile, and against an amide and an amine that are not nitriles, so a match and a non-match are both visible in the table.",
+    "source_url": "https://www.rdkit.org/docs/Cookbook.html",
+    "values": {
+      "task": "molecule",
+      "input_mode": "text",
+      "descriptor_set": "common",
+      "standardize": false,
+      "include_inchi": false,
+      "hashes": false,
+      "murcko_scaffold": false,
+      "ring_analysis": false,
+      "stereo": false,
+      "substructure_smarts": "[NX1]#[CX2]",
+      "find_mcs": false,
+      "fingerprint": "none",
+      "job_name": "rdkit-nitriles",
+      "smiles": "CCCC#N butyronitrile\nc1ccccc1C#N benzonitrile\nCCCC(=O)N butyramide\nCCCCN butylamine\n"
+    }
+  },
+  {
+    "id": "mcs_and_fingerprints",
+    "label": "Common substructure · capsaicin analogues",
+    "description": "The three molecules Getting Started runs rdFMCS.FindMCS over, with Morgan fingerprints at radius 2 beside the table. The maximum common substructure is one answer for the whole set and is reported in the run's JSON rather than as a column.",
+    "source_url": "https://www.rdkit.org/docs/GettingStartedInPython.html",
+    "values": {
+      "task": "molecule",
+      "input_mode": "text",
+      "descriptor_set": "common",
+      "standardize": false,
+      "include_inchi": false,
+      "hashes": false,
+      "murcko_scaffold": false,
+      "ring_analysis": false,
+      "stereo": false,
+      "substructure_smarts": "",
+      "find_mcs": true,
+      "fingerprint": "morgan",
+      "job_name": "rdkit-mcs",
+      "smiles": "O=C(NCc1cc(OC)c(O)cc1)CCCC/C=C/C(C)C capsaicin\nCC(C)CCCCCC(=O)NCC1=CC(=C(C=C1)O)OC dihydrocapsaicin-analogue\nc1(C=O)cc(OC)c(O)cc1 vanillin\n",
+      "mcs_timeout": 20,
+      "fingerprint_bits": 2048,
+      "fingerprint_radius": 2
+    }
+  },
+  {
+    "id": "oxidations",
+    "label": "Reactions · alcohol oxidations",
+    "description": "The three oxidations Getting Started uses as reaction examples, atom-mapped so the bond edits can be read off: each turns a C-O single bond into a double bond, which is what the reaction centre reports. None of them names the oxidant that takes the two hydrogens, so each is also flagged as not element-balanced -- which is exactly what the balance check is for.",
+    "source_url": "https://www.rdkit.org/docs/GettingStartedInPython.html",
+    "values": {
+      "task": "reaction",
+      "input_mode": "text",
+      "reaction_participants": true,
+      "reaction_balance": true,
+      "reaction_bond_edits": true,
+      "job_name": "rdkit-oxidations",
+      "reaction_smiles": "[CH3:1][CH2:2][CH2:3][OH:4]>>[CH3:1][CH2:2][CH:3]=[O:4] propanol-oxidation\n[CH3:1][CH:2]([OH:3])[CH3:4]>>[CH3:1][C:2](=[O:3])[CH3:4] isopropanol-oxidation\n[NH2:1][CH2:2][CH2:3][OH:4]>>[NH2:1][CH2:2][CH:3]=[O:4] ethanolamine-oxidation\n"
+    }
+  },
+  {
+    "id": "ester_hydrolysis",
+    "label": "Reaction · balanced ester hydrolysis",
+    "description": "Methyl acetate and water to acetic acid and methanol, fully atom-mapped: a reaction that is element- and charge-balanced, whose mapping is complete, and whose bond edits are therefore reliable. A useful reference for what a well-formed mapped reaction looks like.",
+    "source_url": "https://www.rdkit.org/docs/GettingStartedInPython.html",
+    "values": {
+      "task": "reaction",
+      "input_mode": "text",
+      "reaction_participants": true,
+      "reaction_balance": true,
+      "reaction_bond_edits": true,
+      "job_name": "rdkit-hydrolysis",
+      "reaction_smiles": "[CH3:1][C:2](=[O:3])[O:4][CH3:5].[OH2:6]>>[CH3:1][C:2](=[O:3])[OH:6].[OH:4][CH3:5] methyl-acetate-hydrolysis\n"
+    }
+  }
+]

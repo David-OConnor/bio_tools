@@ -161,6 +161,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+The weights and reference data a tool downloads for itself on first use are usually the largest
+part of an install, and several tools want the same ones. They all go into one model cache --
+`model_cache/` beside the tools, or a directory on the native filesystem when the tools root is a
+WSL mount of a Windows drive -- through the variables each tool already reads (`HF_HOME`,
+`TORCH_HOME`, `BOLTZ_CACHE`, `CHAI_DOWNLOADS_DIR`, `OPENDDE_ROOT_DIR`, `PROTENIX_ROOT_DIR`,
+`CATPRED_CACHE_PATH`); `BIO_TOOLS_MODEL_CACHE` moves the lot somewhere else, and a variable you
+set yourself is left alone. The Hugging Face and Torch caches are content-addressed, so tools
+sharing a checkpoint download it once between them rather than once each. Installing a tool moves
+what it had already downloaded into that cache, so this costs no refetch.
+
+An uninstall removes everything the install put on disk, including that tool's own downloads; the
+shared library caches go once no managed tool is left.
+Uninstalling and reinstalling is therefore the repair for a cache gone bad: a download
+interrupted partway leaves a truncated file that the tool will happily reuse forever, and
+removing it is what makes the next install fetch it properly. Downloads the installer makes
+itself are additionally checked against the size the server publishes, so a short file is
+replaced rather than adopted.
+
 **Python** (equivalent):
 
 ```python

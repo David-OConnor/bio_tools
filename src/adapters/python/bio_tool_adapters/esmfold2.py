@@ -239,7 +239,7 @@ def check_status() -> ToolStatus:
                 (
                     "from inspect import signature; "
                     "from esm.models.hub import read_safetensors_dir; "
-                    "assert 'dtype' in signature(read_safetensors_dir).parameters, "
+                    "assert 'key_dtypes' in signature(read_safetensors_dir).parameters, "
                     "'reinstall ESMFold2 to enable its low-memory checkpoint loader'"
                 ),
             ]

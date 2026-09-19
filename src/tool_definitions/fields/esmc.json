@@ -1,0 +1,276 @@
+{
+  "fields": [
+    {
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "esmc-demo",
+      "required": false,
+      "help": "Names the output directory.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 80,
+      "accept": "",
+      "task": "",
+      "group": "Input"
+    },
+    {
+      "name": "sequence_molecules",
+      "label": "Proteins",
+      "kind": "molecule_builder",
+      "default": "[{\"type\": \"protein\", \"id\": \"GFP\", \"sequence\": \"MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK\", \"modifications\": []}]",
+      "required": true,
+      "help": "One independent protein per box (up to 26). Amino-acid letters only; no complexes, modifications, MSAs or templates. Maximum 2046 residues per protein, reserving two positions for start/end tokens.",
+      "options": [
+        {
+          "value": "protein",
+          "label": "Protein"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters",
+      "molecule_features": "id"
+    },
+    {
+      "name": "input_fasta",
+      "label": "Protein sequence or FASTA",
+      "kind": "textarea",
+      "default": ">GFP\nMSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK",
+      "required": true,
+      "help": "Enter one bare sequence (line wrapping allowed) or up to 26 FASTA records with unique headers. Each protein is analyzed independently. Accepts standard amino acids plus X, B, Z, U and O. Maximum 2046 residues per protein; sequences are never truncated.",
+      "options": [],
+      "rows": 12,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 100000,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "text"
+    },
+    {
+      "name": "inputs_file",
+      "label": "Sequence file",
+      "kind": "file",
+      "default": "",
+      "required": false,
+      "help": "Upload FASTA or a plain-text protein sequence. The file contents are sent to the compute node.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".fasta,.fa,.faa,.txt",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "name": "model",
+      "label": "Model",
+      "kind": "select",
+      "default": "biohub/ESMC-300M",
+      "required": false,
+      "help": "Current Biohub MIT-licensed checkpoints, downloaded on first use. 300M is the lightest; 6B requires substantially more RAM/VRAM.",
+      "options": [
+        {
+          "value": "biohub/ESMC-300M",
+          "label": "ESMC 300M (960-dimensional embeddings)"
+        },
+        {
+          "value": "biohub/ESMC-600M",
+          "label": "ESMC 600M (1152-dimensional embeddings)"
+        },
+        {
+          "value": "biohub/ESMC-6B",
+          "label": "ESMC 6B (2560-dimensional embeddings)"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "save_embeddings",
+      "label": "Save residue and mean embeddings",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Export FP32 embeddings [residues, dimensions] and mean_embedding [dimensions] in one compressed NPZ per sequence. Excludes start/end tokens and padding.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Outputs"
+    },
+    {
+      "name": "save_logits",
+      "label": "Save full logits and probabilities",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Export [residues, 64] raw logits and softmax probabilities in NPZ. summary.json maps vocabulary indices; unused slots are null. Position predictions and CSV summaries are always saved.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Outputs"
+    },
+    {
+      "name": "hidden_layer",
+      "label": "Additional hidden-state layer",
+      "kind": "number",
+      "default": -1,
+      "required": false,
+      "help": "-1 disables additional hidden-state export. Otherwise upstream indices are 0 through 30 (300M), 36 (600M), or 80 (6B). Index 0 is the first block input; the last is the final normalized output. Upstream collects all layers in memory when this is enabled; reduce batch size for long sequences.",
+      "options": [],
+      "rows": null,
+      "minimum": -1,
+      "maximum": 80,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Outputs"
+    },
+    {
+      "name": "mutations",
+      "label": "Single substitutions (optional)",
+      "kind": "textarea",
+      "default": "",
+      "required": false,
+      "help": "Exactly one input protein. Enter up to 100 substitutions such as M1A, separated by spaces, commas or newlines. Positions are one-based and the reference residue must match. Each substitution is scored independently by masking its position and computing log P(mutant) - log P(reference). Positive means model preference, not measured fitness or stability. Saves mutation_scores.csv.",
+      "options": [],
+      "rows": 4,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 10000,
+      "accept": "",
+      "task": "",
+      "group": "Scoring"
+    },
+    {
+      "name": "batch_size",
+      "label": "Batch size",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "Number of independent proteins per inference batch. Smaller batches reduce memory use; sequences are padded only within a batch.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 8,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "device",
+      "label": "Device",
+      "kind": "select",
+      "default": "auto",
+      "required": false,
+      "help": "Auto uses CUDA when available, otherwise CPU. An explicitly requested unavailable CUDA device fails clearly.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "cuda",
+          "label": "CUDA"
+        },
+        {
+          "value": "cpu",
+          "label": "CPU"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "precision",
+      "label": "Precision",
+      "kind": "select",
+      "default": "default",
+      "required": false,
+      "help": "Model weight dtype. BF16 reduces memory on supported hardware. All exported floating arrays use FP32.",
+      "options": [
+        {
+          "value": "default",
+          "label": "Checkpoint default"
+        },
+        {
+          "value": "fp32",
+          "label": "FP32"
+        },
+        {
+          "value": "bf16",
+          "label": "BF16"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    }
+  ],
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "parameters",
+    "options": [
+      {
+        "value": "parameters",
+        "label": "Set parameters here"
+      },
+      {
+        "value": "text",
+        "label": "Enter sequence or FASTA"
+      },
+      {
+        "value": "upload",
+        "label": "Upload sequence or FASTA"
+      }
+    ]
+  },
+  "tasks": []
+}

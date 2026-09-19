@@ -9,7 +9,6 @@ pub mod fields;
 pub mod presets;
 
 mod abmpnn;
-mod aggrescan3d;
 mod alphafold3;
 mod antibody_annotator;
 mod antifold;
@@ -25,6 +24,7 @@ mod deepsp;
 mod deepstabp;
 mod dlkcat;
 mod enzymemap;
+mod esmc;
 mod esmfold2;
 mod genie3;
 mod germinal;
@@ -59,6 +59,7 @@ pub enum Tool {
     Boltz2,
     Chai1,
     Protenix,
+    EsmC,
     EsmFold2,
     ImmuneBuilder,
     HighFold,
@@ -82,7 +83,6 @@ pub enum Tool {
     TlImmuno2,
     NetSolP,
     DeepStabP,
-    AggreScan3d,
     DlkCat,
     CatPred,
     Anarcii,
@@ -99,6 +99,7 @@ impl Tool {
         Self::Boltz2,
         Self::Chai1,
         Self::Protenix,
+        Self::EsmC,
         Self::EsmFold2,
         Self::ImmuneBuilder,
         Self::HighFold,
@@ -119,7 +120,6 @@ impl Tool {
         Self::TlImmuno2,
         Self::NetSolP,
         Self::DeepStabP,
-        Self::AggreScan3d,
         Self::DlkCat,
         Self::CatPred,
         Self::IgBlast,
@@ -139,6 +139,7 @@ impl Tool {
             Self::Boltz2 => "boltz2",
             Self::Chai1 => "chai1",
             Self::Protenix => "protenix",
+            Self::EsmC => "esmc",
             Self::EsmFold2 => "esmfold2",
             Self::ImmuneBuilder => "immunebuilder",
             Self::HighFold => "highfold",
@@ -162,7 +163,6 @@ impl Tool {
             Self::TlImmuno2 => "tlimmuno2",
             Self::NetSolP => "netsolp",
             Self::DeepStabP => "deepstabp",
-            Self::AggreScan3d => "aggrescan3d",
             Self::DlkCat => "dlkcat",
             Self::CatPred => "catpred",
             Self::Anarcii => "anarcii",
@@ -181,9 +181,8 @@ impl Tool {
         match self {
             Self::Boltz2 => "boltz",
             Self::Chai1 => "chai-lab",
-            Self::EsmFold2 => "python",
+            Self::EsmC | Self::EsmFold2 => "python",
             Self::ImmuneBuilder => "ABodyBuilder2",
-            Self::AggreScan3d => "aggrescan",
             Self::Mber => "mber-vhh",
             _ => self.slug(),
         }
@@ -197,6 +196,7 @@ impl Tool {
             Self::Boltz2 => "Boltz-2",
             Self::Chai1 => "Chai-1",
             Self::Protenix => "Protenix-v2",
+            Self::EsmC => "ESMC",
             Self::EsmFold2 => "ESMFold 2",
             Self::ImmuneBuilder => "ImmuneBuilder",
             Self::HighFold => "HighFold",
@@ -220,7 +220,6 @@ impl Tool {
             Self::TlImmuno2 => "TLimmuno2",
             Self::NetSolP => "NetSolP",
             Self::DeepStabP => "DeepSTABp",
-            Self::AggreScan3d => "AggreScan3D",
             Self::DlkCat => "DLKcat",
             Self::CatPred => "CatPred",
             Self::Anarcii => "ANARCII",
@@ -289,10 +288,6 @@ impl Tool {
                  gigabytes, are not specific to this tool, and are reused by any recipe that \
                  needs them.",
             ],
-            Self::OpenDde => &[
-                "The OpenDDE model checkpoint under ~/.cache/opendde was kept: it lives outside \
-                 the managed tree and is reused by a later reinstall.",
-            ],
             Self::AlphaFold3 => &[
                 "The AlphaFold 3 model parameters and genetic databases were kept: they are \
                  licensed assets configured by hand, not installed by this recipe.",
@@ -320,7 +315,6 @@ impl Tool {
                     | Self::Mber
                     | Self::IgDesign
                     | Self::Genie3
-                    | Self::AggreScan3d
                     | Self::CatPred
                     | Self::Placer
                     | Self::Gromacs
@@ -357,6 +351,7 @@ impl FromStr for Tool {
             "boltz" | "boltz2" => Self::Boltz2,
             "chai1" => Self::Chai1,
             "protenix" | "protenixv2" => Self::Protenix,
+            "esmc" | "esmcambrian" => Self::EsmC,
             "esmfold" | "esmfold2" => Self::EsmFold2,
             "immunebuilder" => Self::ImmuneBuilder,
             "highfold" => Self::HighFold,
@@ -380,7 +375,6 @@ impl FromStr for Tool {
             "tlimmuno" | "tlimmuno2" => Self::TlImmuno2,
             "netsolp" => Self::NetSolP,
             "deepstabp" => Self::DeepStabP,
-            "aggrescan3d" => Self::AggreScan3d,
             "dlkcat" => Self::DlkCat,
             "catpred" => Self::CatPred,
             "anarcii" | "antibodyannotator" => Self::Anarcii,

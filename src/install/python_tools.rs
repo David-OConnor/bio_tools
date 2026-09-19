@@ -1,4 +1,8 @@
-use std::{fs, path::Path, process::Command};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use super::{
     InstallError, Installer,
@@ -95,6 +99,13 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             Ok(())
         }
         Tool::Protenix => install_protenix(installer),
+        Tool::EsmC => install_recipe(
+            installer,
+            UvRecipe {
+                verify: Some(("python", &["-c", "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer"])),
+                ..UvRecipe::simple(Tool::EsmC.slug(), "3.12", &["esm==3.4.1"], &[])
+            },
+        ),
         Tool::EsmFold2 => install_esmfold(installer),
         Tool::ImmuneBuilder => install_recipe(
             installer,
@@ -346,7 +357,9 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
     // The audited all-atom API is version 3.4.1 in the Biohub repository, while PyPI currently
     // stops at 3.4.0. Keep a patched checkout of the immutable source revision so ESMC-6B's fp32
     // checkpoint tensors are moved and narrowed one at a time instead of filling host RAM before
-    // the model is converted to bf16 and transferred to CUDA.
+    // the model is converted to bf16 and transferred to CUDA. The patch also reads the bundled
+    // ESMC straight into bf16 under the default precision, and frees each q/k/v and gate/up part
+    // once it is fused, so the ~24 GB fp32 encoder never has to fit on a 16 GB GPU.
     let source = installer.tools_root().join("esmfold2-esm");
     installer.clone_or_update(ESMFOLD2_ESM_URL, &source)?;
 
@@ -396,9 +409,49 @@ fn install_esmfold(installer: &mut Installer) -> Result<(), InstallError> {
     let mut verify = Command::new(installer.venv_python(Tool::EsmFold2.slug()));
     verify.args([
         "-c",
-        "from inspect import signature; from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model; from esm.models.hub import read_safetensors_dir; assert 'dtype' in signature(read_safetensors_dir).parameters",
+        "from inspect import signature; from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model; from esm.models.hub import read_safetensors_dir; assert 'key_dtypes' in signature(read_safetensors_dir).parameters",
     ]);
     installer.checked(&mut verify)
+}
+
+/// The model weights and reference data Protenix downloads for itself on first use.
+///
+/// Protenix keeps them under `PROTENIX_ROOT_DIR`, which defaults to the home directory: `common`
+/// for reference data and `checkpoint` for weights, together some ten gigabytes. Listed by exact
+/// name, because both are ordinary directory names that may well hold something of the
+/// operator's too.
+pub(super) fn protenix_cache_files(root: &Path) -> Vec<PathBuf> {
+    const REFERENCE_DATA: &[&str] = &[
+        "components.cif",
+        "components.cif.rdkit_mol.pkl",
+        "clusters-by-entity-40.txt",
+        "obsolete_release_date.csv",
+        "obsolete_to_successor.json",
+        "release_date_cache.json",
+    ];
+    let mut found: Vec<PathBuf> = REFERENCE_DATA
+        .iter()
+        .map(|name| root.join("common").join(name))
+        .filter(|path| path.is_file())
+        .collect();
+    let checkpoints = root.join("checkpoint");
+    if let Ok(entries) = fs::read_dir(&checkpoints) {
+        let mut weights: Vec<PathBuf> = entries
+            .flatten()
+            .map(|entry| entry.path())
+            .filter(|path| {
+                path.is_file()
+                    && path.extension().is_some_and(|extension| extension == "pt")
+                    && path.file_name().is_some_and(|name| {
+                        let name = name.to_string_lossy();
+                        name.starts_with("protenix") || name.starts_with("esm2_t36_3B_UR50D")
+                    })
+            })
+            .collect();
+        weights.sort();
+        found.extend(weights);
+    }
+    found
 }
 
 fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
@@ -819,35 +872,41 @@ fn install_catpred(installer: &mut Installer) -> Result<(), InstallError> {
         }
         installer.extract_archive(&archive, &data)?;
     }
-    if data.join("data/pretrained").is_dir() {
+    // The archive carries a ten-model production ensemble per parameter, which
+    // is what CatPred's own demos, notebooks and web app predict with; the
+    // reproduce_checkpoints beside them are the paper's per-seed experiments.
+    // The adapter finds `production` on its own, so this is only a note.
+    let production = data.join("data/pretrained/production");
+    if production.is_dir() {
         create_catpred_links(&target)?;
+    } else if data.join("data/pretrained").is_dir() {
+        installer.note(
+            "The CatPred archive has no production checkpoints; the per-seed reproduce \
+             checkpoints will be used instead",
+        );
     } else {
         installer.note(
-            "The CatPred checkpoint layout was not recognized; set a checkpoint directory manually",
+            "The CatPred checkpoint layout was not recognized; set CATPRED_CHECKPOINT_DIR manually",
         );
     }
     Ok(())
 }
 
+/// A stable kcat/km/ki layout beside the checkout, for an operator pointing
+/// something else (CATPRED_CHECKPOINT_DIR, CatPred's own API) at these weights.
 #[cfg(unix)]
 fn create_catpred_links(target: &Path) -> Result<(), InstallError> {
     use std::os::unix::fs::symlink;
 
-    let reproduce = target.join("capsule_data/data/pretrained/reproduce_checkpoints");
+    let production = target.join("capsule_data/data/pretrained/production");
     let links = target.join("checkpoint_links");
     fs::create_dir_all(&links)
         .map_err(|error| InstallError::io("unable to create CatPred checkpoint links", error))?;
-    for (name, source) in [
-        ("kcat", reproduce.join("kcat/seed0/fold_0")),
-        (
-            "km",
-            reproduce.join("km/seed0/seqemb36_attn6_esm_ens10/fold_0"),
-        ),
-        (
-            "ki",
-            reproduce.join("ki/seed0/seqemb36_attn6_ens10_Pretrained_egnnFeats/fold_0"),
-        ),
-    ] {
+    for name in ["kcat", "km", "ki"] {
+        let source = production.join(name);
+        if !source.is_dir() {
+            continue;
+        }
         let destination = links.join(name);
         if destination
             .symlink_metadata()

@@ -4,29 +4,35 @@
       "name": "job_name",
       "label": "Job name",
       "kind": "text",
-      "default": "protenix-demo",
+      "default": "protenix-job",
       "required": false,
-      "help": "",
+      "help": "Names the single Protenix job generated from these parameters; results are written under this name.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 80,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters"
     },
     {
       "name": "sequence_molecules",
       "label": "Molecules",
       "kind": "molecule_builder",
-      "default": "[{\"type\": \"protein\", \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\", \"cyclic\": false, \"modifications\": []}]",
+      "default": "[{\"type\": \"protein\", \"id\": \"A\", \"count\": 1, \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\", \"cyclic\": false, \"modifications\": []}]",
       "required": true,
-      "help": "Add one box per chain: Protein, DNA, RNA, Ligand, or Ion. Ligands take a SMILES string or a CCD_ code (e.g. CCD_ATP); ions take a CCD ion code (e.g. NA, MG, ZN). A modification applies a CCD residue code at a given position; \"Cyclic\" bonds the chain's first and last residue.",
+      "help": "Add one box per unique Protenix entity. Set count and an optional matching list of comma-separated chain IDs, plus the sequence, ligand (a CCD_ code such as CCD_ATP, several joined for a glycan such as CCD_NAG_BMA_BGC, a SMILES string, or FILE_ and an absolute path to a 3D structure file), or ion code (e.g. MG, without CCD_). Modifications take a CCD code at a 1-based position. \"Cyclic\" closes a peptide with a head-to-tail amide bond. MSA and template paths are optional precomputed files.",
       "options": [
         {
           "value": "protein",
           "label": "Protein"
+        },
+        {
+          "value": "ligand",
+          "label": "Ligand"
         },
         {
           "value": "dna",
@@ -35,10 +41,6 @@
         {
           "value": "rna",
           "label": "RNA"
-        },
-        {
-          "value": "ligand",
-          "label": "Ligand"
         },
         {
           "value": "ion",
@@ -51,87 +53,84 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": "sequence"
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters",
+      "molecule_features": "id,count,cyclic,modifications,protein_paired_msa,protein_unpaired_msa,protein_templates,rna_unpaired_msa"
     },
     {
-      "name": "proteins",
-      "label": "Protein chains",
+      "name": "covalent_bonds",
+      "label": "Covalent bonds (JSON, optional)",
       "kind": "textarea",
-      "default": "MSTNPKPQRKTKRNTNRRPQDVKFPGG",
-      "required": true,
-      "help": "One protein chain sequence per line.",
+      "default": "",
+      "required": false,
+      "help": "Native Protenix covalent_bonds array, e.g. [{\"entity1\": \"2\", \"copy1\": 1, \"position1\": \"2\", \"atom1\": \"N6\", \"entity2\": \"3\", \"copy2\": 1, \"position2\": \"1\", \"atom2\": \"C1\"}]. Entities are 1-based box indexes; copies are 1-based within count and may be omitted together to bond every copy pair.",
       "options": [],
       "rows": 6,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 500000,
       "accept": "",
-      "task": "list"
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters"
     },
     {
-      "name": "dnas",
-      "label": "DNA chains (optional)",
+      "name": "constraint",
+      "label": "Constraint (JSON, optional)",
       "kind": "textarea",
       "default": "",
       "required": false,
-      "help": "One DNA chain sequence per line.",
-      "options": [],
-      "rows": 2,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": "list"
-    },
-    {
-      "name": "rnas",
-      "label": "RNA chains (optional)",
-      "kind": "textarea",
-      "default": "",
-      "required": false,
-      "help": "One RNA chain sequence per line.",
-      "options": [],
-      "rows": 2,
-      "minimum": null,
-      "maximum": null,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": "list"
-    },
-    {
-      "name": "molecules",
-      "label": "Molecules",
-      "kind": "textarea",
-      "default": "[{\"type\": \"protein\", \"chain\": \"A\", \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\"}]",
-      "required": true,
-      "help": "JSON list of {\"type\": \"protein\"|\"dna\"|\"rna\", \"chain\": \"A\", \"sequence\": \"...\"}.",
+      "help": "Native Protenix constraint object with a \"contact\" list and/or a \"pocket\" object, e.g. {\"pocket\": {\"binder_chain\": {\"entity\": 2, \"copy\": 1}, \"contact_residues\": [{\"entity\": 1, \"copy\": 1, \"position\": 69}], \"max_distance\": 8}}. A soft constraint, read only by protenix_base_constraint_v0.5.0.",
       "options": [],
       "rows": 6,
       "minimum": null,
       "maximum": null,
       "step": null,
-      "maxlength": null,
+      "maxlength": 20000,
       "accept": "",
-      "task": "molecules"
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters"
     },
     {
-      "name": "ligands",
-      "label": "Ligands (optional)",
+      "name": "input_json",
+      "label": "Protenix inference jobs (JSON)",
       "kind": "textarea",
+      "default": "[\n  {\n    \"name\": \"protenix-demo\",\n    \"sequences\": [\n      {\n        \"proteinChain\": {\n          \"sequence\": \"MSTNPKPQRKTKRNTNRRPQDVKFPGG\",\n          \"count\": 1\n        }\n      }\n    ]\n  }\n]",
+      "required": true,
+      "help": "Complete native Protenix input: a non-empty top-level list of named jobs using proteinChain, dnaSequence, rnaSequence, ligand, or ion entities, with optional covalent_bonds, constraint, and modelSeeds.",
+      "options": [],
+      "rows": 18,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 1000000,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "text",
+      "help_note": "Bio Web writes this text to input.json. Any MSA, template, or FILE_ ligand paths inside it must be absolute paths available to the runner."
+    },
+    {
+      "name": "inputs_file",
+      "label": "Inference jobs file (JSON)",
+      "kind": "file",
       "default": "",
       "required": false,
-      "help": "One ligand per line: a CCD code such as CCD_ATP, or a SMILES string.",
+      "help": "The JSON file defining this run's jobs, in Protenix's own input format.",
       "options": [],
-      "rows": 2,
+      "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
-      "accept": "",
-      "task": "list,molecules"
+      "accept": ".json",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload",
+      "help_note": "Choose a file. Its contents are read here and sent as the input document."
     },
     {
       "name": "model",
@@ -139,27 +138,43 @@
       "kind": "select",
       "default": "protenix-v2",
       "required": false,
-      "help": "Use protenix_base_constraint_v0.5.0 for pocket/contact restraints to have any effect on the prediction.",
+      "help": "Checkpoint to run; weights download on first use. protenix-v2 and the v1.0.0 base models add template and RNA MSA support; only protenix_base_constraint_v0.5.0 reads constraints; the mini and tiny models trade accuracy for speed (recommended: 4 cycles and 5 steps), and the ESM and ISM variants add ESM2-3B embeddings for use without MSAs. The protenix pred CLI default is protenix_base_default_v1.0.0.",
       "options": [
         {
           "value": "protenix-v2",
-          "label": "protenix-v2"
-        },
-        {
-          "value": "protenix_base_20250630_v1.0.0",
-          "label": "protenix_base_20250630_v1.0.0"
-        },
-        {
-          "value": "protenix_base_constraint_v0.5.0",
-          "label": "protenix_base_constraint_v0.5.0"
-        },
-        {
-          "value": "protenix_base_default_v0.5.0",
-          "label": "protenix_base_default_v0.5.0"
+          "label": "protenix-v2 (464M)"
         },
         {
           "value": "protenix_base_default_v1.0.0",
-          "label": "protenix_base_default_v1.0.0"
+          "label": "protenix_base_default_v1.0.0 (368M)"
+        },
+        {
+          "value": "protenix_base_20250630_v1.0.0",
+          "label": "protenix_base_20250630_v1.0.0 (368M, 2025-06-30 data cutoff)"
+        },
+        {
+          "value": "protenix_base_default_v0.5.0",
+          "label": "protenix_base_default_v0.5.0 (368M)"
+        },
+        {
+          "value": "protenix_base_constraint_v0.5.0",
+          "label": "protenix_base_constraint_v0.5.0 (368M, constraints)"
+        },
+        {
+          "value": "protenix_mini_esm_v0.5.0",
+          "label": "protenix_mini_esm_v0.5.0 (135M, ESM)"
+        },
+        {
+          "value": "protenix_mini_ism_v0.5.0",
+          "label": "protenix_mini_ism_v0.5.0 (135M, ISM)"
+        },
+        {
+          "value": "protenix_mini_default_v0.5.0",
+          "label": "protenix_mini_default_v0.5.0 (134M)"
+        },
+        {
+          "value": "protenix_tiny_default_v0.5.0",
+          "label": "protenix_tiny_default_v0.5.0 (110M)"
         }
       ],
       "rows": null,
@@ -168,95 +183,101 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inference"
     },
     {
-      "name": "num_samples",
+      "name": "seeds",
+      "label": "Seeds",
+      "kind": "text",
+      "default": "101",
+      "required": false,
+      "help": "Comma-separated integers passed to --seeds; every job runs once per seed. The CLI default is 101.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 200,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "use_seeds_in_json",
+      "label": "Use seeds from the input JSON",
+      "kind": "checkbox",
+      "default": false,
+      "required": false,
+      "help": "Use modelSeeds from the first job in place of Seeds, for every job in the run.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "samples",
       "label": "Samples",
       "kind": "number",
       "default": 5,
       "required": false,
-      "help": "",
+      "help": "Number of structure samples per seed (--sample). The CLI default is 5.",
       "options": [],
       "rows": null,
       "minimum": 1,
-      "maximum": 25,
-      "step": null,
+      "maximum": 64,
+      "step": 1,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inference"
     },
     {
-      "name": "num_seeds",
-      "label": "Consecutive seeds",
-      "kind": "number",
-      "default": 1,
-      "required": false,
-      "help": "Runs this many seeds (MSA computed once); total predictions = seeds x samples.",
-      "options": [],
-      "rows": null,
-      "minimum": 1,
-      "maximum": 10,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": ""
-    },
-    {
-      "name": "seed",
-      "label": "Starting random seed",
-      "kind": "number",
-      "default": 101,
-      "required": false,
-      "help": "",
-      "options": [],
-      "rows": null,
-      "minimum": 0,
-      "maximum": 2147483647,
-      "step": null,
-      "maxlength": null,
-      "accept": "",
-      "task": ""
-    },
-    {
-      "name": "num_recycles",
-      "label": "Recycles",
+      "name": "cycles",
+      "label": "Pairformer cycles",
       "kind": "number",
       "default": 10,
       "required": false,
-      "help": "",
+      "help": "Number of Pairformer recycling cycles (--cycle). The CLI default is 10.",
       "options": [],
       "rows": null,
       "minimum": 1,
-      "maximum": 30,
-      "step": null,
+      "maximum": 100,
+      "step": 1,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inference"
     },
     {
-      "name": "diffusion_steps",
+      "name": "steps",
       "label": "Diffusion steps",
       "kind": "number",
       "default": 200,
       "required": false,
-      "help": "",
+      "help": "Number of diffusion steps (--step). The CLI default is 200.",
       "options": [],
       "rows": null,
-      "minimum": 10,
-      "maximum": 500,
-      "step": null,
+      "minimum": 1,
+      "maximum": 1000,
+      "step": 1,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inference"
     },
     {
-      "name": "use_msa_server",
-      "label": "Use the public MSA server",
+      "name": "use_default_params",
+      "label": "Use the model's recommended parameters",
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "Opt in to a network call for better accuracy; off keeps the run local.",
+      "help": "Replace cycles and steps with the selected model's recommended values: 10 and 200 for base models and protenix-v2, 4 and 5 for mini and tiny models. Also turns MSAs off for the mini ESM and ISM models.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -264,15 +285,59 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Inference"
+    },
+    {
+      "name": "use_msa",
+      "label": "Use or generate protein MSAs",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Use protein MSA features. A protein without paired or unpaired MSA paths has its sequence sent to the MSA server chosen below. Turn off for private sequences or offline runs, at a significant cost in accuracy unless an ESM model is used.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Optional features"
+    },
+    {
+      "name": "msa_server_mode",
+      "label": "MSA server",
+      "kind": "select",
+      "default": "protenix",
+      "required": false,
+      "help": "Where missing protein MSAs are searched: the Protenix MSA service (https://protenix-server.com/api/msa; set MMSEQS_SERVICE_HOST_URL on the runner to use your own) or the public ColabFold MMseqs2 server (https://api.colabfold.com).",
+      "options": [
+        {
+          "value": "protenix",
+          "label": "Protenix server"
+        },
+        {
+          "value": "colabfold",
+          "label": "ColabFold server"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Optional features"
     },
     {
       "name": "use_template",
-      "label": "Search PDB for templates",
+      "label": "Use protein templates",
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "Network search; only supported by protenix-v2 and the v1.0.0 base models.",
+      "help": "Use template features from each protein's templatesPath (.a3m or .hhr). A protein without one gets a local template search instead, which needs protein MSAs, HMMER (hmmsearch and hmmbuild) on the runner's PATH, and downloads the PDB seqres database on first use. Requires protenix-v2 or a v1.0.0 base model.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -280,15 +345,16 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Optional features"
     },
     {
       "name": "use_rna_msa",
-      "label": "Use RNA MSA search",
+      "label": "Use RNA MSAs",
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "Network search; only supported by protenix-v2 and the v1.0.0 base models.",
+      "help": "Use RNA MSA features from each RNA's unpaired MSA path. An RNA without one gets a local nhmmer search instead, which needs HMMER on the runner's PATH and downloads the Rfam, RNAcentral, and NT-RNA databases on first use. Requires protein MSAs to be on, and protenix-v2 or a v1.0.0 base model.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -296,15 +362,16 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Optional features"
     },
     {
       "name": "use_guidance",
-      "label": "Use physics-aware guidance",
+      "label": "Use training-free guidance",
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "Training-free guidance for improved ligand plausibility (chirality, planarity, stereochemistry); increases compute time.",
+      "help": "Apply Training-Free Guidance (--use_tfg_guidance) for improved ligand plausibility, such as chirality and planarity; increases compute time.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -312,69 +379,182 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Optional features"
     },
     {
-      "name": "bonds",
-      "label": "Covalent bonds (optional)",
-      "kind": "textarea",
-      "default": "",
+      "name": "need_atom_confidence",
+      "label": "Write atom-level confidence data",
+      "kind": "checkbox",
+      "default": false,
       "required": false,
-      "help": "JSON list, e.g. [{\"atom1Chain\":\"A\",\"atom1Idx\":32,\"atom1Atom\":\"C\",\"atom2Chain\":\"B\",\"atom2Idx\":1,\"atom2Atom\":\"N\"}].",
+      "help": "Write full per-atom confidence JSON in addition to each sample's summary confidence.",
       "options": [],
-      "rows": 2,
+      "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Output"
     },
     {
-      "name": "pocket_restraints",
-      "label": "Pocket restraint (optional)",
-      "kind": "textarea",
-      "default": "",
+      "name": "dtype",
+      "label": "Inference precision",
+      "kind": "select",
+      "default": "bf16",
       "required": false,
-      "help": "At most one, as a JSON list, e.g. [{\"binderChain\":\"A\",\"pocketChain\":\"B\",\"pocketContacts\":\"5 6 7\",\"maxDistance\":6}].",
-      "options": [],
-      "rows": 2,
+      "help": "Protenix defaults to BF16; FP32 uses more memory.",
+      "options": [
+        {
+          "value": "bf16",
+          "label": "BF16"
+        },
+        {
+          "value": "fp32",
+          "label": "FP32"
+        }
+      ],
+      "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Runtime"
     },
     {
-      "name": "contact_restraints",
-      "label": "Contact restraints (optional)",
-      "kind": "textarea",
-      "default": "",
+      "name": "triatt_kernel",
+      "label": "Triangle attention kernel",
+      "kind": "select",
+      "default": "cuequivariance",
       "required": false,
-      "help": "JSON list, e.g. [{\"chainA\":\"A\",\"res_idxA\":1,\"chainB\":\"B\",\"res_idxB\":1,\"max_distance_angstrom\":6,\"min_distance_angstrom\":3}].",
-      "options": [],
-      "rows": 2,
+      "help": "Kernel for triangle attention. DeepSpeed needs DeepSpeed and CUTLASS_PATH on the runner; PyTorch needs no extra kernels.",
+      "options": [
+        {
+          "value": "cuequivariance",
+          "label": "cuEquivariance"
+        },
+        {
+          "value": "triattention",
+          "label": "TriAttention"
+        },
+        {
+          "value": "deepspeed",
+          "label": "DeepSpeed"
+        },
+        {
+          "value": "torch",
+          "label": "PyTorch"
+        }
+      ],
+      "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "trimul_kernel",
+      "label": "Triangle multiplicative kernel",
+      "kind": "select",
+      "default": "cuequivariance",
+      "required": false,
+      "help": "Kernel for the triangle multiplicative update.",
+      "options": [
+        {
+          "value": "cuequivariance",
+          "label": "cuEquivariance"
+        },
+        {
+          "value": "torch",
+          "label": "PyTorch"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "enable_cache",
+      "label": "Cache diffusion variables",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Cache shareable variables in the diffusion module.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "enable_fusion",
+      "label": "Kernel fusion",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Enable efficient kernel fusion in the diffusion transformer.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
+    },
+    {
+      "name": "enable_tf32",
+      "label": "TF32 matrix multiplication",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Enable TF32 for FP32 matrix multiplications on supported GPUs.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Runtime"
     }
   ],
-  "tasks": [
-    {
-      "value": "sequence",
-      "label": "Sequence"
-    },
-    {
-      "value": "list",
-      "label": "Chain list"
-    },
-    {
-      "value": "molecules",
-      "label": "Molecules (JSON)"
-    }
-  ]
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "parameters",
+    "options": [
+      {
+        "value": "parameters",
+        "label": "Set parameters here"
+      },
+      {
+        "value": "text",
+        "label": "Enter YAML or JSON"
+      },
+      {
+        "value": "upload",
+        "label": "Upload YAML or JSON"
+      }
+    ]
+  },
+  "tasks": []
 }

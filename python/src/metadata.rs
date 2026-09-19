@@ -180,6 +180,7 @@ python_enum!(
         DnaSequence = 4,
         RnaSequence = 5,
         Csv = 6,
+        Tsv = 7,
     },
     {
         /// "Structure", "Sequence" or "Table": the family, which is what
@@ -189,10 +190,10 @@ python_enum!(
             self.inner.category().to_string()
         }
 
-        /// A word for a job row, where there is room for one: "Structure", "Seq".
+        /// A word for a job row, where there is room for one: "Structure", "CSV".
         #[getter]
         fn label(&self) -> &'static str {
-            self.inner.category().label()
+            self.inner.label()
         }
 
         /// Every suffix this family is written with, lower-case and before any `.gz`.
@@ -820,13 +821,12 @@ fn catalog_fields(
         }
         let options = PyList::empty(py);
         if let Some(items) = dynamic_options.as_ref().and_then(|items| items.get(&name)) {
+            // The catalog's own default is kept: a field whose options are
+            // discovered on the host still declares one that is always among
+            // them (IgBLAST's germline pickers default to "auto"), and
+            // overriding it here would make the form and the API disagree.
             for (value, label) in items {
                 options.append(option_type.call1(py, (value, label))?)?;
-            }
-            if matches!(name.as_str(), "germline_db_v" | "germline_db_j") {
-                if let Some((value, _)) = items.first() {
-                    kwargs.set_item("default", value)?;
-                }
             }
         } else {
             let original: Bound<'_, PyList> = get("options")?.extract()?;

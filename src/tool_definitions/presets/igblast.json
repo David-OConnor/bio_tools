@@ -1,0 +1,94 @@
+[
+  {
+    "id": "human_igh_airr",
+    "label": "Human IGH · AIRR table",
+    "description": "Y14934, the human rearranged heavy chain NCBI's own IgBLAST web service names as its example accession, against the AIRR-C human germline set and the NCBI human constant-region genes. Leaves the AIRR rearrangement table alongside the flat query-anchored report.",
+    "source_url": "https://www.ncbi.nlm.nih.gov/igblast/",
+    "values": {
+      "job_name": "igblast-human-igh",
+      "input_mode": "text",
+      "sequence_type": "nucleotide",
+      "input_fasta": ">Y14934.1 Homo sapiens mRNA for IgG1 rheumatoid factor immunoglobulin heavy chain, clones 1011, 838, 843\nGGGGGAGGCCTGGTCAAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCCCCTTCAGTA\nACTACACCATGCACTGGGTCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTCTCATCCATTACTAGTAG\nTAGTAGTTACAGATATTACGCAGACTCAGTGGAGGGCCGATTCACCATCTCCAGAGACAACGCCAAGAAC\nTCACTGTATCTGCAAATGAACAGCCTGAGAGCCGAGGACACGGCTGTGTATTTCTGTGTGAGAGATCGGG\nGCTATGATAGTAGTGGTTATTACGGAAATCTTGACTGCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTC\nA\n",
+      "organism": "human",
+      "ig_seqtype": "Ig",
+      "germline_db_v": "auto",
+      "germline_db_d": "auto",
+      "germline_db_j": "auto",
+      "c_region_db": "auto",
+      "domain_system": "imgt",
+      "show_translation": true,
+      "write_airr": true,
+      "report_format": "3",
+      "num_clonotype": 0
+    }
+  },
+  {
+    "id": "human_rf_repertoire",
+    "label": "Human IGH repertoire · clonotypes",
+    "description": "Five rheumatoid factor heavy chains from the same GenBank submission as the example accession (Y14934-Y14938), annotated together so the run also writes a clonotype summary: the IgG1 pair share a V(D)J assignment and differ only in CDR3, which is what puts them in clonotypes of their own.",
+    "source_url": "https://www.ncbi.nlm.nih.gov/igblast/",
+    "values": {
+      "job_name": "igblast-human-repertoire",
+      "input_mode": "text",
+      "sequence_type": "nucleotide",
+      "input_fasta": ">Y14934.1 Homo sapiens mRNA for IgG1 rheumatoid factor immunoglobulin heavy chain, clones 1011, 838, 843\nGGGGGAGGCCTGGTCAAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCCCCTTCAGTA\nACTACACCATGCACTGGGTCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTCTCATCCATTACTAGTAG\nTAGTAGTTACAGATATTACGCAGACTCAGTGGAGGGCCGATTCACCATCTCCAGAGACAACGCCAAGAAC\nTCACTGTATCTGCAAATGAACAGCCTGAGAGCCGAGGACACGGCTGTGTATTTCTGTGTGAGAGATCGGG\nGCTATGATAGTAGTGGTTATTACGGAAATCTTGACTGCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTC\nA\n>Y14935.1 Homo sapiens mRNA for IgG1 rheumatoid factor immunoglobulin heavy chain, clone 1012\nGGGGGAGGCCTGGTCAAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCCCCTTCAGTA\nACTACACCATGCACTGGGTCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTCTCATCCATTACTAGTAG\nTAGTAGTTACAGATATTACACACACTCAGTGGAGGGCCGATTCACCATCTCCAGAGACAACGCCAAGAAC\nTCACTGTATCTGCAAATGAACAGCCTGAGAGCCGAGGACACGGCTGTGTATTTCTGTGTGAGAGATCGGG\nGCTATGATAGTATTGGTTATTACGGAAATCTTGACTGCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTC\nA\n>Y14936.1 Homo sapiens mRNA for IgM rheumatoid factor immunoglobulin heavy chain, clones 1042, 785, 786, 854, 856, 881\nGGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCTGTCTCTGGTTACTCCATCAGCA\nGTGGTTACTACTGGGGCTGGATCCGGCAGCCCCCAGGGAAGGGGCTGGAGTGGATTGGGAGTATCTATCA\nTAGTGGGAACACCTACTACAACCCGTCCCTCAAGAGTCGAGTCACCATATCAGTAGACACGTCCAAGAAC\nCAGTTCTCCCTGAAGCTAACCTCTGTGACCGCCGCAGACACGGCCGTGTATTACTGTGCGAGAGGTTACT\nATGATATTAGTGGTTATTACTTTGACGCTTTTAATATCTGGGGCCAAGGGACAATGGTCACCGTCTCTTC\nA\n>Y14937.1 Homo sapiens mRNA for IgM rheumatoid factor immunoglobulin heavy chain, clone 1376\nGGCGCGGGACTGTTGAAGCCTTCGGGGACCCTGTCCCTCACCTGCGCTGTCTATGGTGAATTCTTCAGTG\nATTACCACTGGACCTGGATACGCCAGCCCCCAGGGAAGGGGCTGGAGTGGATTGGCGAAGTCAATGATGG\nTGGATTCACCGATTACAATCCGTCCCTCAGGGGTCGAGCCCACTTATCACTAGACACCTCTAAGAAGCAG\nTTCTCCCTGAAGCTGACCTCTGTGACCGCCGCGGACACTGCTGTTTATTACTGTGCGAGGGGGTCCACTC\nGCGGACTTGTTAACATCCTCTACTACTGGAGCCATGGAACCCTGGTCACCGTCTCCTCA\n>Y14938.1 Homo sapiens mRNA for IgG4 rheumatoid factor immunoglobulin heavy chain, clones 725, 727, 730, 844, 845, 847, 848, 852, 874, 1031\nGGCCCAGGACTGGTGAAGGCTTCGGAGACCCTGTCCCTCACCTGCGCTGTCTCTGGTGACTCCATCAACA\nGTAGTGCTTACTACTGGGGCTGGATCCGCCAGCCCCCAGGGAAGGGCCTGGAATGGATTGCGACTGTTTA\nCTACAATGGGAAAACCTACTACAAGCCGTCCATCAAGAGTCGAGCCACCATATCCATAGACACGTCCAAG\nAATCAGTTCTCCCTGAGGCTGACCTCTGTGACCGCCGCAGACACGGCTATGTATTATTGTGCGAGAATTT\nCGGGCTTTCGAATGGTTGTAGTAGTGATATGGATCGATTCCTGGGGCCAGGGAGCCCCGGTCACCGTCAC\nCTCA\n",
+      "organism": "human",
+      "ig_seqtype": "Ig",
+      "germline_db_v": "auto",
+      "germline_db_d": "auto",
+      "germline_db_j": "auto",
+      "c_region_db": "auto",
+      "domain_system": "imgt",
+      "show_translation": true,
+      "write_airr": true,
+      "report_format": "7",
+      "num_clonotype": 100
+    }
+  },
+  {
+    "id": "mouse_igh_report",
+    "label": "Mouse IGH · official mouse command",
+    "description": "The mouse igblastn example from the IgBLAST cookbook -- NCBI's mouse_gl_V, mouse_gl_D and mouse_gl_J with the mouse auxiliary file, -show_translation and -outfmt 3 -- run against X67210, a BALB/c hybridoma IgG2b heavy chain mRNA that carries its constant region as well as the rearranged V(D)J.",
+    "source_url": "https://ncbi.github.io/igblast/cook/examples.html",
+    "values": {
+      "job_name": "igblast-mouse-igh",
+      "input_mode": "text",
+      "sequence_type": "nucleotide",
+      "input_fasta": ">X67210.1 M.musculus rearranged immunoglobulin gamma 2b heavy chain\nCTCCAAAGTCCCTGAACACACTGACTCTAACCATGGAATGGAGTTGGATATTTCTCTTTCTCCTGTCAGG\nAACTGCAGGTGTCCACTCTGAGGTCCAGCTGCAGCAGTCTGGACCTGAGCTGGTAAATCCTGGGGCTTCA\nGTGAAGATGTCCTGCAAGGCCTCTGGATACACATTCATTACCTATGTTATGCACTGGGTGAAGCAGAAGC\nCTGGGCAGGGCCTTGAGTGGATTGGATATATTAATCCTAACAAAGACGGTACAAAGTTCAATGAGAAGTT\nCAAAGGCAAGGCCACACTGACTTCAGACAAATCCTCCAACACAGCCTACATGGAGCTCAGCAGCCTGACC\nTCTGAGGACTCTGCGGTCTATTACTGTGCAAGAGACTATGATTACGACTGGTTTGCTTACTGGGGCCAGG\nGGACTCTGGTCACTGTCTCTGCAGCCAAAACAACACCCCCATCAGTCTATCCACTGGCCCCTGGGTGTGG\nAGATACAACTGGTTCCTCCGTGACCTCTGGGTGCCTGGTCAAGGGCTACTTCCCTGAGTCAGTGACTGTG\nACTTGGAACTCTGGATCCCTGTCCAGCAGTGTGCACACCCTCTCCCAGGCTCTCCTGCAGTCTGGACTCT\nACACTATGAGCAGCTCAGTGACTGTCCCCTCCAGCACCTGGCCAAGTCAGACCGTCACCTGCAGCGTTGC\nTCACCCAGCCAGCAGCACCACGGTGGACAAAAAACTTGAGCCCAGCGGGCCCATTTCAACAATCAACCCC\nTGTCCTCCATGCAAGGAGTGTCACAAATGCCCAGCTCCTAACCTCGAGGGTGGACCATCCGTCTTCATCT\nTCCCTCCAAATATCAAGGATGTACTCATGATCTCCCTGACACCCAAGGTCACGTGTGTGGTGGTGGATGT\nGAGCGAGGATGACCCAGACGTCCAGATCAGCTGGTTTGTGAACAACGTGGAAGTACACACAGCTCAGACA\nCAAACCCATAGAGAGGATTACAACAGTACTATCCGGGTGGTCAGCACCCTCCCCATCCAGCACCAGGACT\nGGATGAGTGGCAAGGAGTTCAAATGCAAGGTCAACAACAAAGACCTCCCATCACCCATCGAGAGAACCAT\nCTCAAAAATTAAAGGGCTAGTCAGAGCTCCACAAGTATACATCTTGCCGCCACCAGCAGAGCAGTTGTCC\nAGGAAAGATGTCAGTCTCACTTGCCTGGTCGTGGGCTTCAACCCTGGAGACATCAGTGTGGAGTGGACCA\nGCAATGGGCATACAGAGGAGAACTACAAGGACACCGCACCAGTCCTGGACTCTGACGGTTCTTACTTCAT\nATATAGCAAGCTCAATATGAAAACAAGCAAGTGGGAGAAAACAGATTCCTTCTCATGCAACGTGAGACAC\nGAGGGTCTGAAAAATTACTACCTGAAGAAGACCATCTCCCGGTCTCCGGGTAAATGAGCTCAGCACCCAC\nAAAGCTCTCAGGTCCTAAGAGACACTGGCACCCATATCCATGCATCCCTTGTATAAATAAAGCATCCAGC\nAAAGCC\n",
+      "organism": "mouse",
+      "ig_seqtype": "Ig",
+      "germline_db_v": "mouse_gl_V",
+      "germline_db_d": "mouse_gl_D",
+      "germline_db_j": "mouse_gl_J",
+      "c_region_db": "",
+      "domain_system": "imgt",
+      "show_translation": true,
+      "write_airr": true,
+      "report_format": "3",
+      "num_clonotype": 0
+    }
+  },
+  {
+    "id": "mouse_vh_protein",
+    "label": "Mouse VH · igblastp",
+    "description": "The igblastp example from the IgBLAST cookbook -- mouse_gl_V, -organism mouse, -outfmt 3 -- on the V domain of the same X67210 heavy chain. A protein query aligns against germline V genes only, so there is no D, J, junction or AIRR table for it.",
+    "source_url": "https://ncbi.github.io/igblast/cook/examples.html",
+    "values": {
+      "job_name": "igblast-mouse-vh",
+      "input_mode": "text",
+      "sequence_type": "protein",
+      "input_fasta": ">CAA47649.1 immunoglobulin gamma 2b heavy chain V domain, Mus musculus (X67210)\nEVQLQQSGPELVNPGASVKMSCKASGYTFITYVMHWVKQKPGQGLEWIGYINPNKDGTKFNEKFKGKATL\nTSDKSSNTAYMELSSLTSEDSAVYYCARDYDYDWFAYWGQGTLVTVSA\n",
+      "organism": "mouse",
+      "ig_seqtype": "Ig",
+      "germline_db_v": "mouse_gl_V",
+      "germline_db_d": "",
+      "germline_db_j": "auto",
+      "c_region_db": "",
+      "domain_system": "imgt",
+      "show_translation": false,
+      "write_airr": false,
+      "report_format": "3",
+      "num_clonotype": 0
+    }
+  }
+]

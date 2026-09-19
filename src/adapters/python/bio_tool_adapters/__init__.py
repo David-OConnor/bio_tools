@@ -18,6 +18,7 @@ import logging
 import os
 import shutil
 from contextvars import ContextVar
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -31,6 +32,7 @@ from bio_tools import (
 
 from .environments import (
     environment_python,
+    environment_root,
     environment_script,
     process_executables_root,
 )
@@ -292,7 +294,12 @@ def run_command(
     env: dict[str, str] | None = None,
     artifacts: Iterable[Path] | None = None,
 ) -> dict[str, Any]:
-    """Execute and durably audit a shell-free command through bio_tools."""
+    """Execute and durably audit a shell-free command through bio_tools.
+
+    Every tool is pointed at the installer's shared model cache, so weights one
+    tool downloaded are there for the next and nothing lands in the home
+    directory; an adapter's own `env` still wins.
+    """
 
     try:
         completed = bio_tools.CommandSpec(
@@ -300,7 +307,11 @@ def run_command(
             cwd=cwd,
             timeout=timeout,
             stdin=stdin,
-            env=env,
+            env={
+                **model_cache_environment(),
+                **_triton_cache_environment(command[0]),
+                **(env or {}),
+            },
             check=True,
             output_limit=100_000,
             run_log_dir=RUN_LOGS,
@@ -316,6 +327,42 @@ def run_command(
         "stdout": completed.stdout,
         "stderr": completed.stderr,
         "run_log_dir": str(completed.run_log_dir),
+    }
+
+
+def _triton_cache_environment(executable: str) -> dict[str, str]:
+    """A Triton cache of its own for the tool environment `executable` is in.
+
+    Triton keys the helper modules it compiles (`cuda_utils.so`) by their C
+    source and platform, not by Python version, so environments on different
+    Pythons with the same Triton release load each other's builds from a shared
+    `~/.triton/cache` and fail with "PY_SSIZE_T_CLEAN macro must be defined for
+    '#' formats". An operator's own TRITON_CACHE_DIR is split the same way.
+    """
+
+    try:
+        relative = Path(os.path.abspath(executable)).relative_to(
+            os.path.abspath(environment_root())
+        )
+    except ValueError:
+        return {}
+    if len(relative.parts) < 2:
+        return {}
+    base = os.environ.get("TRITON_CACHE_DIR") or str(Path.home() / ".triton" / "cache")
+    return {"TRITON_CACHE_DIR": str(Path(base) / relative.parts[0])}
+
+
+@lru_cache(maxsize=1)
+def model_cache_environment() -> dict[str, str]:
+    """Where each tool downloads its weights: `bio_tools`' one managed cache.
+
+    Cached because every command asks, and the answer is this installation's
+    layout: resolving it also creates the directories.
+    """
+
+    return {
+        name: str(path)
+        for name, path in bio_tools.model_cache_environment(PROCESS_EXECUTABLES).items()
     }
 
 

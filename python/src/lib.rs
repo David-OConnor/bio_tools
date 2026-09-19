@@ -1,7 +1,7 @@
 mod metadata;
 mod run;
 
-use std::{env, path::PathBuf, time::Duration};
+use std::{collections::HashMap, env, path::PathBuf, time::Duration};
 
 use bio_tools_rs::{
     install::{Installer as RustInstaller, UninstallReport},
@@ -602,6 +602,18 @@ fn adapter_package_path() -> PyResult<String> {
         .map_err(|error| pyo3::exceptions::PyRuntimeError::new_err(error.to_string()))
 }
 
+/// The download-cache variables every tool process under `process_executables` is given, so the
+/// adapters that launch tools directly share the installer's single model cache.
+#[pyfunction]
+fn model_cache_environment(process_executables: PathBuf) -> PyResult<HashMap<String, PathBuf>> {
+    let installer = RustInstaller::for_process_executables(process_executables).map_err(install_error)?;
+    Ok(installer
+        .model_cache_environment()
+        .into_iter()
+        .map(|(name, path)| (name.to_owned(), path))
+        .collect())
+}
+
 /// Download Chai-1's official example MSAs under `process_executables` if they are not already
 /// there, and return the directory holding them.
 #[pyfunction]
@@ -634,6 +646,7 @@ fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     metadata::register(m)?;
     m.add_function(wrap_pyfunction!(adapter_package_path, m)?)?;
+    m.add_function(wrap_pyfunction!(model_cache_environment, m)?)?;
     m.add_function(wrap_pyfunction!(chai1_example_msas, m)?)?;
     m.add_function(wrap_pyfunction!(chai1_kalign, m)?)?;
     run::register(m)?;

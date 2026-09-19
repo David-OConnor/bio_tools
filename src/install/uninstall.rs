@@ -1,10 +1,11 @@
 //! Removal of a tool one of this crate's recipes installed.
 //!
-//! Only what a recipe created is removed: the tool's isolated environment, the checkouts and
-//! binary distributions it unpacked under the tools root, and its installation marker. Shared
-//! infrastructure -- the micromamba root, the bootstrapped Conda, the uv cache -- belongs to every
-//! other tool as well and is left alone, as are the multi-gigabyte assets that are expensive to
-//! fetch and are not owned by the tool that happened to download them.
+//! What this install put on disk is removed: the tool's isolated environment, the checkouts and
+//! binary distributions it unpacked under the tools root, its installation marker, and the model
+//! weights and reference data it downloaded on first use, which are usually the largest part of
+//! an install (see [`super::model_cache`]). Shared infrastructure -- the micromamba root, the
+//! bootstrapped Conda, the uv cache -- belongs to every other tool as well and is left alone, as
+//! are assets an operator supplied by hand and ones that several recipes share.
 
 use std::{
     fs,
@@ -47,6 +48,8 @@ pub(super) fn uninstall(
     for path in removable_paths(installer, tool, &mut report) {
         remove(installer, &path, &mut report)?;
     }
+
+    super::model_cache::remove(installer, tool, &mut report);
 
     for note in tool.retained_assets() {
         report.kept.push((*note).to_owned());
@@ -131,6 +134,7 @@ fn guard(installer: &Installer, path: &Path) -> Result<(), InstallError> {
     let roots = [
         installer.tools_root().to_path_buf(),
         installer.config.layout.environments_root.clone(),
+        installer.model_cache_root(),
     ];
     if roots
         .iter()

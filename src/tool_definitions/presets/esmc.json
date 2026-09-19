@@ -1,0 +1,29 @@
+[
+  {
+    "id": "gfp_embeddings",
+    "label": "GFP embeddings",
+    "description": "GFP sequence from the official local ESMC example, using the smaller 300M checkpoint.",
+    "source_url": "https://github.com/Biohub/esm#running-esmc-through-hugging-face",
+    "values": {
+      "job_name": "esmc-gfp",
+      "input_mode": "text",
+      "input_fasta": ">GFP\nMSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK",
+      "model": "biohub/ESMC-300M",
+      "save_embeddings": true
+    }
+  },
+  {
+    "id": "gfp_substitution",
+    "label": "GFP single-substitution scores",
+    "description": "Adapter scoring example using the official GFP sequence; two independent N-terminal substitutions scored with masked context.",
+    "source_url": "https://github.com/Biohub/esm#running-esmc-through-hugging-face",
+    "values": {
+      "job_name": "esmc-gfp-scores",
+      "input_mode": "text",
+      "input_fasta": ">GFP\nMSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK",
+      "model": "biohub/ESMC-300M",
+      "mutations": "M1A\nS2A",
+      "save_embeddings": false
+    }
+  }
+]

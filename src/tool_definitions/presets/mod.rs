@@ -139,11 +139,16 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
         "chai1" => Some(include_str!("chai1.json")),
         "boltz2" => Some(include_str!("boltz2.json")),
+        "catpred" => Some(include_str!("catpred.json")),
+        "esmc" => Some(include_str!("esmc.json")),
         "esmfold2" => Some(include_str!("esmfold2.json")),
+        "igblast" => Some(include_str!("igblast.json")),
         "ligandmpnn" => Some(include_str!("ligandmpnn.json")),
         "opendde" => Some(include_str!("opendde.json")),
         "proteinmpnn" => Some(include_str!("proteinmpnn.json")),
         "proteinmpnn_ddg" => Some(include_str!("proteinmpnn_ddg.json")),
+        "protenix" => Some(include_str!("protenix.json")),
+        "rdkit" => Some(include_str!("rdkit.json")),
         "rfd3" => Some(include_str!("rfd3.json")),
         "thermompnn" => Some(include_str!("thermompnn.json")),
         _ => None,
@@ -221,6 +226,31 @@ pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
         ("proteinmpnn_ddg", "provenance.json") => {
             Some(include_str!("proteinmpnn_ddg/provenance.json"))
         }
+
+        ("protenix", "LICENSE") => Some(include_str!("protenix/LICENSE")),
+        ("protenix", "examples/7r6r/msa/1/non_pairing.a3m") => {
+            Some(include_str!("protenix/examples/7r6r/msa/1/non_pairing.a3m"))
+        }
+        ("protenix", "examples/7r6r/msa/1/pairing.a3m") => {
+            Some(include_str!("protenix/examples/7r6r/msa/1/pairing.a3m"))
+        }
+        ("protenix", "examples/7wux/msa/1/non_pairing.a3m") => {
+            Some(include_str!("protenix/examples/7wux/msa/1/non_pairing.a3m"))
+        }
+        ("protenix", "examples/7wux/msa/1/pairing.a3m") => {
+            Some(include_str!("protenix/examples/7wux/msa/1/pairing.a3m"))
+        }
+        ("protenix", "examples/7wux/msa/2/non_pairing.a3m") => {
+            Some(include_str!("protenix/examples/7wux/msa/2/non_pairing.a3m"))
+        }
+        ("protenix", "examples/7wux/msa/2/pairing.a3m") => {
+            Some(include_str!("protenix/examples/7wux/msa/2/pairing.a3m"))
+        }
+        ("protenix", "examples/examples_with_rna_msa/9gmw/9gmw_2_all.a3m") => Some(include_str!(
+            "protenix/examples/examples_with_rna_msa/9gmw/9gmw_2_all.a3m"
+        )),
+        ("protenix", "provenance.json") => Some(include_str!("protenix/provenance.json")),
+
         ("rfd3", "LICENSE.md") => Some(include_str!("rfd3/LICENSE.md")),
         ("rfd3", "input_pdbs/1bna.pdb") => Some(include_str!("rfd3/input_pdbs/1bna.pdb")),
         ("rfd3", "input_pdbs/1q75.pdb") => Some(include_str!("rfd3/input_pdbs/1q75.pdb")),

@@ -36,6 +36,11 @@ pub(crate) fn record_install(installer: &Installer, tool: Tool) -> Result<(), In
     })
 }
 
+/// Whether this crate's recipe recorded `tool` as installed.
+pub(crate) fn is_recorded(installer: &Installer, tool: Tool) -> bool {
+    marker_path(installer, tool).is_file()
+}
+
 pub(crate) fn forget_install(installer: &Installer, tool: Tool) -> Result<(), InstallError> {
     let marker = marker_path(installer, tool);
     match fs::remove_file(&marker) {
@@ -186,7 +191,8 @@ pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
     };
     let detail = output_detail(&output);
     if !output.status.success()
-        && (detail.is_empty()
+        && (tool == Tool::EsmC
+            || detail.is_empty()
             || detail
                 .trim_start()
                 .starts_with("Traceback (most recent call last):"))
@@ -302,6 +308,20 @@ fn alphafold3_command(
 fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     // The executable's name comes from `Tool::console_script`, which is not always the slug; only
     // the probe argument is decided here.
+    if tool == Tool::EsmC {
+        return Some(installer.tool_python_command(tool).args([
+            "-c", "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer",
+        ]));
+    }
+    if tool == Tool::CatPred {
+        // The prediction pipeline rather than the package: it is what the
+        // adapter calls, and it imports the RDKit and pandas stack a working
+        // install needs, none of which importing `catpred` alone would touch.
+        return Some(installer.tool_python_command(tool).args([
+            "-c",
+            "from catpred.inference import PredictionRequest, run_inprocess_prediction_pipeline",
+        ]));
+    }
     if tool == Tool::EsmFold2 {
         return Some(installer.tool_python_command(tool).args([
             "-c",
@@ -318,7 +338,6 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         | Tool::BioPhi
         | Tool::ProteinMpnnDdg
         | Tool::Anarcii
-        | Tool::AggreScan3d
         | Tool::Mber => &["--help"],
         Tool::IgBlast => {
             let executable = installer.tools_root().join("igblast/bin/igblastn");
@@ -372,7 +391,12 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
             "BindCraft/params/params_model_5_ptm.npz",
             "BindCraft weights",
         )],
-        Tool::IgBlast => &[("igblast/internal_data", "IgBLAST internal data")],
+        Tool::IgBlast => &[
+            ("igblast/internal_data", "IgBLAST internal data"),
+            // The J coding frames, without which CDR3's end and FWR4 go unannotated.
+            ("igblast/optional_file", "IgBLAST auxiliary data"),
+            ("igblast/germline_db", "IgBLAST germline databases"),
+        ],
         Tool::ProteinMpnn => &[
             ("ProteinMPNN/protein_mpnn_run.py", "ProteinMPNN runner"),
             (
@@ -404,7 +428,10 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
             "DLKcat/DeeplearningApproach/Code/example/prediction_for_input.py",
             "DLKcat runner",
         )],
-        Tool::CatPred => &[("CatPred/predict.py", "CatPred runner")],
+        Tool::CatPred => &[(
+            "CatPred/capsule_data/data/pretrained",
+            "CatPred checkpoint archive",
+        )],
         Tool::Placer => &[("PLACER/run_PLACER.py", "PLACER runner")],
         Tool::HighFold => &[
             ("HighFold", "HighFold checkout"),
@@ -444,6 +471,7 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
             | Tool::Boltz2
             | Tool::Chai1
             | Tool::Protenix
+            | Tool::EsmC
             | Tool::EsmFold2
             | Tool::ImmuneBuilder
             | Tool::BoltzGen
