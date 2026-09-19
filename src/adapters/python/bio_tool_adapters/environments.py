@@ -57,6 +57,9 @@ BIO_TOOLS_ENVIRONMENT_NAMES = {
 def environment_path(name: str) -> Path:
     """Resolve legacy adapter names to bio_tools' stable environment slugs."""
 
+    configured = os.getenv("BIO_TOOLS_ADAPTER_ENVIRONMENT")
+    if configured:
+        return Path(configured).expanduser()
     return environment_root() / BIO_TOOLS_ENVIRONMENT_NAMES.get(name, name)
 
 
@@ -82,3 +85,9 @@ def environment_script(name: str, script: str) -> Path:
         if candidate.is_file():
             return candidate
     return directory / f"{script}.exe"
+
+
+def bundle_path(name: str) -> Path:
+    """A desktop-selected checkout, or the shared installer's standard bundle."""
+    configured = os.getenv("BIO_TOOLS_ADAPTER_BUNDLE_ROOT")
+    return Path(configured).expanduser() if configured else process_executables_root() / name

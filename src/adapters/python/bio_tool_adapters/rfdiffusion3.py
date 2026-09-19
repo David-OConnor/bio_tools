@@ -34,7 +34,7 @@ from . import (
     tool_script,
     torch_device,
 )
-from .environments import environment_python
+from .environments import environment_python, bundle_path
 from .field_processing import boolean, decimal, integer, safe_name
 from .status_check import (
     CheckResult,
@@ -852,7 +852,7 @@ _BUILDERS = {
 
 def _checkpoint() -> Path:
     filename = _CHECKPOINT_NAME
-    configured = os.getenv("RFD3_CHECKPOINT_DIR")
+    configured = os.getenv("RFD3_CHECKPOINT_DIR", str(bundle_path("rfd3") / "checkpoints"))
     if configured:
         root = Path(configured).expanduser().resolve()
         path = (root / filename).resolve()

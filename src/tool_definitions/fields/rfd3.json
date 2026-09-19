@@ -194,11 +194,11 @@
       "options": [
         {
           "value": "2",
-          "label": "2 — current"
+          "label": "2 \u2014 current"
         },
         {
           "value": "1",
-          "label": "1 — legacy"
+          "label": "1 \u2014 legacy"
         }
       ],
       "rows": null,
@@ -308,7 +308,7 @@
       "kind": "textarea",
       "default": "",
       "required": false,
-      "help": "Atom-wise donor/acceptor flags. Atom-wise selection of hydrogen bond donors and acceptors, respectively. Only dictionary inputs allowed. See RFdiffusion3 — Nucleic acid binder design examples for an example.",
+      "help": "Atom-wise donor/acceptor flags. Atom-wise selection of hydrogen bond donors and acceptors, respectively. Only dictionary inputs allowed. See RFdiffusion3 \u2014 Nucleic acid binder design examples for an example.",
       "options": [],
       "rows": 3,
       "minimum": null,
@@ -326,7 +326,7 @@
       "kind": "textarea",
       "default": "",
       "required": false,
-      "help": "Atom-wise donor/acceptor flags. Atom-wise selection of hydrogen bond donors and acceptors, respectively. Only dictionary inputs allowed. See RFdiffusion3 — Nucleic acid binder design examples for an example.",
+      "help": "Atom-wise donor/acceptor flags. Atom-wise selection of hydrogen bond donors and acceptors, respectively. Only dictionary inputs allowed. See RFdiffusion3 \u2014 Nucleic acid binder design examples for an example.",
       "options": [],
       "rows": 3,
       "minimum": null,
@@ -344,7 +344,7 @@
       "kind": "textarea",
       "default": "",
       "required": false,
-      "help": "Atom-level or residue-level hotspots. Hotspots will typically be at most 4.5 Å to any heavy atom in the designed structure. Typically used for designing binders.",
+      "help": "Atom-level or residue-level hotspots. Hotspots will typically be at most 4.5 \u00c5 to any heavy atom in the designed structure. Typically used for designing binders.",
       "options": [],
       "rows": 3,
       "minimum": null,
@@ -417,7 +417,7 @@
       "kind": "select",
       "default": "",
       "required": false,
-      "help": "\"com\" or \"hotspots\". The center of mass of the diffused region will typically be within 5Å of the ORI token. Using hotspots will place the ORI token 10Å outward from the center of mass of the specified hotspots. Using com will place the token at the center of mass of the input structure.",
+      "help": "\"com\" or \"hotspots\". The center of mass of the diffused region will typically be within 5\u00c5 of the ORI token. Using hotspots will place the ORI token 10\u00c5 outward from the center of mass of the specified hotspots. Using com will place the token at the center of mass of the input structure.",
       "options": [
         {
           "value": "",
@@ -474,11 +474,11 @@
         },
         {
           "value": "true",
-          "label": "True — fewer loops"
+          "label": "True \u2014 fewer loops"
         },
         {
           "value": "false",
-          "label": "False — more loops"
+          "label": "False \u2014 more loops"
         }
       ],
       "rows": null,
@@ -497,7 +497,7 @@
       "kind": "number",
       "default": "",
       "required": false,
-      "help": "Noise (Å) for partial diffusion, enables partial diffusion (sets the noise level.) Recommended values are 5.0-15.0 Å. See Partial Diffusion for more information.",
+      "help": "Noise (\u00c5) for partial diffusion, enables partial diffusion (sets the noise level.) Recommended values are 5.0-15.0 \u00c5. See Partial Diffusion for more information.",
       "options": [],
       "rows": null,
       "minimum": 0,
@@ -606,7 +606,7 @@
       "kind": "number",
       "default": 1.5,
       "required": false,
-      "help": "scales diffusion step size; higher → less diverse, more designable (default: 1.5).",
+      "help": "scales diffusion step size; higher \u2192 less diverse, more designable (default: 1.5).",
       "options": [],
       "rows": null,
       "minimum": 0.1,
@@ -671,7 +671,8 @@
       "task": "",
       "group": "Most useful CLI arguments",
       "input_modes": "",
-      "help_note": "Enter a directory name within this run. The results page collects its files; absolute server paths are not accepted."
+      "help_note": "The runner creates a separate results folder for each run.",
+      "managed_by_runner": true
     },
     {
       "name": "specification",
@@ -708,7 +709,8 @@
       "task": "",
       "group": "Most useful CLI arguments",
       "input_modes": "",
-      "help_note": "Use rfd3 for the configured default, or a .ckpt filename in the configured checkpoint directory."
+      "help_note": "The runner uses the installed RFdiffusion3 checkpoint.",
+      "managed_by_runner": true
     },
     {
       "name": "skip_existing",
@@ -726,7 +728,9 @@
       "accept": "",
       "task": "",
       "group": "Most useful CLI arguments",
-      "input_modes": ""
+      "input_modes": "",
+      "managed_by_runner": true,
+      "help_note": "Each run starts in a new folder, so no existing designs are skipped."
     },
     {
       "name": "global_prefix",
@@ -929,7 +933,7 @@
       "kind": "select",
       "default": "all",
       "required": false,
-      "help": "Specifies how to center the coordinates during the inference run to ensure that structures are alined around a specific point. Options include: all — (default) Uses the center of mass (COM) of all atoms motif — Uses the COM of the motif atoms with fixed coordinates diffuse — Uses the COM of all fixed coordinates that are not part of motif atoms",
+      "help": "Specifies how to center the coordinates during the inference run to ensure that structures are alined around a specific point. Options include: all \u2014 (default) Uses the center of mass (COM) of all atoms motif \u2014 Uses the COM of the motif atoms with fixed coordinates diffuse \u2014 Uses the COM of all fixed coordinates that are not part of motif atoms",
       "options": [
         {
           "value": "all",
@@ -978,7 +982,7 @@
       "kind": "checkbox",
       "default": false,
       "required": false,
-      "help": "If set to True (default: False) then the noised structure can be realigned during inference based on the location of a given motif. From Issue #154: It is generally not needed to include this option, there are fewer ‘weird’ interactions with motif scaffolding when it’s set to False.",
+      "help": "If set to True (default: False) then the noised structure can be realigned during inference based on the location of a given motif. From Issue #154: It is generally not needed to include this option, there are fewer \u2018weird\u2019 interactions with motif scaffolding when it\u2019s set to False.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -1014,7 +1018,7 @@
       "kind": "number",
       "default": 7,
       "required": false,
-      "help": "Determines the ‘shape’ of the noise schedule (default: 7).",
+      "help": "Determines the \u2018shape\u2019 of the noise schedule (default: 7).",
       "options": [],
       "rows": null,
       "minimum": 0.001,
@@ -1050,7 +1054,7 @@
       "kind": "number",
       "default": 0.0,
       "required": false,
-      "help": "Controls the standard deviation of the Gaussian distribution that is used to ‘jitter’ the motif offset (default: 0.0, no jitter).",
+      "help": "Controls the standard deviation of the Gaussian distribution that is used to \u2018jitter\u2019 the motif offset (default: 0.0, no jitter).",
       "options": [],
       "rows": null,
       "minimum": 0,

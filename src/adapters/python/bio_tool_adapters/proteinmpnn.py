@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import bio_tools
+from .environments import bundle_path
 
 from . import (
     ToolExecutionError,
@@ -768,7 +769,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             "conditional_probs_only_backbone is only used for conditional probabilities."
         )
 
-    runner_value = os.getenv("PROTEINMPNN_RUNNER")
+    runner_value = os.getenv("PROTEINMPNN_RUNNER", str(bundle_path("ProteinMPNN") / "protein_mpnn_run.py"))
     if not runner_value or not Path(runner_value).is_file():
         raise ToolUnavailable("Configure PROTEINMPNN_RUNNER with protein_mpnn_run.py.")
     runner = Path(runner_value).resolve()
@@ -880,7 +881,7 @@ def check_status() -> ToolStatus:
         return ToolStatus(
             CheckResult.ERROR, output or f"python --version exited {code}."
         )
-    runner = os.getenv("PROTEINMPNN_RUNNER")
+    runner = os.getenv("PROTEINMPNN_RUNNER", str(bundle_path("ProteinMPNN") / "protein_mpnn_run.py"))
     if not runner or not Path(runner).is_file():
         return ToolStatus(
             CheckResult.NOT_INSTALLED, "PROTEINMPNN_RUNNER is not configured."

@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import importlib
+import filecmp
 import json
 from pathlib import Path
 import sys
 import traceback
 import zipfile
 
-from . import preset_payload
+from . import preset_payload, _RUN_LOG_NAME
 
 SUPPORTED = {
     'rfd3': 'rfdiffusion3', 'proteinmpnn': 'proteinmpnn',
@@ -25,14 +26,29 @@ def main() -> None:
             raise ValueError(f'Unsupported desktop adapter: {slug}')
         adapter = importlib.import_module(f'.{SUPPORTED[slug]}', __package__)
         payload = json.loads(Path(request_file).read_text(encoding='utf-8'))
-        result = adapter.run(preset_payload(slug, payload))
+        token = _RUN_LOG_NAME.set(slug)
+        try:
+            result = adapter.run(preset_payload(slug, payload))
+        finally:
+            _RUN_LOG_NAME.reset(token)
         log = Path(result['run_log_dir'])
+        # Audit snapshots include inputs too. Offer files created or changed by
+        # the model as results, while retaining every original in the raw archive.
+        outputs = log / 'outputs'
+        result['output_files'] = [
+            str(file) for file in sorted(outputs.rglob('*'))
+            if file.is_file() and not (
+                (before := log / 'inputs' / file.relative_to(outputs)).is_file()
+                and filecmp.cmp(before, file, shallow=False)
+            )
+        ]
         archive = response.parent / 'raw-results.zip'
         with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as output:
             for file in sorted(log.rglob('*')):
                 if file.is_file():
                     output.write(file, file.relative_to(log))
             output.write(request_file, 'submitted-form.json')
+            output.writestr('result.json', json.dumps(result, indent=2))
         result['archive'] = str(archive)
         response.write_text(json.dumps({'result': result}, indent=2), encoding='utf-8')
     except Exception as error:

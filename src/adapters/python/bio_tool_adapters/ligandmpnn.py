@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import bio_tools
+from .environments import bundle_path
 
 from . import (
     ToolExecutionError,
@@ -534,7 +535,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             str(int(boolean(payload, "use_sequence", True))),
         ]
 
-    runner = Path(os.getenv("LIGANDMPNN_RUNNER", ""))
+    runner = Path(os.getenv("LIGANDMPNN_RUNNER", str(bundle_path("LigandMPNN") / "run.py")))
     if not runner.is_file():
         raise ToolUnavailable("Configure LIGANDMPNN_RUNNER with run.py.")
     runner = (
@@ -542,7 +543,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     )
     if not runner.is_file():
         raise ToolUnavailable("The LigandMPNN checkout is missing score.py.")
-    model_dir_value = os.getenv("LIGANDMPNN_MODEL_DIR")
+    model_dir_value = os.getenv("LIGANDMPNN_MODEL_DIR", str(bundle_path("LigandMPNN") / "model_params"))
     if not model_dir_value or not Path(model_dir_value).is_dir():
         raise ToolUnavailable(
             "Configure LIGANDMPNN_MODEL_DIR with the downloaded model weights."
@@ -628,7 +629,7 @@ def check_status() -> ToolStatus:
         python = tool_python("ligandmpnn", "LIGANDMPNN_PYTHON")
     except ToolUnavailable as exc:
         return ToolStatus(CheckResult.NOT_INSTALLED, str(exc))
-    runner_value = os.getenv("LIGANDMPNN_RUNNER")
+    runner_value = os.getenv("LIGANDMPNN_RUNNER", str(bundle_path("LigandMPNN") / "run.py"))
     if (
         not runner_value
         or not Path(runner_value).is_file()
@@ -638,7 +639,7 @@ def check_status() -> ToolStatus:
             CheckResult.NOT_INSTALLED,
             "Configure LIGANDMPNN_RUNNER with a checkout containing run.py and score.py.",
         )
-    model_dir = os.getenv("LIGANDMPNN_MODEL_DIR")
+    model_dir = os.getenv("LIGANDMPNN_MODEL_DIR", str(bundle_path("LigandMPNN") / "model_params"))
     required = [
         prefix + n + suffix
         for prefix, levels, _, suffix in _MODELS.values()

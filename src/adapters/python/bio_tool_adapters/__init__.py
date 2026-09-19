@@ -225,7 +225,7 @@ def tool_script(environment: str, script: str, env_name: str) -> str:
     can never be picked up by accident. Only `env_name` overrides it.
     """
 
-    override = _override(env_name)
+    override = _override("BIO_TOOLS_ADAPTER_EXECUTABLE") or _override(env_name)
     if override:
         return override
 
@@ -247,7 +247,7 @@ def tool_python(environment: str, env_name: str) -> str:
     inside the server's own environment.
     """
 
-    override = _override(env_name)
+    override = _override("BIO_TOOLS_ADAPTER_PYTHON") or _override(env_name)
     if override:
         return override
 

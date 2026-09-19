@@ -4,7 +4,10 @@
 //! durable artifacts use the bio_tools Python binding's CommandSpec.
 use std::{fs, io, path::{Path, PathBuf}, hash::{Hash, Hasher}};
 
+pub mod rpc;
+
 const FILES: &[(&str, &[u8])] = &[
+    ("bio_tools_desktop.py", include_bytes!("python/bio_tools_desktop.py")),
     ("bio_tool_adapters/desktop.py", include_bytes!("python/bio_tool_adapters/desktop.py")),
     ("bio_tool_adapters/__init__.py", include_bytes!("python/bio_tool_adapters/__init__.py")),
     ("bio_tool_adapters/boltz2.py", include_bytes!("python/bio_tool_adapters/boltz2.py")),
