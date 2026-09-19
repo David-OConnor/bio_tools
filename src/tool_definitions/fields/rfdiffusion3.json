@@ -17,7 +17,7 @@
       "task": "",
       "group": "Inputs",
       "input_modes": "text",
-      "help_note": "Enter the JSON or YAML contents here. Use \"input\": \"uploaded\" to reference the structure upload, or keep a bundled bio-tools://rfd3/ reference from a preset. Enter null with specification overrides for an override-only design."
+      "help_note": "Enter the JSON or YAML contents here. Use \"input\": \"uploaded\" to reference the structure upload. Presets may use a bundled bio-tools://rfd3/ reference or an official ../input_pdbs/ example path. Enter null with specification overrides for an override-only design."
     },
     {
       "name": "spec_input_file",
@@ -1226,5 +1226,5 @@
     "ckpt_path": "Filename inside the configured checkpoint directory.",
     "cif_parser_args": "cache_dir is excluded because it refers to a server path; extra_fields is rejected without an mmCIF structure instead of being silently dropped."
   },
-  "_comment": "Field help is transcribed from the official input documentation (BSD-3-Clause): https://rosettacommons.github.io/foundry/models/rfd3/input.html . Formatting is plain text; help_note describes web input adaptations. See ../presets/rfd3/LICENSE.md for the upstream license."
+  "_comment": "Field help is transcribed from the official input documentation (BSD-3-Clause): https://rosettacommons.github.io/foundry/models/rfd3/input.html . Formatting is plain text; help_note describes web input adaptations. See ../presets/rfdiffusion3/LICENSE.md for the upstream license."
 }

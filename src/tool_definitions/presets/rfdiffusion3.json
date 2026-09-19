@@ -105,7 +105,7 @@
     "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/enzyme_design.json",
     "values": {
       "job_name": "enzyme_design",
-      "inputs": "{\n  \"M0255_1mg5_unfixed\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/M0255_1mg5.pdb\",\n    \"ligand\": \"NAI,ACT\",\n    \"unindex\": \"A108,A139,A152,A156\",\n    \"length\": \"180-200\",\n    \"select_fixed_atoms\": {\n      \"A108\": \"ND2,CG\",\n      \"A139\": \"OG,CB,CA\",\n      \"A152\": \"OH,CZ\",\n      \"A156\": \"NZ,CE,CD\",\n      \"ACT\": \"OXT\",\n      \"NAI\": \"\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  }\n}",
+      "inputs": "{\n  \"M0255_1mg5_unfixed\": {\n    \"input\": \"bio-tools://rfd3/input_pdbs/M0255_1mg5.pdb\",\n    \"ligand\": \"NAI,ACT\",\n    \"unindex\": \"A108,A139,A152,A156\",\n    \"length\": \"180-200\",\n    \"select_fixed_atoms\": {\n      \"A108\": \"ND2,CG\",\n      \"A139\": \"OG,CB,CA\",\n      \"A152\": \"OH,CZ\",\n      \"A156\": \"NZ,CE,CD\",\n      \"ACT\": \"OXT\",\n      \"NAI\": \"\"\n    }\n  }\n}",
       "n_batches": 1,
       "diffusion_batch_size": 1,
       "input_mode": "text"
@@ -133,8 +133,7 @@
         "A156": "NZ,CE,CD",
         "ACT": "OXT",
         "NAI": ""
-      },
-      "allow_ligand_on_existing_chain": true
+      }
     }
   },
   {
@@ -400,7 +399,7 @@
     "source_url": "https://github.com/RosettaCommons/foundry/blob/b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c/models/rfd3/docs/examples/symmetry.json",
     "values": {
       "job_name": "symmetry",
-      "inputs": "{\n  \"uncond_C5\": {\n    \"length\": 100,\n    \"is_non_loopy\": true,\n    \"symmetry\": {\n      \"id\": \"C5\"\n    }\n  },\n  \"uncond_D4\": {\n    \"length\": 50,\n    \"is_non_loopy\": true,\n    \"symmetry\": {\n      \"id\": \"D4\"\n    }\n  },\n  \"unindexed_C2_1j79\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1j79_C2.pdb\",\n    \"ligand\": \"ORO,ZN\",\n    \"unindex\": \"A250\",\n    \"length\": 130,\n    \"select_fixed_atoms\": {\n      \"A250\": \"OD1,CG\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"unindexed_C2_1e3v\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1e3v_C2.pdb\",\n    \"ligand\": \"DXC\",\n    \"unindex\": \"A16,A40,A100,A103\",\n    \"length\": 80,\n    \"select_fixed_atoms\": {\n      \"A16\": \"OH,CZ,CE1,CE2\",\n      \"A40\": \"OD2,CG\",\n      \"A100\": \"N,CA,C,CB\",\n      \"A103\": \"OD2,CG\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"indexed_unsym_C2_1bfr\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true,\n      \"is_unsym_motif\": \"HEM\"\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1bfr_C2.pdb\",\n    \"ligand\": \"HEM\",\n    \"contig\": \"51,M52,80\",\n    \"length\": null,\n    \"select_fixed_atoms\": {\n      \"M52\": \"CG,SD,CE\"\n    },\n    \"allow_ligand_on_existing_chain\": true\n  },\n  \"unsym_C3_6t8h\": {\n    \"symmetry\": {\n      \"id\": \"C3\",\n      \"is_symmetric_motif\": true,\n      \"is_unsym_motif\": \"Y1-11,Z16-25\"\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/6t8h_C3.pdb\",\n    \"contig\": \"100-100,/0,Y1-11,/0,Z16-25\",\n    \"length\": null,\n    \"is_non_loopy\": true\n  }\n}",
+      "inputs": "{\n  \"uncond_C5\": {\n    \"length\": 100,\n    \"is_non_loopy\": true,\n    \"symmetry\": {\n      \"id\": \"C5\"\n    }\n  },\n  \"uncond_D4\": {\n    \"length\": 50,\n    \"is_non_loopy\": true,\n    \"symmetry\": {\n      \"id\": \"D4\"\n    }\n  },\n  \"unindexed_C2_1j79\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1j79_C2.pdb\",\n    \"ligand\": \"ORO,ZN\",\n    \"unindex\": \"A250\",\n    \"length\": 130,\n    \"select_fixed_atoms\": {\n      \"A250\": \"OD1,CG\"\n    }\n  },\n  \"unindexed_C2_1e3v\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1e3v_C2.pdb\",\n    \"ligand\": \"DXC\",\n    \"unindex\": \"A16,A40,A100,A103\",\n    \"length\": 80,\n    \"select_fixed_atoms\": {\n      \"A16\": \"OH,CZ,CE1,CE2\",\n      \"A40\": \"OD2,CG\",\n      \"A100\": \"N,CA,C,CB\",\n      \"A103\": \"OD2,CG\"\n    }\n  },\n  \"indexed_unsym_C2_1bfr\": {\n    \"symmetry\": {\n      \"id\": \"C2\",\n      \"is_symmetric_motif\": true,\n      \"is_unsym_motif\": \"HEM\"\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/1bfr_C2.pdb\",\n    \"ligand\": \"HEM\",\n    \"contig\": \"51,M52,80\",\n    \"length\": null,\n    \"select_fixed_atoms\": {\n      \"M52\": \"CG,SD,CE\"\n    }\n  },\n  \"unsym_C3_6t8h\": {\n    \"symmetry\": {\n      \"id\": \"C3\",\n      \"is_symmetric_motif\": true,\n      \"is_unsym_motif\": \"Y1-11,Z16-25\"\n    },\n    \"input\": \"bio-tools://rfd3/input_pdbs/symmetry_examples/6t8h_C3.pdb\",\n    \"contig\": \"100-100,/0,Y1-11,/0,Z16-25\",\n    \"length\": null,\n    \"is_non_loopy\": true\n  }\n}",
       "n_batches": 1,
       "diffusion_batch_size": 1,
       "input_mode": "text"
@@ -462,8 +461,7 @@
       "unindex": "A250",
       "select_fixed_atoms": {
         "A250": "OD1,CG"
-      },
-      "allow_ligand_on_existing_chain": true
+      }
     }
   },
   {
@@ -490,8 +488,7 @@
         "A40": "OD2,CG",
         "A100": "N,CA,C,CB",
         "A103": "OD2,CG"
-      },
-      "allow_ligand_on_existing_chain": true
+      }
     }
   },
   {
@@ -504,7 +501,7 @@
       "job_name": "indexed_unsym_C2_1bfr",
       "diffusion_batch_size": 1,
       "n_batches": 1,
-      "length": "",
+      "length": "null",
       "is_non_loopy": "",
       "symmetry": {
         "id": "C2",
@@ -516,8 +513,7 @@
       "contig": "51,M52,80",
       "select_fixed_atoms": {
         "M52": "CG,SD,CE"
-      },
-      "allow_ligand_on_existing_chain": true
+      }
     }
   },
   {
@@ -530,7 +526,7 @@
       "job_name": "unsym_C3_6t8h",
       "diffusion_batch_size": 1,
       "n_batches": 1,
-      "length": "",
+      "length": "null",
       "is_non_loopy": true,
       "symmetry": {
         "id": "C3",

@@ -536,6 +536,8 @@ def _custom_specification(
         # them otherwise. Refuse instead, so a request never looks like it took effect.
         extra_fields = bool(parser_args and parser_args.get("extra_fields"))
         source = entry.get("input")
+        if isinstance(source, str):
+            source = _bundled_structure(source)
         if source in (None, ""):
             selections = [
                 name
@@ -727,9 +729,12 @@ def _native_parameters(payload: dict[str, Any]) -> dict[str, Any]:
         )
         if value:
             entry[key] = value
-    length = _length(payload, "length", required=False)
-    if length is not None:
-        entry["length"] = length
+    if payload.get("length") == "null":
+        entry["length"] = None
+    else:
+        length = _length(payload, "length", required=False)
+        if length is not None:
+            entry["length"] = length
     unindex = _unindex(payload, "unindex")
     if unindex is not None:
         entry["unindex"] = unindex
@@ -809,6 +814,107 @@ def _native_parameters(payload: dict[str, Any]) -> dict[str, Any]:
     if "partial_t" in entry and not structure:
         raise ToolInputError("Partial diffusion requires an input structure.")
     return entry
+
+
+def _bundled_structure(source: str) -> str:
+    """Resolve an example's documented relative path without reading server paths."""
+    if source.startswith("../input_pdbs/"):
+        source = "bio-tools://rfd3/" + source.removeprefix("../")
+    if source.startswith("bio-tools://rfd3/"):
+        try:
+            bio_tools.catalog_input_text("rfd3", source)
+        except ValueError as exc:
+            raise ToolInputError(str(exc)) from exc
+    return source
+
+
+def from_boxes(payload: dict[str, Any]) -> str:
+    """Show the native parameter fields as one named RFD3 input document."""
+    name = safe_name(payload, default="design")
+    explicit: set[str] = set()
+    try:
+        previous = _input_document(payload.get("inputs"), yaml_allowed=True)
+    except ToolInputError:
+        previous = None
+    if isinstance(previous, dict) and isinstance(previous.get(name), dict):
+        explicit = set(previous[name])
+    elif payload.get("preset"):
+        preset = next(
+            (
+                item for item in bio_tools.catalog_presets("rfd3")
+                if item["id"] == payload["preset"]
+            ),
+            None,
+        )
+        if preset:
+            explicit = set(preset["values"])
+    entry = _native_parameters(payload)
+    for field_name, default in (
+        ("dialect", 2),
+        ("plddt_enhanced", True),
+        ("redesign_motif_sidechains", False),
+    ):
+        if entry.get(field_name) == default and field_name not in explicit:
+            entry.pop(field_name)
+    if isinstance(entry.get("input"), str):
+        entry["input"] = entry["input"].replace(
+            "bio-tools://rfd3/input_pdbs/", "../input_pdbs/", 1
+        )
+    if "ori_token" in entry:
+        entry["ori_token"] = [
+            int(value) if value.is_integer() else value
+            for value in entry["ori_token"]
+        ]
+    order = ("input", "contig", "length", "ori_token", "is_non_loopy")
+    entry = {**{key: entry[key] for key in order if key in entry}, **entry}
+    return json.dumps({name: entry}, indent=2)
+
+
+def to_boxes(document: str, values: dict[str, Any]) -> dict[str, Any]:
+    """Read one named JSON/YAML design into the native parameter fields."""
+    parsed = _input_document(document, yaml_allowed=True)
+    if not isinstance(parsed, dict) or len(parsed) != 1:
+        raise ToolInputError(
+            "Set parameters here describes one design. Keep multiple designs in the text mode."
+        )
+    name, entry = next(iter(parsed.items()))
+    _filename(name, "Input name")
+    if not isinstance(entry, dict):
+        raise ToolInputError("The named design must be an object.")
+    fields = {
+        field.name: field
+        for field in tool_fields("rfd3")
+        if "parameters" in field.input_modes.split(",")
+    }
+    unknown = set(entry) - fields.keys()
+    if unknown:
+        raise ToolInputError(
+            "Set parameters here has no field for: " + ", ".join(sorted(unknown))
+        )
+    result: dict[str, Any] = {key: field.default for key, field in fields.items()}
+    result.update(entry)
+    if result.get("input"):
+        source = _bundled_structure(str(result["input"]))
+        if source == "uploaded":
+            source = str(values.get("spec_input_file") or "")
+            if not source:
+                raise ToolInputError("Upload the structure before switching to parameters.")
+        elif not source.startswith("bio-tools://rfd3/"):
+            raise ToolInputError(
+                "Only a bundled example structure can be carried to parameters."
+            )
+        result["input"] = source
+    for key, value in result.items():
+        if isinstance(value, (dict, list)):
+            result[key] = json.dumps(value, indent=2)
+        elif isinstance(value, bool):
+            result[key] = str(value).lower()
+        elif value is None:
+            result[key] = "null" if key == "length" and key in entry else ""
+        else:
+            result[key] = str(value)
+    result["job_name"] = name
+    return result
 
 
 def _validate_symmetry(specification: dict[str, Any], gamma_0: float) -> bool:

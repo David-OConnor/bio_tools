@@ -2,14 +2,6 @@
   "source_url": "https://github.com/RosettaCommons/foundry/tree/production/models/rfd3/docs/examples",
   "input_documentation": "https://rosettacommons.github.io/foundry/models/rfd3/input.html",
   "revision": "b02eed6a6bdf8f44d14a80cc36e3da13c9f2291c",
-  "compatibility": {
-    "allow_ligand_on_existing_chain": [
-      "enzyme_design/M0255_1mg5_unfixed",
-      "symmetry/unindexed_C2_1j79",
-      "symmetry/unindexed_C2_1e3v",
-      "symmetry/indexed_unsym_C2_1bfr"
-    ]
-  },
   "sha256": {
     "LICENSE.md": "34ab4f089ed0332b059b3783839e997d44adbe0cdbab9b0ebd142feff75d64eb",
     "input_pdbs/1bna.pdb": "a129ee7e3576c8bf82ad0718776665b65c6a11164f5705014a16f7dcbdc391ae",
