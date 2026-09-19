@@ -24,7 +24,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
     spec: SpecData {
         summary: "Generates protein backbone coordinates around proteins, small molecules, \
          nucleic acids, and metals. Given geometric and other constraints, specifies backbone geometry. \
-          A useful first step in a protein design pipeline.",
+          A useful first step in a protein design pipeline. Very well documented!",
         description: "RFdiffusion3 is a practical first step in protein design workflows: It generates coordinates \
         of the backbone atoms for a protein based on contraints (For example, to spacially deconflict with specific \
         molecules). Its output can be fed into ProteinMPNN or LigandMPNN to generate an amino acid sequence.",
