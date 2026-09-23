@@ -33,3 +33,15 @@ documentation = "https://docs.rs/bio_tools"
 module-name = "bio_tools"
 # Using ABI3 allows this to work on any Python version > 3.10; not just 3.10.
 features = ["pyo3/extension-module", "pyo3/abi3-py310"]
+
+[tool.uv]
+# uv caches a local build of this package by `pyproject.toml` alone. Rebuild when these bindings or
+# the `bio_tools` crate they wrap change, so a consumer running against the source tree (e.g.
+# Molchanica's tool coordinator) never gets stale bindings.
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "Cargo.toml" },
+    { file = "src/**/*.rs" },
+    { file = "../Cargo.toml" },
+    { file = "../src/**/*.rs" },
+]

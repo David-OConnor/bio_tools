@@ -14,6 +14,10 @@ const ESMFOLD2_ESM_REVISION: &str = "bf343ba264b650dff7a073643725f9aaa1fdbe8d";
 const ESMFOLD2_ESM_URL: &str = "https://github.com/Biohub/esm.git";
 const ESMFOLD2_STREAMING_LOADER_PATCH: &str =
     include_str!("patches/esmfold2_streaming_loader.patch");
+/// Run by [`install_rfd3`] where the platform has no `fork`. Its own docstring is the
+/// explanation; in short, it gives atomworks a conformer-generation time limit that Windows can
+/// apply, without which every RFdiffusion3 design over a ligand or a nucleic acid aborts.
+const ATOMWORKS_FORK_FREE_TIMEOUT: &str = include_str!("patches/atomworks_fork_free_timeout.py");
 
 struct FetchedScript {
     name: &'static str,
@@ -603,6 +607,11 @@ fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
             )
         },
     )?;
+    // Windows and macOS both reach this; only Windows lacks `fork`, and the script is a no-op
+    // where it exists, but running it at all outside that case would append dead code.
+    if cfg!(target_os = "windows") {
+        patch_atomworks_timeout(installer)?;
+    }
     // `foundry install rfd3` fetches exactly this file, but also rewrites the installed package's
     // own .env to record where it went. Download it directly instead, under the name foundry's
     // checkpoint registry knows it by, so nothing inside the environment is edited after the fact
@@ -612,6 +621,26 @@ fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
         "https://files.ipd.uw.edu/pub/rfd3/rfd3_foundry_2025_12_01_remapped.ckpt",
         &checkpoints.join("rfd3_latest.ckpt"),
     )
+}
+
+/// Teach atomworks a conformer-generation time limit this platform can apply.
+///
+/// atomworks runs the limit in a `fork`ed child, so on Windows every RFdiffusion3 design whose
+/// input carries a ligand or a nucleic acid dies in `CreateDesignReferenceFeatures` with
+/// `cannot find context for 'fork'`, while protein-only designs -- which ask for no conformers
+/// -- succeed. RFD3 exposes neither the limit nor the strategy as a setting, so the fix belongs
+/// in atomworks; [`ATOMWORKS_FORK_FREE_TIMEOUT`] is the whole argument and it verifies its own
+/// work. Rerunning it is safe, which matters because the recipe is meant to be rerunnable and
+/// because a later `rc-foundry` install may replace atomworks with an unpatched copy.
+fn patch_atomworks_timeout(installer: &Installer) -> Result<(), InstallError> {
+    let scratch = ScratchDir::new_in(installer.tools_root(), "rfd3-patch")?;
+    let script = scratch.path().join("atomworks_fork_free_timeout.py");
+    fs::write(&script, ATOMWORKS_FORK_FREE_TIMEOUT).map_err(|error| {
+        InstallError::io(format!("unable to write {}", script.display()), error)
+    })?;
+    let mut command = Command::new(installer.venv_python(Tool::RfDiffusion3.slug()));
+    command.arg(&script);
+    installer.checked(&mut command)
 }
 
 fn install_rfantibody(installer: &mut Installer) -> Result<(), InstallError> {
