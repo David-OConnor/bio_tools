@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+import tarfile
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,7 @@ from typing import Any
 import yaml
 
 from . import (
+    ToolExecutionError,
     ToolInputError,
     ToolUnavailable,
     catalog_spec,
@@ -228,6 +230,24 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             artifacts=[output_path, input_path],
         )
         generated = readable_files(output_path)
+        extension = "cif" if output_format == "mmcif" else "pdb"
+        structures = list(output_path.glob(f"boltz_results_*/predictions/*/*.{extension}"))
+        msa_reply = _msa_server_reply(output_path) if use_msa_server else ""
+
+    # `boltz predict` catches a failure while preparing an input, prints
+    # "Failed to process ... Skipping." and exits 0 with nothing predicted, so
+    # a run that did nothing is only visible from what it left behind.
+    if not structures:
+        if msa_reply:
+            raise ToolExecutionError(
+                f"The MSA server ({msa_server_url}) replied with an error instead of "
+                f"an alignment: {msa_reply} Public ColabFold server errors are "
+                "usually temporary; run again, or supply MSAs yourself."
+            )
+        raise ToolExecutionError(
+            "Boltz exited without writing a structure. "
+            + (_failure_detail(result.get("stdout") or "") or "See the run log for details.")
+        )
 
     return {
         "status": "completed",
@@ -235,6 +255,38 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         "generated_files": generated,
         **result,
     }
+
+
+def _msa_server_reply(output: Path) -> str:
+    """The server's reply, when Boltz saved one in place of an MSA download.
+
+    Boltz writes the body of `result/download` to `out.tar.gz` without checking
+    the HTTP status, so an error from the server (e.g. a 404 JSON body) becomes
+    a "not a gzip file" failure that hides what the server said.
+    """
+
+    for archive in sorted(output.glob("boltz_results_*/msa/*/out.tar.gz")):
+        if tarfile.is_tarfile(archive):
+            continue
+        reply = archive.read_bytes()[:1_000].decode("utf-8", errors="replace").strip()
+        return reply or "an empty response."
+    return ""
+
+
+def _failure_detail(stdout: str) -> str:
+    """Boltz's error for an input it skipped, with its continuation lines."""
+
+    lines = stdout.splitlines()
+    for index, line in enumerate(lines):
+        if line.startswith("Failed to process ") and " Error: " in line:
+            detail = [line.split(" Error: ", 1)[1]]
+            for following in lines[index + 1 :]:
+                if not following.startswith("- "):
+                    break
+                detail.append(following)
+            message = "\n".join(detail).strip()
+            return message if len(message) <= 2_000 else message[:2_000] + "…"
+    return ""
 
 
 def check_status() -> ToolStatus:
