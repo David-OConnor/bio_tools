@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 from pathlib import Path
 from typing import Any
 
 from . import (
+    ToolExecutionError,
     ToolInputError,
     ToolUnavailable,
     catalog_spec,
@@ -30,6 +32,9 @@ from .field_processing import (
 from .status_check import CheckResult, ToolStatus, probe_cli
 
 SPEC = catalog_spec("opendde", fields=tool_fields("opendde"))
+
+# Runs the `opendde` CLI with its chunk size capped to the GPU's free memory.
+RUNNER = Path(__file__).resolve().parent / "tool_scripts" / "opendde_predict.py"
 
 
 # What one chain is called in OpenDDE's own input, by the molecule box's type.
@@ -240,6 +245,31 @@ def _choice(
     return value
 
 
+def _interpreter() -> str:
+    """The Python of the environment the `opendde` script belongs to.
+
+    Found through the script, so an executable override still decides which
+    installation runs.
+    """
+
+    script = Path(tool_script("opendde", "opendde", "OPENDDE_EXECUTABLE"))
+    python = script.with_name("python.exe" if os.name == "nt" else "python")
+    if not python.is_file():
+        raise ToolUnavailable(f"No Python interpreter beside {script}.")
+    return str(python)
+
+
+def _error_reports(output: Path) -> str:
+    """The first line of each job's ERR report, which names the job and the error."""
+
+    reports = sorted((output / "ERR").glob("*.txt")) if (output / "ERR").is_dir() else []
+    lines = (
+        report.read_text(encoding="utf-8", errors="replace").strip().splitlines()
+        for report in reports
+    )
+    return "\n".join(line[0] for line in lines if line)
+
+
 def run(payload: dict[str, Any]) -> dict[str, Any]:
     payload = document_input(payload, "input_json", from_boxes=from_boxes)
     document, input_json = _input_document(payload)
@@ -257,7 +287,8 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     check_msa_paths(document, use_msa=use_msa, use_rna_msa=use_rna_msa)
 
     command = [
-        tool_script("opendde", "opendde", "OPENDDE_EXECUTABLE"),
+        _interpreter(),
+        str(RUNNER),
         "pred",
         "-i",
         "input.json",
@@ -302,6 +333,25 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             artifacts=[output_path, input_path],
         )
         generated = readable_files(output_path)
+        # Each job writes <name>/seed_<seed>/predictions/<name>_sample_<rank>.cif.
+        structures = sorted(output_path.rglob("*.cif"))
+        failed = [
+            job["name"]
+            for job in document
+            if not any(
+                output_path / job["name"] in structure.parents
+                for structure in structures
+            )
+        ]
+        errors = _error_reports(output_path)
+
+    # `opendde pred` catches a failed job, writes ERR/<name>.txt and exits 0, so
+    # a run that produced nothing is only visible from what it left behind.
+    if not structures:
+        raise ToolExecutionError(
+            "OpenDDE exited without writing a structure. "
+            + (errors or "See the run log for details.")
+        )
 
     response = {
         "status": "completed",
@@ -309,15 +359,25 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         "generated_files": generated,
         **result,
     }
+    warnings = []
+    if failed:
+        warnings.append(
+            "OpenDDE wrote no structure for "
+            + ", ".join(f'"{name}"' for name in failed)
+            + ". "
+            + (errors or "See the run log for details.")
+        )
     # OpenDDE logs a failed ColabFold search and folds on with the query alone,
     # so the run succeeds with none of the MSA it was asked for.
     log = f"{result.get('stdout') or ''}\n{result.get('stderr') or ''}"
     if use_msa and "falling back to query-only" in log:
-        response["warnings"] = [
+        warnings.append(
             "The MSA search did not complete for at least one protein, so OpenDDE "
             "folded it from its sequence alone. See the run log for the server "
             "error; the prediction is likely less accurate than with an MSA."
-        ]
+        )
+    if warnings:
+        response["warnings"] = warnings
     return response
 
 

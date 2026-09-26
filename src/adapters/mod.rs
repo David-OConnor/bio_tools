@@ -22,6 +22,7 @@ const FILES: &[(&str, &[u8])] = &[
     ("bio_tool_adapters/igblast.py", include_bytes!("python/bio_tool_adapters/igblast.py")),
     ("bio_tool_adapters/ligandmpnn.py", include_bytes!("python/bio_tool_adapters/ligandmpnn.py")),
     ("bio_tool_adapters/opendde.py", include_bytes!("python/bio_tool_adapters/opendde.py")),
+    ("bio_tool_adapters/tool_scripts/opendde_predict.py", include_bytes!("python/bio_tool_adapters/tool_scripts/opendde_predict.py")),
     ("bio_tool_adapters/proteinmpnn.py", include_bytes!("python/bio_tool_adapters/proteinmpnn.py")),
     ("bio_tool_adapters/protenix.py", include_bytes!("python/bio_tool_adapters/protenix.py")),
     ("bio_tool_adapters/rdkit.py", include_bytes!("python/bio_tool_adapters/rdkit.py")),
