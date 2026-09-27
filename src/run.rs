@@ -379,6 +379,12 @@ impl CommandRunner {
             })?;
 
         let mut command = Command::new(&spec.program);
+        // Captured background tools should not open a console window on Windows.
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            command.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+        }
         command
             .args(&spec.arguments)
             .stdout(Stdio::piped())

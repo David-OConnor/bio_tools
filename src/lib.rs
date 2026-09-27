@@ -18,6 +18,7 @@ use std::{fmt, io, path::Path};
 pub mod adapters;
 mod input;
 pub mod install;
+pub mod rdkit;
 pub mod run;
 mod run_log;
 pub mod status;

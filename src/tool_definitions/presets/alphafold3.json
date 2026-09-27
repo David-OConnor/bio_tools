@@ -1,0 +1,142 @@
+[
+  {
+    "id": "quick_start_2pv7",
+    "label": "Quick start · 2PV7",
+    "description": "The README's first prediction, fold_input.json: 2PV7, one 298-residue protein entity as a homodimer (chains A and B), with one seed.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/README.md#installation-and-running-your-first-prediction",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"2PV7\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": [\"A\", \"B\"],\n        \"sequence\": \"GMRESYANENQFGFKTINSDIHKIVIVGGYGKLGGLFARYLRASGYPISILDREDWAVAESILANADVVIVSVPINLTLETIERLKPYLTENMLLADLTSVKREPLAKMLEVHTGAVLGLHPMFGADIASMAKQVVVRCDGRFPERYEWLLEQIQIWGAKIYQTNATEHDHNMTYIQALRHFSTFANGLHLSKQPINLANLLALSSPIYRLELAMIGRLFAQDAELYADIIMDKSENLAVIETLKQTYDEALTFFENNDRQGFIDAFHKVRDWFGDYSEQFLKESRQLLQQANDLKQG\"\n      }\n    }\n  ],\n  \"modelSeeds\": [1],\n  \"dialect\": \"alphafold3\",\n  \"version\": 1\n}"
+    }
+  },
+  {
+    "id": "ubiquitin_monomer",
+    "label": "Ubiquitin monomer",
+    "description": "The smallest official example: human ubiquitin, one 76-residue protein chain.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/ubiquitin_monomer.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"ubiquitin_monomer\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG\",\n        \"description\": \"Human ubiquitin, 76 residues (UniProt P0CG48)\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "barnase_barstar",
+    "label": "Barnase–barstar complex",
+    "description": "A heterodimer of barnase (110 aa) and its inhibitor barstar (89 aa). With the ColabFold MSA option the two chains get a paired alignment, placed first in each chain's MSA.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/barnase_barstar.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"barnase_barstar_complex\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIR\",\n        \"description\": \"Barnase (ribonuclease), B. amyloliquefaciens (UniProt P00648, mature chain, 110 aa)\"\n      }\n    },\n    {\n      \"protein\": {\n        \"id\": \"B\",\n        \"sequence\": \"KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGCDITIILS\",\n        \"description\": \"Barstar (barnase inhibitor), B. amyloliquefaciens (UniProt P11540, mature chain, 89 aa)\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "tetr_homodimer",
+    "label": "TetR homodimer",
+    "description": "The tetracycline repressor (218 aa) as a homodimer: one protein entity with two chain IDs.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/tetr_homodimer.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"TetR_homodimer\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": [\"A\", \"B\"],\n        \"sequence\": \"MARLNRESVIDAALELLNETGIDGLTTRKLAQKLGIEQPTLYWHVKNKRALLDALAVEILARHHDYSLPAAGESWQSFLRNNAMSFRRALLRYRDGAKVHLGTRPDEKQYDTVETQLRFMTENGFSLRDGLYAISAVSHFTLGAVLEQQEHTAALTDRPAAPDENLPPLLREALQIMDSDDGEQAFLHGLESLIRGFEVQLTALLQIVGGDKLIIPFC\",\n        \"description\": \"Tetracycline repressor protein class D, E. coli (UniProt P0ACT4, 218 aa)\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "tetr_dimer_tetracycline",
+    "label": "TetR dimer + tetracycline",
+    "description": "The TetR homodimer with two copies of tetracycline, given by CCD code (TAC).",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/tetr_dimer_tetracycline.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"TetR_dimer_tetracycline\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": [\"A\", \"B\"],\n        \"sequence\": \"MARLNRESVIDAALELLNETGIDGLTTRKLAQKLGIEQPTLYWHVKNKRALLDALAVEILARHHDYSLPAAGESWQSFLRNNAMSFRRALLRYRDGAKVHLGTRPDEKQYDTVETQLRFMTENGFSLRDGLYAISAVSHFTLGAVLEQQEHTAALTDRPAAPDENLPPLLREALQIMDSDDGEQAFLHGLESLIRGFEVQLTALLQIVGGDKLIIPFC\",\n        \"description\": \"Tetracycline repressor protein class D, E. coli (UniProt P0ACT4, 218 aa)\"\n      }\n    },\n    {\n      \"ligand\": {\n        \"id\": [\"C\", \"D\"],\n        \"ccdCodes\": [\"TAC\"],\n        \"description\": \"Tetracycline (CCD: TAC), one per TetR monomer\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "tetr_dimer_dna",
+    "label": "TetR dimer on tetO DNA",
+    "description": "The TetR homodimer bound to its 20 bp tetO2 operator, as two complementary DNA strands.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/tetr_dimer_dna.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"TetR_dimer_tetO_DNA\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": [\"A\", \"B\"],\n        \"sequence\": \"MARLNRESVIDAALELLNETGIDGLTTRKLAQKLGIEQPTLYWHVKNKRALLDALAVEILARHHDYSLPAAGESWQSFLRNNAMSFRRALLRYRDGAKVHLGTRPDEKQYDTVETQLRFMTENGFSLRDGLYAISAVSHFTLGAVLEQQEHTAALTDRPAAPDENLPPLLREALQIMDSDDGEQAFLHGLESLIRGFEVQLTALLQIVGGDKLIIPFC\",\n        \"description\": \"Tetracycline repressor protein class D, E. coli (UniProt P0ACT4, 218 aa)\"\n      }\n    },\n    {\n      \"dna\": {\n        \"id\": \"C\",\n        \"sequence\": \"TACTCTATCATTGATAGAGT\",\n        \"description\": \"tetO2 operator, forward strand (19 bp palindromic core + 1 bp flank, 20 nt)\"\n      }\n    },\n    {\n      \"dna\": {\n        \"id\": \"D\",\n        \"sequence\": \"ACTCTATCAATGATAGAGTA\",\n        \"description\": \"tetO2 operator, reverse complement strand (20 nt)\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "calmodulin_4calcium",
+    "label": "Calmodulin + 4 Ca²⁺",
+    "description": "Human calmodulin with four calcium ions, one per EF hand. AlphaFold 3 treats ions as ligands (CCD code CA), here one entity with four IDs.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/calmodulin_4calcium.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"calmodulin_4calcium\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"MADQLTEEQIAEFKEAFSLFDKDGDGTITTKELGTVMRSLGQNPTEAELQDMINEVDADGNGTIDFPEFLTMMARKMKDTDSEEEIREAFRVFDKDGNGYISAAELRHVMTNLGEKLTDEEVDEMIREADIDGDGQVNYEEFVQMMTAK\",\n        \"description\": \"Human calmodulin-1 (UniProt P0DP23, 149 aa)\"\n      }\n    },\n    {\n      \"ligand\": {\n        \"id\": [\"B\", \"C\", \"D\", \"E\"],\n        \"ccdCodes\": [\"CA\"],\n        \"description\": \"Calcium ions (CCD: CA), 4 copies for 4 EF-hand binding sites\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "streptavidin_biotin_smiles",
+    "label": "Streptavidin + biotin (SMILES)",
+    "description": "Core streptavidin with D-biotin given as a SMILES string rather than a CCD code.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/streptavidin_biotin_smiles.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"streptavidin_biotin_smiles\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"EAGITGTWYNQLGSTFIVTAGADGALTGTYESAVGNAESRYVLTGRYDSAPATDGSGTALGWTVAWKNNYRNAHSATTWSGQYVGGAEARINTQWLLTSGTTEANAWKSTLVGHDTFTKVKPSAAS\",\n        \"description\": \"Core streptavidin, S. avidinii (UniProt P22629, residues 38-163, 126 aa)\"\n      }\n    },\n    {\n      \"ligand\": {\n        \"id\": \"B\",\n        \"smiles\": \"OC(=O)CCCC[C@@H]1SC[C@@H]2NC(=O)N[C@H]12\",\n        \"description\": \"D-Biotin (vitamin B7), specified by SMILES\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "kras_g12c_sotorasib",
+    "label": "KRAS G12C + sotorasib (covalent)",
+    "description": "KRAS4B G12C with sotorasib (CCD MOV), covalently bonded to Cys12 through bondedAtomPairs.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/kras_g12c_sotorasib.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"KRAS_G12C_sotorasib_covalent\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"MTEYKLVVVGACGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGETCLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHHYREQIKRVKDSEDVPMVLVGNKCDLPSRTVDTKQAQDLARSYGIPFIETSAKTRQRVEDAFYTLVREIRQYRLKKISKEEKTPGCVKIKKCIIM\",\n        \"description\": \"Human KRAS4B G12C mutant (UniProt P01116 with G12C, 189 aa)\"\n      }\n    },\n    {\n      \"ligand\": {\n        \"id\": \"B\",\n        \"ccdCodes\": [\"MOV\"],\n        \"description\": \"Sotorasib / AMG-510 (CCD: MOV), covalent KRAS G12C inhibitor\"\n      }\n    }\n  ],\n  \"bondedAtomPairs\": [\n    [[\"A\", 12, \"SG\"], [\"B\", 1, \"C25\"]]\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "rnaseb_glycosylated",
+    "label": "RNase B, N-glycosylated",
+    "description": "Bovine RNase B with a Man3GlcNAc2 glycan at Asn34: a five-component CCD ligand whose linkages and attachment are given as bondedAtomPairs.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/rnaseb_glycosylated.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"RNaseB_glycosylated\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"KETAAAKFERQHMDSSTSAASSSNYCNQMMKSRNLTKDRCKPVNTFVHESLADVQAVCSQKNVACKNGQTNCYQSYSTMSITDCRETGSSKYPNCAYKTTQANKHIIVACEGNPYVPVHFDASV\",\n        \"description\": \"Bovine RNase B (UniProt P61823, mature chain 27-150, 124 aa), N-glycosylated at Asn34\"\n      }\n    },\n    {\n      \"ligand\": {\n        \"id\": \"B\",\n        \"ccdCodes\": [\"NAG\", \"NAG\", \"BMA\", \"MAN\", \"MAN\"],\n        \"description\": \"Core N-linked glycan pentasaccharide (Man3GlcNAc2)\"\n      }\n    }\n  ],\n  \"bondedAtomPairs\": [\n    [[\"A\", 34, \"ND2\"], [\"B\", 1, \"C1\"]],\n    [[\"B\", 1, \"O4\"],   [\"B\", 2, \"C1\"]],\n    [[\"B\", 2, \"O4\"],   [\"B\", 3, \"C1\"]],\n    [[\"B\", 3, \"O3\"],   [\"B\", 4, \"C1\"]],\n    [[\"B\", 3, \"O6\"],   [\"B\", 5, \"C1\"]]\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "erk2_phosphorylated",
+    "label": "ERK2, dual-phosphorylated",
+    "description": "Human ERK2 (360 aa) with activation-loop phosphothreonine (TPO) and phosphotyrosine (PTR) as protein modifications.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/erk2_phosphorylated.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"ERK2_dual_phosphorylated\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"MAAAAAAGAGPEMVRGQVFDVGPRYTNLSYIGEGAYGMVCSAYDNVNKVRVAIKKISPFEHQTYCQRTLREIKILLRFRHENIIGINDIIRAPTIEQMKDVYIVQDLMETDLYKLLKTQHLSNDHICYFLYQILRGLKYIHSANVLHRDLKPSNLLLNTTCDLKICDFGLARVADPDHDHTGFLTEYVATRWYRAPEIMLNSKGYTKSIDIWSVGCILAEMLSNRPIFPGKHYLDQLNHILGILGSPSQEDLNCIINLKARNYLLSLPHKNKVPWNRLFPNADSKALDLLDKMLTFNPHKRIEVEQALAHPYLEQYYDPSDEPIAEAPFKFDMELDDLPKEKLKELIFEETARFQPGYRS\",\n        \"modifications\": [\n          {\"ptmType\": \"TPO\", \"ptmPosition\": 185},\n          {\"ptmType\": \"PTR\", \"ptmPosition\": 187}\n        ],\n        \"description\": \"Human ERK2/MAPK1 (UniProt P28482, 360 aa) with activation-loop dual phosphorylation: pThr185 (TPO) + pTyr187 (PTR)\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "u1a_rna_hairpin",
+    "label": "U1A + RNA hairpin",
+    "description": "The U1A RRM1 domain with the U1 snRNA stem-loop II hairpin. The RNA runs MSA-free unless the local data pipeline is used.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/u1a_rna_hairpin.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"U1A_RNA_hairpin\",\n  \"sequences\": [\n    {\n      \"protein\": {\n        \"id\": \"A\",\n        \"sequence\": \"AVPETRPNHTIYINNLNEKIKKDELKKSLYAIFSQFGQILDILVSRSLKMRGQAFVIFKEVSSATNALRSMQGFPFYDKPMRIQYAKTDSDIIAKMKGTFV\",\n        \"description\": \"Human U1A spliceosomal protein, RRM1 domain (UniProt P09012, residues 2-102, 101 aa)\"\n      }\n    },\n    {\n      \"rna\": {\n        \"id\": \"B\",\n        \"sequence\": \"AAUCCAUUGCACUCCGGAUUU\",\n        \"description\": \"U1 snRNA stem-loop II hairpin (21 nt, from PDB 1URN)\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "modified_rna",
+    "label": "Modified RNA hairpin",
+    "description": "A 25-nt tRNA-like fragment with pseudouridine, 5-methylcytidine, and 2'-O-methylguanosine modifications. RNA only, so no MSA server is contacted.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/modified_rna.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"modified_RNA_hairpin\",\n  \"sequences\": [\n    {\n      \"rna\": {\n        \"id\": \"A\",\n        \"sequence\": \"GGCCCGAUAGCUCAGUCGGUAGAGC\",\n        \"modifications\": [\n          {\"modificationType\": \"PSU\", \"basePosition\": 13},\n          {\"modificationType\": \"5MC\", \"basePosition\": 18},\n          {\"modificationType\": \"OMG\", \"basePosition\": 4}\n        ],\n        \"description\": \"Modified tRNA-like fragment (25 nt): pseudouridine (PSU) at 13, 5-methylcytidine (5MC) at 18, 2'-O-methylguanosine (OMG) at 4\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  },
+  {
+    "id": "methylated_dna",
+    "label": "Methylated CpG dsDNA",
+    "description": "A 20 bp DNA duplex with 5-methylcytosine at each CpG, on both strands. DNA only, so no MSA server is contacted.",
+    "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/methylated_dna.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"name\": \"methylated_CpG_dsDNA\",\n  \"sequences\": [\n    {\n      \"dna\": {\n        \"id\": \"A\",\n        \"sequence\": \"AGATCGATCGATCGATCGAT\",\n        \"modifications\": [\n          {\"modificationType\": \"5CM\", \"basePosition\": 5},\n          {\"modificationType\": \"5CM\", \"basePosition\": 9},\n          {\"modificationType\": \"5CM\", \"basePosition\": 13},\n          {\"modificationType\": \"5CM\", \"basePosition\": 17}\n        ],\n        \"description\": \"Forward strand (20 nt) with 5-methylcytosine (5CM) at CpG sites (positions 5, 9, 13, 17)\"\n      }\n    },\n    {\n      \"dna\": {\n        \"id\": \"B\",\n        \"sequence\": \"ATCGATCGATCGATCGATCT\",\n        \"modifications\": [\n          {\"modificationType\": \"5CM\", \"basePosition\": 3},\n          {\"modificationType\": \"5CM\", \"basePosition\": 7},\n          {\"modificationType\": \"5CM\", \"basePosition\": 11},\n          {\"modificationType\": \"5CM\", \"basePosition\": 15}\n        ],\n        \"description\": \"Reverse complement strand (20 nt) with 5-methylcytosine (5CM) at CpG sites (positions 3, 7, 11, 15)\"\n      }\n    }\n  ],\n  \"modelSeeds\": [42],\n  \"dialect\": \"alphafold3\",\n  \"version\": 4\n}"
+    }
+  }
+]

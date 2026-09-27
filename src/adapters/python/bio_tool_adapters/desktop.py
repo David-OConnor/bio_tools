@@ -16,6 +16,7 @@ SUPPORTED = {
     'ligandmpnn': 'ligandmpnn', 'opendde': 'opendde',
     'boltz2': 'boltz2', 'chai1': 'chai1', 'esmfold2': 'esmfold2',
     'protenix': 'protenix', 'esmc': 'esmc', 'catpred': 'catpred',
+    'alphafold3': 'alphafold3',
 }
 
 

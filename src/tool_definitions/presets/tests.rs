@@ -165,6 +165,83 @@ fn protenix_presets_name_known_fields_and_bundled_msas() {
     }
 }
 
+/// Every official example is a preset, written as an `alphafold3`-dialect input AlphaFold 3's own
+/// parser accepts: the keys it validates, uppercase entity IDs, and a seed.
+#[test]
+fn alphafold3_presets_are_the_official_examples() {
+    let contract: Value =
+        serde_json::from_str(super::super::fields::by_slug("alphafold3").unwrap()).unwrap();
+    let mut known: Vec<&str> = contract["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|field| field["name"].as_str().unwrap())
+        .collect();
+    known.push(contract["input_modes"]["name"].as_str().unwrap());
+
+    let provenance: Value =
+        serde_json::from_str(asset("alphafold3", "provenance.json").unwrap()).unwrap();
+    let examples: Vec<&str> = provenance["assets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|entry| entry["path"].as_str()?.strip_prefix("examples/"))
+        .collect();
+    assert_eq!(examples.len(), 13);
+
+    let presets: Value = serde_json::from_str(by_slug("alphafold3").unwrap()).unwrap();
+    let presets = presets.as_array().unwrap();
+    for example in &examples {
+        let id = example.strip_suffix(".json").unwrap();
+        assert!(
+            presets.iter().any(|preset| preset["id"] == id),
+            "no preset for the official example {example}"
+        );
+    }
+    for preset in presets {
+        for key in preset["values"].as_object().unwrap().keys() {
+            assert!(known.contains(&key.as_str()), "unknown field {key:?}");
+        }
+        let input: Value =
+            serde_json::from_str(preset["values"]["input_json"].as_str().unwrap()).unwrap();
+        let input = input.as_object().unwrap();
+        for key in input.keys() {
+            assert!(
+                [
+                    "dialect",
+                    "version",
+                    "name",
+                    "modelSeeds",
+                    "sequences",
+                    "bondedAtomPairs",
+                    "userCCD",
+                    "userCCDPath",
+                ]
+                .contains(&key.as_str()),
+                "{}: unexpected key {key}",
+                preset["id"]
+            );
+        }
+        assert_eq!(input["dialect"], "alphafold3");
+        assert!((1..=4).contains(&input["version"].as_u64().unwrap()));
+        assert!(!input["modelSeeds"].as_array().unwrap().is_empty());
+        for entry in input["sequences"].as_array().unwrap() {
+            let entry = entry.as_object().unwrap();
+            assert_eq!(entry.len(), 1);
+            let (kind, entity) = entry.iter().next().unwrap();
+            assert!(["protein", "rna", "dna", "ligand"].contains(&kind.as_str()));
+            let ids = match &entity["id"] {
+                Value::String(id) => vec![id.as_str()],
+                Value::Array(ids) => ids.iter().map(|id| id.as_str().unwrap()).collect(),
+                other => panic!("invalid id {other}"),
+            };
+            for id in ids {
+                assert!(!id.is_empty() && id.chars().all(|c| c.is_ascii_uppercase()));
+            }
+        }
+    }
+}
+
 #[test]
 fn catpred_presets_name_known_fields_and_valid_reactions() {
     let contract: Value =

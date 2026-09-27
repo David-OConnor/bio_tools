@@ -137,6 +137,7 @@ pub fn materialize(slug: &str, values: &Value, directory: &Path) -> io::Result<V
 /// Serialized preset descriptors: id, label, description, source_url and form values.
 pub fn by_slug(slug: &str) -> Option<&'static str> {
     match slug {
+        "alphafold3" => Some(include_str!("alphafold3.json")),
         "chai1" => Some(include_str!("chai1.json")),
         "boltz2" => Some(include_str!("boltz2.json")),
         "catpred" => Some(include_str!("catpred.json")),
@@ -159,6 +160,9 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
 /// Consumers can write these contents into their own job directory before inference.
 pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
     match (slug, name) {
+        ("alphafold3", "LICENSE") => Some(include_str!("alphafold3/LICENSE")),
+        ("alphafold3", "provenance.json") => Some(include_str!("alphafold3/provenance.json")),
+
         ("ligandmpnn", "inputs/1BC8.pdb") => Some(include_str!("ligandmpnn/inputs/1BC8.pdb")),
         ("ligandmpnn", "inputs/2GFB.pdb") => Some(include_str!("ligandmpnn/inputs/2GFB.pdb")),
         ("ligandmpnn", "inputs/4GYT.pdb") => Some(include_str!("ligandmpnn/inputs/4GYT.pdb")),

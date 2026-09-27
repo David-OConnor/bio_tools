@@ -245,67 +245,70 @@ fn check_alphafold3(installer: &Installer, was_installed: bool) -> ToolStatus {
         Err(status) => return status,
     };
     match run_probe(command) {
-        Ok(output) if output.status.success() || !output_detail(&output).is_empty() => pass(
+        Ok(output) if output.status.success() => pass(
             output_detail(&output)
                 .lines()
-                .next()
+                .last()
                 .unwrap_or("AlphaFold 3 answered its status probe."),
             probe_device(installer, Tool::AlphaFold3),
         ),
         Ok(output) => error(format!(
-            "AlphaFold 3 did not answer its status probe: {}",
+            "AlphaFold 3 did not import: {}",
             output_detail(&output)
         )),
         Err(cause) => missing_or_broken(was_installed, cause.to_string()),
     }
 }
 
+/// The AlphaFold 3 import probe, once the checkout and the model parameters are both in place.
+///
+/// The parameters are checked here rather than left to the first run: they are the one part of an
+/// AlphaFold 3 installation the recipe cannot provide by itself, so an environment that imports
+/// cleanly but has none is the usual way this tool is "installed" and still unable to predict
+/// anything. The genetic databases are not required: runs use the ColabFold MSA server by default.
 fn alphafold3_command(
     installer: &Installer,
     was_installed: bool,
 ) -> Result<CommandSpec, ToolStatus> {
-    let Some(runner) = env::var_os("ALPHAFOLD3_RUNNER").map(PathBuf::from) else {
-        return Err(missing_or_broken(
-            was_installed,
-            "The Python environment is prepared, but ALPHAFOLD3_RUNNER is not configured."
-                .to_owned(),
-        ));
-    };
-    for (name, variable) in [
-        ("model directory", "ALPHAFOLD3_MODEL_DIR"),
-        ("database directory", "ALPHAFOLD3_DATABASE_DIR"),
-    ] {
-        let Some(path) = env::var_os(variable).map(PathBuf::from) else {
-            return Err(missing_or_broken(
-                was_installed,
-                format!("{variable} is not configured."),
-            ));
-        };
-        if !path.exists() {
-            return Err(missing_or_broken(
-                was_installed,
-                format!(
-                    "The configured {name} does not exist at {}.",
-                    path.display()
-                ),
-            ));
-        }
-    }
+    use crate::install::alphafold3::{has_parameters, models_dir, source_dir};
+
+    let runner = env::var_os("ALPHAFOLD3_RUNNER")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| source_dir(installer).join("run_alphafold.py"));
     if !runner.is_file() {
         return Err(missing_or_broken(
             was_installed,
-            format!("ALPHAFOLD3_RUNNER does not exist at {}.", runner.display()),
+            format!(
+                "Missing AlphaFold 3's run_alphafold.py at {}.",
+                runner.display()
+            ),
         ));
     }
-    Ok(installer
-        .tool_python_command(Tool::AlphaFold3)
-        .arg(&runner)
-        .arg("--help"))
+    let models = models_dir(installer);
+    if !has_parameters(&models) {
+        return Err(missing_or_broken(
+            was_installed,
+            format!(
+                "AlphaFold 3 is installed, but its model parameters are not: put af3.bin.zst \
+                 (from https://storage.googleapis.com/alphafold3/af3.bin.zst, under the AlphaFold 3 \
+                 Model Parameters Terms of Use) in {}, or set ALPHAFOLD3_MODEL_DIR.",
+                models.display()
+            ),
+        ));
+    }
+    Ok(installer.tool_python_command(Tool::AlphaFold3).args([
+        "-c",
+        "import importlib.metadata as m, alphafold3.model.model; \
+         print('AlphaFold 3', m.version('alphafold3'))",
+    ]))
 }
 
 /// For commands directly runnable from CLI, launch them with a "help" or "version" command as
 /// a coarse status check.
 fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
+    if tool == Tool::RdKit {
+        return Some(installer.tool_python_command(tool).args(["-I", "-c", crate::rdkit::PROBE]));
+    }
     // The executable's name comes from `Tool::console_script`, which is not always the slug; only
     // the probe argument is decided here.
     if tool == Tool::EsmC {
@@ -462,7 +465,7 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
 fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
     let framework = if matches!(
         tool,
-        Tool::HighFold | Tool::ProteinMpnnDdg | Tool::Germinal | Tool::Mber
+        Tool::AlphaFold3 | Tool::HighFold | Tool::ProteinMpnnDdg | Tool::Germinal | Tool::Mber
     ) {
         "jax"
     } else if matches!(

@@ -1,13 +1,13 @@
 use crate::{
     LaunchType, License, LicenseCategory, ProcessExpense, SpecData, ToolCategory,
-    tool_definitions::catalog::{CatalogEntry, DataType, Identity},
+    tool_definitions::{
+        Tool,
+        catalog::{CatalogEntry, DataType, Identity},
+    },
 };
 
 pub const ENTRY: CatalogEntry = CatalogEntry {
-    identity: Identity::Uninstalled {
-        slug: "rdkit",
-        name: "RDKit",
-    },
+    identity: Identity::Installed(Tool::RdKit),
     categories: &[ToolCategory::Cheminformatics],
     launch_type: LaunchType::PythonLib,
     license_type: LicenseCategory::Permissive,
@@ -30,8 +30,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         Given atom-mapped reaction SMILES, it reports the reaction's participants, its element and \
         formal-charge balance, the quality of its atom mapping, and the bonds formed, broken or \
         changed in order -- the reaction centre a precedent search or an enzyme design starts from.",
-        availability: "An ordinary Python dependency of the application, installed with it; the \
-        analysis runs in a process of its own. Runs on CPU.",
+        availability: "Installable in an isolated Python environment on Windows, Linux and macOS; \
+        existing application environments can also supply it. Runs on CPU in a subprocess.",
         license_details: "BSD 3-Clause from the RDKit project. Academic and commercial use are \
         both unrestricted.",
         repo_url: Some("https://github.com/rdkit/rdkit"),

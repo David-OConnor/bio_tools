@@ -1,0 +1,85 @@
+{
+  "repository": "https://github.com/google-deepmind/alphafold3",
+  "release": "v3.0.4",
+  "commit": "85c4d20505fd5cef05eac22b534d4e793971ae69",
+  "input_reference": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/docs/input.md",
+  "example_reference": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples",
+  "assets": [
+    {
+      "path": "LICENSE",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "examples/ubiquitin_monomer.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/ubiquitin_monomer.json",
+      "sha256": "1880c15e12df1a331e0ee464705639ee80c6b036a3273b5cf5dcd8875e8c7749"
+    },
+    {
+      "path": "examples/barnase_barstar.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/barnase_barstar.json",
+      "sha256": "7c389b385c82ff994bd2951c9c7cb446a4c746e1c05458be16f46bc40d443648"
+    },
+    {
+      "path": "examples/tetr_homodimer.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/tetr_homodimer.json",
+      "sha256": "72df516afd6513bf756d1dc0e47a5bb80de5c60c3ae75a57138f35717b5756a6"
+    },
+    {
+      "path": "examples/tetr_dimer_tetracycline.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/tetr_dimer_tetracycline.json",
+      "sha256": "72622d8200e32b3e281538cb8328ed00257e21e3998433b003c6c3a231bf9b6b"
+    },
+    {
+      "path": "examples/tetr_dimer_dna.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/tetr_dimer_dna.json",
+      "sha256": "f126b292c61290cffd90603f6680b721334856ba6380f9378b6d571afa02e242"
+    },
+    {
+      "path": "examples/calmodulin_4calcium.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/calmodulin_4calcium.json",
+      "sha256": "7ef1d5421a2c03dc4715ef5194bfb3d5bfc747cbf4e1ae267786cb661ba4480d"
+    },
+    {
+      "path": "examples/streptavidin_biotin_smiles.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/streptavidin_biotin_smiles.json",
+      "sha256": "32fc2a5cf5b1adf1354c41dd919dc6d6791fc40b82fd8d9f35c3f74477fce5cc"
+    },
+    {
+      "path": "examples/kras_g12c_sotorasib.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/kras_g12c_sotorasib.json",
+      "sha256": "f0715064526e1444e2de8b2ecd8ef34f419841d44979348457ba0ad7a371ec7b"
+    },
+    {
+      "path": "examples/rnaseb_glycosylated.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/rnaseb_glycosylated.json",
+      "sha256": "1838d8d02637f6604a5232d79158f0df191a72816457952d9e75f93dd5916aa1"
+    },
+    {
+      "path": "examples/erk2_phosphorylated.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/erk2_phosphorylated.json",
+      "sha256": "2af97a82e85719eea7762a3d3b6b259ab5f6091a981d818bf120be2847fcafcd"
+    },
+    {
+      "path": "examples/u1a_rna_hairpin.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/u1a_rna_hairpin.json",
+      "sha256": "f1dcaf4fadda697a5f2a09866bf493bdc0aee76029d4d756667dcaf5c57dac42"
+    },
+    {
+      "path": "examples/modified_rna.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/modified_rna.json",
+      "sha256": "e5748e7852e579afde67ee90d16d9708703f1527099f0c106688966d3a728ad9"
+    },
+    {
+      "path": "examples/methylated_dna.json",
+      "source_url": "https://github.com/google-deepmind/alphafold3/blob/85c4d20505fd5cef05eac22b534d4e793971ae69/examples/methylated_dna.json",
+      "sha256": "736f86d7639c27bf80fc2f31fbc7bad91db1cae564a60e4196ded7c980d54a27"
+    }
+  ],
+  "adaptations": [
+    "Each preset is an official example input embedded verbatim, as the input JSON text; the files themselves are listed here for provenance and are not bundled separately.",
+    "The quick-start preset is the fold_input.json shown in the README.",
+    "The examples carry no MSAs or templates, so upstream runs them through the local data pipeline; here they default to MSAs from the ColabFold MMseqs2 server and no templates.",
+    "The input code is Apache 2.0; running any preset still requires the separately licensed model parameters, and its output falls under the AlphaFold 3 Output Terms of Use."
+  ]
+}

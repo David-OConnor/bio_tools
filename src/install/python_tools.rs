@@ -103,6 +103,13 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             Ok(())
         }
         Tool::Protenix => install_protenix(installer),
+        Tool::RdKit => install_recipe(
+            installer,
+            UvRecipe {
+                verify: Some(("python", &["-I", "-c", crate::rdkit::PROBE])),
+                ..UvRecipe::simple(Tool::RdKit.slug(), "3.12", &["rdkit"], &[])
+            },
+        ),
         Tool::EsmC => install_recipe(
             installer,
             UvRecipe {

@@ -54,6 +54,7 @@ mod tlimmuno;
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Tool {
+    RdKit,
     AlphaFold3,
     OpenDde,
     Boltz2,
@@ -93,7 +94,8 @@ pub enum Tool {
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 35] = [
+    pub const ALL: [Self; 36] = [
+        Self::RdKit,
         Self::AlphaFold3,
         Self::OpenDde,
         Self::Boltz2,
@@ -134,6 +136,7 @@ impl Tool {
     /// Stable machine-readable name used for environment and checkout paths.
     pub const fn slug(self) -> &'static str {
         match self {
+            Self::RdKit => "rdkit",
             Self::AlphaFold3 => "alphafold3",
             Self::OpenDde => "opendde",
             Self::Boltz2 => "boltz2",
@@ -181,7 +184,7 @@ impl Tool {
         match self {
             Self::Boltz2 => "boltz",
             Self::Chai1 => "chai-lab",
-            Self::EsmC | Self::EsmFold2 => "python",
+            Self::EsmC | Self::EsmFold2 | Self::RdKit => "python",
             Self::ImmuneBuilder => "ABodyBuilder2",
             Self::Mber => "mber-vhh",
             _ => self.slug(),
@@ -191,6 +194,7 @@ impl Tool {
     /// Human-readable upstream name.
     pub const fn name(self) -> &'static str {
         match self {
+            Self::RdKit => "RDKit",
             Self::AlphaFold3 => "AlphaFold 3",
             Self::OpenDde => "OpenDDE",
             Self::Boltz2 => "Boltz-2",
@@ -236,6 +240,7 @@ impl Tool {
     /// assets, which is what [`Installer::uninstall`] needs and no probe can rediscover.
     pub const fn asset_directories(self) -> &'static [&'static str] {
         match self {
+            Self::AlphaFold3 => &crate::install::alphafold3::OWNED_DIRECTORIES,
             Self::Chai1 => &["chai1"],
             Self::HighFold => &["HighFold"],
             Self::BindCraft => &["BindCraft"],

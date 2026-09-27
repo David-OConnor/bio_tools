@@ -19,7 +19,7 @@ use std::{
 
 use crate::{run::CommandSpec, status};
 
-mod alphafold3;
+pub(crate) mod alphafold3;
 mod boltz2;
 mod boltzgen;
 mod chai1;

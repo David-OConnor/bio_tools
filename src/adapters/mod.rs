@@ -10,6 +10,8 @@ const FILES: &[(&str, &[u8])] = &[
     ("bio_tools_desktop.py", include_bytes!("python/bio_tools_desktop.py")),
     ("bio_tool_adapters/desktop.py", include_bytes!("python/bio_tool_adapters/desktop.py")),
     ("bio_tool_adapters/__init__.py", include_bytes!("python/bio_tool_adapters/__init__.py")),
+    ("bio_tool_adapters/alphafold3.py", include_bytes!("python/bio_tool_adapters/alphafold3.py")),
+    ("bio_tool_adapters/tool_scripts/alphafold3_prepare.py", include_bytes!("python/bio_tool_adapters/tool_scripts/alphafold3_prepare.py")),
     ("bio_tool_adapters/boltz2.py", include_bytes!("python/bio_tool_adapters/boltz2.py")),
     ("bio_tool_adapters/catpred.py", include_bytes!("python/bio_tool_adapters/catpred.py")),
     ("bio_tool_adapters/tool_scripts/catpred_inference.py", include_bytes!("python/bio_tool_adapters/tool_scripts/catpred_inference.py")),
