@@ -24,8 +24,10 @@ pub fn depict_smiles(python: &Path, smiles: &str, width: u32, height: u32) -> io
         "width": width,
         "height": height,
     }))?;
+    // Ignore inherited PYTHONHOME/PYTHONPATH, but keep the user site-packages directory:
+    // system installations made with `pip install --user rdkit` must work too.
     let command = CommandSpec::new(python.as_os_str())
-        .args(["-I", "-c", include_str!("rdkit_depict.py")])
+        .args(["-E", "-c", include_str!("rdkit_depict.py")])
         .stdin(input)
         .timeout(Duration::from_secs(30))
         .capture_limits(CaptureLimits::new(2 * 1024 * 1024, 8 * 1024));

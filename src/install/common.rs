@@ -166,7 +166,6 @@ impl Installer {
         slug: &str,
         python_version: &str,
     ) -> Result<(), InstallError> {
-        let uv = self.ensure_uv()?;
         let target = self.venv_dir(slug);
         self.step(format!(
             "Creating {} with uv-managed Python {python_version}",
@@ -178,9 +177,11 @@ impl Installer {
             })?;
         }
 
-        let mut command = uv_venv_command(&uv, python_version, &target);
+        let mut command = uv_venv_command(self.uv_command()?, python_version, &target);
         scrub_python_environment(&mut command);
         self.checked(&mut command)?;
+        // `--clear` emptied it, Torch included.
+        self.pinned_torch.retain(|pinned| pinned != slug);
 
         let python = self.venv_python(slug);
         if !python.is_file() {
@@ -203,12 +204,15 @@ impl Installer {
         if requirements.is_empty() {
             return Ok(());
         }
-        let uv = self.ensure_uv()?;
         let python = self.venv_python(slug);
-        let mut command = Command::new(uv);
+        let mut command = self.uv_command()?;
         command.args(["pip", "install", "--python"]);
         command.arg(python);
-        if options.upgrade {
+        // A Torch build `install_torch` pinned holds for the rest of the recipe. In an environment
+        // `create_venv` has just emptied, `--upgrade` can only move what an earlier step put
+        // there, and for a requirement that depends on Torch it swaps the backend-specific wheel
+        // for PyPI's newest -- leaving that one's CUDA libraries installed beside the first's.
+        if options.upgrade && !self.pinned_torch.iter().any(|pinned| pinned == slug) {
             command.arg("--upgrade");
         }
         if let Some(index) = options.index_url {
@@ -247,7 +251,9 @@ impl Installer {
                 ..PipOptions::default()
             }
         };
-        self.pip_install(slug, packages, options)
+        self.pip_install(slug, packages, options)?;
+        self.pinned_torch.push(slug.to_owned());
+        Ok(())
     }
 
     pub(crate) fn select_torch_backend(&mut self) -> Result<TorchBackend, InstallError> {
@@ -1057,8 +1063,7 @@ fn executable_name(name: &str) -> OsString {
     }
 }
 
-fn uv_venv_command(uv: &Path, python_version: &str, target: &Path) -> Command {
-    let mut command = Command::new(uv);
+fn uv_venv_command(mut command: Command, python_version: &str, target: &Path) -> Command {
     command.args([
         "venv",
         "--no-project",

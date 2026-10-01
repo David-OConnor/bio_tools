@@ -42,7 +42,8 @@ struct UvRecipe<'a> {
     // tool moves it to the newest versions its constraints allow. Turn it off where an earlier
     // step of the same recipe installed something the later one must not move -- an exact torch a
     // compiled extension is built against, say, whose version floor in some other requirement
-    // would otherwise be met by upgrading it.
+    // would otherwise be met by upgrading it. (The build the `torch` step pins is kept whatever
+    // this says; see `Installer::pip_install`.)
     upgrade: bool,
     // Not `'static`: a few recipes (e.g. ESMFold2) need to pass a path computed at install time,
     // such as a scoped CUDA toolchain's prefix, rather than a string literal.
@@ -106,7 +107,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::RdKit => install_recipe(
             installer,
             UvRecipe {
-                verify: Some(("python", &["-I", "-c", crate::rdkit::PROBE])),
+                verify: Some(("python", &["-E", "-c", crate::rdkit::PROBE])),
                 ..UvRecipe::simple(Tool::RdKit.slug(), "3.12", &["rdkit"], &[])
             },
         ),

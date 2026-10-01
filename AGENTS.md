@@ -13,3 +13,11 @@ and input/output
 descriptions as closely as possible. We try to maintain accurate links to these in `SpecData` *_url fields.
 
 See also `bio_web`: `main/tools` `.py` files: These may need to be kept in sync with the official resources.
+
+
+## Installed environments
+- Files in tool environments may be hard links shared with uv's cache and other environments
+  (see `src/install/package_cache.rs`). Install steps that change an installed file must write a
+  new file and rename it over the old one, never edit it in place.
+- When removing a tool, add its slug to `RETIRED` in `src/install/uninstall.rs` so existing
+  installations drop its environment.

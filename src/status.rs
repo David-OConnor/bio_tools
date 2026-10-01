@@ -42,7 +42,12 @@ pub(crate) fn is_recorded(installer: &Installer, tool: Tool) -> bool {
 }
 
 pub(crate) fn forget_install(installer: &Installer, tool: Tool) -> Result<(), InstallError> {
-    let marker = marker_path(installer, tool);
+    forget_slug(installer, tool.slug())
+}
+
+/// [`forget_install`] by slug, for a tool [`Tool`] no longer names.
+pub(crate) fn forget_slug(installer: &Installer, slug: &str) -> Result<(), InstallError> {
+    let marker = slug_marker_path(installer, slug);
     match fs::remove_file(&marker) {
         Ok(()) => Ok(()),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
@@ -57,12 +62,16 @@ pub(crate) fn forget_install(installer: &Installer, tool: Tool) -> Result<(), In
 }
 
 fn marker_path(installer: &Installer, tool: Tool) -> PathBuf {
+    slug_marker_path(installer, tool.slug())
+}
+
+fn slug_marker_path(installer: &Installer, slug: &str) -> PathBuf {
     installer
         .config
         .layout
         .environments_root
         .join(STATUS_DIRECTORY)
-        .join(format!("{}.installed", tool.slug()))
+        .join(format!("{slug}.installed"))
 }
 
 /// Quickly inspect every tool installed by this crate without launching its application code.
@@ -307,7 +316,7 @@ fn alphafold3_command(
 /// a coarse status check.
 fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     if tool == Tool::RdKit {
-        return Some(installer.tool_python_command(tool).args(["-I", "-c", crate::rdkit::PROBE]));
+        return Some(installer.tool_python_command(tool).args(["-E", "-c", crate::rdkit::PROBE]));
     }
     // The executable's name comes from `Tool::console_script`, which is not always the slug; only
     // the probe argument is decided here.

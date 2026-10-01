@@ -33,12 +33,16 @@ Sources:
   the conformer callers   https://github.com/RosettaCommons/atomworks/blob/production/src/atomworks/ml/transforms/rdkit_utils.py
   the RFD3 transform      https://github.com/RosettaCommons/foundry/blob/production/models/rfd3/src/rfd3/transforms/design_transforms.py
 
-Run with the RFdiffusion3 environment's own interpreter. It edits the
-installed `atomworks/ml/utils/timer.py` in place, and is safe to rerun: the
-marker below is what tells it the environment is already patched.
+Run with the RFdiffusion3 environment's own interpreter. It replaces the
+installed `atomworks/ml/utils/timer.py` with a patched copy, and is safe to
+rerun: the marker below is what tells it the environment is already patched.
+A replacement rather than an edit in place, because the installed file may be
+a hard link that uv's cache and every other environment holding the same
+atomworks wheel share.
 """
 
 import importlib
+import os
 import pathlib
 
 from atomworks.ml.utils import timer
@@ -82,7 +86,9 @@ def main() -> None:
     path = pathlib.Path(timer.__file__)
     source = path.read_text(encoding="utf-8")
     if MARKER not in source:
-        path.write_text(source + BLOCK, encoding="utf-8")
+        replacement = path.with_name(path.name + ".bio_tools-patch")
+        replacement.write_text(source + BLOCK, encoding="utf-8")
+        os.replace(replacement, path)
     # A decorated call has to return normally on a platform with no `fork`.
     # Before the guard it raised `ValueError: cannot find context for 'fork'`.
     patched = importlib.reload(timer)

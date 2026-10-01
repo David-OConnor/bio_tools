@@ -5,7 +5,9 @@
 //! weights and reference data it downloaded on first use, which are usually the largest part of
 //! an install (see [`super::model_cache`]). Shared infrastructure -- the micromamba root, the
 //! bootstrapped Conda, the uv cache -- belongs to every other tool as well and is left alone, as
-//! are assets an operator supplied by hand and ones that several recipes share.
+//! are assets an operator supplied by hand and ones that several recipes share; the uv cache kept
+//! beside the environments only loses what no remaining environment links to (see
+//! [`super::package_cache`]).
 
 use std::{
     fs,
@@ -15,6 +17,11 @@ use std::{
 
 use super::{InstallError, Installer};
 use crate::{status, tool_definitions::Tool};
+
+/// Slugs of tools this crate used to install and no longer does. An installation outlives the
+/// release that dropped its tool, so the next install or uninstall removes its environment and
+/// marker. Add a slug here when removing a tool from [`Tool`].
+const RETIRED: &[&str] = &["aggrescan3d"];
 
 /// What [`Installer::uninstall`] removed, and what it deliberately left behind.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -57,6 +64,25 @@ pub(super) fn uninstall(
 
     status::forget_install(installer, tool)?;
     Ok(report)
+}
+
+/// Remove what is left of the [`RETIRED`] tools. Only their environments: whatever else they
+/// installed is no longer described anywhere this crate could read it from.
+pub(super) fn remove_retired(installer: &Installer) {
+    for slug in RETIRED {
+        let environment = installer.config.layout.environment(slug);
+        let mut report = UninstallReport::default();
+        if let Err(error) = remove(installer, &environment, &mut report) {
+            installer.note(format!(
+                "Unable to remove {}, left by a tool bio_tools no longer installs: {error}",
+                environment.display()
+            ));
+            continue;
+        }
+        if let Err(error) = status::forget_slug(installer, slug) {
+            installer.note(error.to_string());
+        }
+    }
 }
 
 /// Everything on disk this tool's recipe owns, whether or not it currently exists.

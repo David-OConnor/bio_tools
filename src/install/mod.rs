@@ -28,6 +28,7 @@ mod conda_tools;
 mod igblast;
 mod model_cache;
 mod opendde;
+mod package_cache;
 pub(crate) mod protein_mpnn;
 mod python_tools;
 mod uninstall;
@@ -383,6 +384,11 @@ pub struct Installer {
     /// Anaconda's terms only need accepting once per run, and only on the Conda path.
     conda_terms_accepted: bool,
     torch_backend: Option<common::TorchBackend>,
+    /// Decided on first use: the uv cache beside the environments, when uv's own cannot be
+    /// linked to them. See [`package_cache`].
+    owned_uv_cache: Option<Option<PathBuf>>,
+    /// Environments whose Torch build `install_torch` pinned since they were last created.
+    pinned_torch: Vec<String>,
 }
 
 impl Installer {
@@ -415,6 +421,8 @@ impl Installer {
             conda: None,
             conda_terms_accepted: false,
             torch_backend: None,
+            owned_uv_cache: None,
+            pinned_torch: Vec::new(),
         }
     }
 
@@ -504,6 +512,7 @@ impl Installer {
 
         self.current_tool = Some(tool);
         self.emit(InstallEvent::ToolStarted(tool));
+        uninstall::remove_retired(self);
         // Before the recipe: Chai-1's old downloads live inside the environment it recreates.
         self.adopt_legacy_caches(tool);
         let result = match tool {
@@ -526,6 +535,8 @@ impl Installer {
             if let Err(error) = status::record_install(self, tool) {
                 self.note(format!("Unable to record installation status: {error}"));
             }
+            self.clean_package_archives();
+            self.prune_uv_cache();
             self.emit(InstallEvent::ToolFinished(tool));
         }
         self.current_tool = None;
@@ -569,8 +580,10 @@ impl Installer {
     pub fn uninstall(&mut self, tool: Tool) -> Result<UninstallReport, InstallError> {
         self.current_tool = Some(tool);
         self.emit(InstallEvent::ToolStarted(tool));
+        uninstall::remove_retired(self);
         let result = uninstall::uninstall(self, tool);
         if result.is_ok() {
+            self.prune_uv_cache();
             self.emit(InstallEvent::ToolFinished(tool));
         }
         self.current_tool = None;

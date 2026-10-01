@@ -129,6 +129,11 @@ folder with excerpts from *Bio Web* and *Molchanica.*)
 Details depend on the tool; most work by downloading and placing application executables in the
 appropriate places. Many of these use Python; it sets them up using [uv](https://docs.astral.sh/uv/), [Micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), or MiniConda in isolated environments. Micromamba is a faster, less-encumbered version of Conda which works for some, but not all Conda packages.
 
+Environments share disk space: uv hard-links each package out of its cache, so tools that need the same
+PyTorch and CUDA libraries store them once. When uv's own cache is on a different filesystem from the
+environments (e.g. a project on `/mnt/c` under WSL, or on a second drive on Windows), the installer keeps a
+`uv-cache` directory beside them instead, and prunes packages from it that no installed tool still uses.
+
 
 `InstallLayout::process_executables` standardizes both consumers on assets under
 `process_executables/` and environments under `process_executables/python_envs/`.

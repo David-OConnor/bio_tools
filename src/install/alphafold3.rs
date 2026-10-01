@@ -94,8 +94,7 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
     // Building the package compiles its C++ extension with CMake, which fetches its C++
     // dependencies itself; the host needs a C++ compiler, `make`, and zlib headers.
     installer.create_venv(SLUG, "3.12")?;
-    let uv = installer.ensure_uv()?;
-    let mut sync = Command::new(uv);
+    let mut sync = installer.uv_command()?;
     sync.args(["sync", "--frozen", "--no-editable", "--no-dev"])
         .current_dir(&source);
     scrub_python_environment(&mut sync);
