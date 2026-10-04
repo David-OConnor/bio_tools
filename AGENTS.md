@@ -21,3 +21,12 @@ See also `bio_web`: `main/tools` `.py` files: These may need to be kept in sync 
   new file and rename it over the old one, never edit it in place.
 - When removing a tool, add its slug to `RETIRED` in `src/install/uninstall.rs` so existing
   installations drop its environment.
+
+
+## Unit tests
+Do not add unit tests permanently. You may add them transiently e.g. while adding or updating
+functionality; clean them up after.
+
+
+## Code format
+Add appropriate line breaks in code; I have noticed LLMs tend to not use line breaks, which makes it tough for me to read and edit code.
