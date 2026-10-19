@@ -610,7 +610,12 @@ fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
                 "3.12",
                 // The extra adds pydantic, which the input specification is built out of; the
                 // model code itself is in the base distribution alongside RF3 and MPNN.
-                &["rc-foundry[rfd3]"],
+                &[
+                    "rc-foundry[rfd3]",
+                    // Foundry 0.2 uses AtomWorks 2 APIs removed in 3.0. Keep fresh
+                    // installs compatible on Linux and Windows until Foundry migrates.
+                    "atomworks[ml]>=2.1.1,<3",
+                ],
                 &["rfd3", "foundry"],
             )
         },
