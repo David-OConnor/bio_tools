@@ -141,6 +141,8 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "chai1" => Some(include_str!("chai1.json")),
         "boltz2" => Some(include_str!("boltz2.json")),
         "catpred" => Some(include_str!("catpred.json")),
+        "deepsp" => Some(include_str!("deepsp.json")),
+        "deepstabp" => Some(include_str!("deepstabp.json")),
         "esmc" => Some(include_str!("esmc.json")),
         "esmfold2" => Some(include_str!("esmfold2.json")),
         "igblast" => Some(include_str!("igblast.json")),

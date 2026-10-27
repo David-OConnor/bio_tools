@@ -1,0 +1,189 @@
+[
+  {
+    "id": "mab1",
+    "label": "mAb1",
+    "description": "Official DeepSP_input.csv: mAb1 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab1",
+      "heavy_sequence": "EVQLVESGGGLVQPGRSLRLSCAASGFTFDDYAMHWVRQAPGKGLEWVSAITWNSGHIDYADSVEGRFTISRDNAKNSLYLQMNSLRAEDTAVYYCAKVSYLSTASSLDYWGQGTLVTVSS",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCRASQGIRNYLAWYQQKPGKAPKLLIYAASTLQSGVPSRFSGSGSGTDFTLTISSLQPEDVATYYCQRYNRAPYTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab2",
+    "label": "mAb2",
+    "description": "Official DeepSP_input.csv: mAb2 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab2",
+      "heavy_sequence": "EVQLVESGGGLVQPGGSLRLSCAASGFTFSDSWIHWVRQAPGKGLEWVAWISPYGGSTYYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCARRHWPGGFDYWGQGTLVTVSA",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCRASQDVSTAVAWYQQKPGKAPKLLIYSASFLYSGVPSRFSGSGSGTDFTLTISSLQPEDFATYYCQQYLYHPATFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab3",
+    "label": "mAb3",
+    "description": "Official DeepSP_input.csv: mAb3 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab3",
+      "heavy_sequence": "QVQLKQSGPGLVQPSQSLSITCTVSGFSLTNYGVHWVRQSPGKGLEWLGVIWSGGNTDYNTPFTSRLSINKDNSKSQVFFKMNSLQSNDTAIYYCARALTYYDYEFAYWGQGTLVTVSA",
+      "light_sequence": "DILLTQSPVILSVSPGERVSFSCRASQSIGTNIHWYQQRTNGSPRLLIKYASESISGIPSRFSGSGSGTDFTLSINSVESEDIADYYCQQNNNWPTTFGAGTKLELK"
+    }
+  },
+  {
+    "id": "mab4",
+    "label": "mAb4",
+    "description": "Official DeepSP_input.csv: mAb4 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab4",
+      "heavy_sequence": "EVQLLESGGGLVQPGGSLRLSCAVSGFTFNSFAMSWVRQAPGKGLEWVSAISGSGGGTYYADSVKGRFTISRDNSKNTLYLQMNSLRAEDTAVYFCAKDKILWFGEPVFDYWGQGTLVTVSS",
+      "light_sequence": "EIVLTQSPATLSLSPGERATLSCRASQSVSSYLAWYQQKPGQAPRLLIYDASNRATGIPARFSGSGSGTDFTLTISSLEPEDFAVYYCQQRSNWPPTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab5",
+    "label": "mAb5",
+    "description": "Official DeepSP_input.csv: mAb5 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab5",
+      "heavy_sequence": "EVQLLESGGGLVQPGGSLRLSCAASGFTFSSYAMSWVRQAPGKGLEWVSGITGSGGSTYYADSVKGRFTISRDNSKNTLYLQMNSLRAEDTAVYYCAKDPGTTVIMSWFDPWGQGTLVTVSS",
+      "light_sequence": "EIVLTQSPGTLSLSPGERATLSCRASQSVRGRYLAWYQQKPGQAPRLLIYGASSRATGIPDRFSGSGSGTDFTLTISRLEPEDFAVFYCQQYGSSPRTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab6",
+    "label": "mAb6",
+    "description": "Official DeepSP_input.csv: mAb6 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab6",
+      "heavy_sequence": "QVQLVESGGGVVQPGRSLRLSCAASGFIFSSYAMHWVRQAPGNGLEWVAFMSYDGSNKKYADSVKGRFTISRDNSKNTLYLQMNSLRAEDTAVYYCARDRGIAAGGNYYYYGMDVWGQGTTVTVSS",
+      "light_sequence": "EIVLTQSPATLSLSPGERATLSCRASQSVYSYLAWYQQKPGQAPRLLIYDASNRATGIPARFSGSGSGTDFTLTISSLEPEDFAVYYCQQRSNWPPFTFGPGTKVDIK"
+    }
+  },
+  {
+    "id": "mab7",
+    "label": "mAb7",
+    "description": "Official DeepSP_input.csv: mAb7 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab7",
+      "heavy_sequence": "EVKLEESGGGLVQPGGSMKLSCVASGFIFSNHWMNWVRQSPEKGLEWVAEIRSKSINSATHYAESVKGRFTISRDDSKSAVYLQMTDLRTEDTGVYYCSRNYYGSTYDYWGQGTTLTVSS",
+      "light_sequence": "DILLTQSPAILSVSPGERVSFSCRASQFVGSSIHWYQQRTNGSPRLLIKYASESMSGIPSRFSGSGSGTDFTLSINTVESEDIADYYCQQSHSWPFTFGSGTNLEVK"
+    }
+  },
+  {
+    "id": "mab8",
+    "label": "mAb8",
+    "description": "Official DeepSP_input.csv: mAb8 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab8",
+      "heavy_sequence": "EVQLVESGGGLVQPGGSLRLSCAVSGYSITSGYSWNWIRQAPGKGLEWVASITYDGSTNYNPSVKGRITISRDDSKNTFYLQMNSLRAEDTAVYYCARGSHYFGHWHFAVWGQGTLVTVSS",
+      "light_sequence": "DIQLTQSPSSLSASVGDRVTITCRASQSVDYDGDSYMNWYQQKPGKAPKLLIYAASYLESGVPSRFSGSGSGTDFTLTISSLQPEDFATYYCQQSHEDPYTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab9",
+    "label": "mAb9",
+    "description": "Official DeepSP_input.csv: mAb9 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab9",
+      "heavy_sequence": "QVQLQESGPGLVKPSETLSLTCTVSGGSVSSGDYYWTWIRQSPGKGLEWIGHIYYSGNTNYNPSLKSRLTISIDTSKTQFSLKLSSVTAADTAIYYCVRDRVTGAFDIWGQGTMVTVSS",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCQASQDISNYLNWYQQKPGKAPKLLIYDASNLETGVPSRFSGSGSGTDFTFTISSLQPEDIATYFCQHFDHLPLAFGGGTKVEIK"
+    }
+  },
+  {
+    "id": "mab10",
+    "label": "mAb10",
+    "description": "Official DeepSP_input.csv: mAb10 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab10",
+      "heavy_sequence": "EVQLVESGGGLVQPGGSLRLSCAASGFTFTDYTMDWVRQAPGKGLEWVADVNPNSGGSIYNQRFKGRFTLSVDRSKNTLYLQMNSLRAEDTAVYYCARNLGPSFYFDYWGQGTLVTVSS",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCKASQDVSIGVAWYQQKPGKAPKLLIYSASYRYTGVPSRFSGSGSGTDFTLTISSLQPEDFATYYCQQYYIYPYTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab11",
+    "label": "mAb11",
+    "description": "Official DeepSP_input.csv: mAb11 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab11",
+      "heavy_sequence": "QVQLQESGPGLVRPSQTLSLTCTVSGYSITSDHAWSWVRQPPGRGLEWIGYISYSGITTYNPSLKSRVTMLRDTSKNQFSLRLSSVTAADTAVYYCARSLARTTAMDYWGQGSLVTVSS",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCRASQDISSYLNWYQQKPGKAPKLLIYYTSRLHSGVPSRFSGSGSGTDFTFTISSLQPEDIATYYCQQGNTLPYTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab12",
+    "label": "mAb12",
+    "description": "Official DeepSP_input.csv: mAb12 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab12",
+      "heavy_sequence": "QVQLVQSGAEVKKPGASVKVSCKGSGYTFTSYWMHWVRQAPGQRLEWIGEIDPSESNTNYNQKFKGRVTLTVDISASTAYMELSSLRSEDTAVYYCARGGYDGWDYAIDYWGQGTLVTVSS",
+      "light_sequence": "DVVMTQSPLSLPVTPGEPASISCRSSQSLAKSYGNTYLSWYLQKPGQSPQLLIYGISNRFSGVPDRFSGSGSGTDFTLKISRVEAEDVGVYYCLQGTHQPYTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab13",
+    "label": "mAb13",
+    "description": "Official DeepSP_input.csv: mAb13 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab13",
+      "heavy_sequence": "QLQQSGTVLARPGASVKMSCKASGYSFTRYWMHWIKQRPGQGLEWIGAIYPGNSDTSYNQKFEGKAKLTAVTSASTAYMELSSLTHEDSAVYYCSRDYGYYFDFWGQGTTLTVSS",
+      "light_sequence": "QIVSTQSPAIMSASPGEKVTMTCSASSSRSYMQWYQQKPGTSPKRWIYDTSKLASGVPARFSGSGSGTSYSLTISSMEAEDAATYYCHQRSSYTFGGGTKLEIK"
+    }
+  },
+  {
+    "id": "mab14",
+    "label": "mAb14",
+    "description": "Official DeepSP_input.csv: mAb14 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab14",
+      "heavy_sequence": "QVQLVQSGAEVKKPGASVKVSCKASGFNIKDTYIHWVRQAPGQRLEWMGRIDPANGYTKYDPKFQGRVTITADTSASTAYMELSSLRSEDEAVYYCAREGYYGNYGVYAMDYWGQGTLVTVSS",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCKTSQDINKYMAWYQQTPGKAPRLLIHYTSALQPGIPSRFSGSGSGRDYTFTISSLQPEDIATYYCLQYDNLWTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "mab15",
+    "label": "mAb15",
+    "description": "Official DeepSP_input.csv: mAb15 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab15",
+      "heavy_sequence": "QVQLVQSGAEVKKPGASVKVSCKASGYTFTSYYIHWVRQAPGQGLEWIGCIYPGNVNTNYNEKFKDRATLTVDTSISTAYMELSRLRSDDTAVYFCTRSHYGLDWNFDVWGQGTTVTVSS",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCHASQNIYVWLNWYQQKPGKAPKLLIYKASNLHTGVPSRFSGSGSGTDFTLTISSLQPEDFATYYCQQGQTYPYTFGGGTKVEIK"
+    }
+  },
+  {
+    "id": "mab16",
+    "label": "mAb16",
+    "description": "Official DeepSP_input.csv: mAb16 heavy/light variable-domain pair.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP_input.csv",
+    "values": {
+      "job_name": "deepsp-mab16",
+      "heavy_sequence": "EVQLVESGGGLVQPGGSLRLSCAASGFTFSSYAMSWVRQAPGKGLEWVSQISPAGGYTNYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCARGELPYYRMSKVMDVWGQGTLVTVSS",
+      "light_sequence": "DIQMTQSPSSLSASVGDRVTITCRASQYFSSYLAWYQQKPGKAPKLLIYGASSRASGVPSRFSGSGSGTDFTLTISSLQPEDFATYYCQQYLGSPPTFGQGTKVEIK"
+    }
+  },
+  {
+    "id": "6p8n",
+    "label": "6p8n (web app example)",
+    "description": "Official DeepSP web app example, split into heavy and light variable domains.",
+    "source_url": "https://github.com/Lailabcode/DeepSP/blob/main/DeepSP-app.py#L91-L97",
+    "values": {
+      "job_name": "deepsp-6p8n",
+      "heavy_sequence": "QVQLVQSGAEVKKPGASVKVSCKASGYTFTGYYMNWVRQAPGQGLEWMGWINPNSGGTNYAQKFQGRVTMTRDTSISTAYMELSRLRSDDTAVYYCARGKNSDYNWDFQHWGQGTLVTVSS",
+      "light_sequence": "DIVMSQSPSSLAVSVGEKVTMSCKSSQSLLYSSNQKNYLAWYQQKPGQSPKLLIYWASTRESGVPDRFTGSGSGTDFTLTISSVKAEDLAVYYCQQYEMFGGGTKLEIK"
+    }
+  }
+]

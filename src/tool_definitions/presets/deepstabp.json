@@ -1,0 +1,32 @@
+[
+  {
+    "id": "single_sequence",
+    "label": "Single Sequence",
+    "description": "Official DeepSTABp web example: One raw amino-acid sequence.",
+    "source_url": "https://csb-deepstabp.bio.rptu.de/",
+    "values": {
+      "job_name": "deepstabp-single-sequence",
+      "fasta": "MAQYHQQHEMKQTMAETQYVTAPPPMGYPVMMKDSPQTVQPPHEGQSKGSGGFLRGCLAAMCCCCVLDCVF"
+    }
+  },
+  {
+    "id": "multiple_sequences",
+    "label": "Multiple sequences",
+    "description": "Official DeepSTABp web example: Two raw sequences separated by >!.",
+    "source_url": "https://csb-deepstabp.bio.rptu.de/",
+    "values": {
+      "job_name": "deepstabp-multiple-sequences",
+      "fasta": ">!MAQYHQQHEMKQTMAETQYVTAPPPMGYPVMMKDSPQTVQPPHEGQSKGSGGFLRGCLAAMCCCCVLDCVF\n>!MNNNIFSTTTTINDDYMLFPYNDHYSSQPLLPFSPSSSINDILIHSTSNTSNNHLDHHHQFQQPSPFSHFEFAPDCALLTSFHPENNGHDDNQTIPNDNHHPSLHFPLNNTIVEQPTEPS"
+    }
+  },
+  {
+    "id": "single_fasta",
+    "label": "Single Fasta",
+    "description": "Official DeepSTABp web example: One named FASTA record.",
+    "source_url": "https://csb-deepstabp.bio.rptu.de/",
+    "values": {
+      "job_name": "deepstabp-single-fasta",
+      "fasta": ">ExampleName\nMAQYHQQHEMKQTMAETQYVTAPPPMGYPVMMKDSPQTVQPPHEGQSKGSGGFLRGCLAAMCCCCVLDCVF"
+    }
+  }
+]

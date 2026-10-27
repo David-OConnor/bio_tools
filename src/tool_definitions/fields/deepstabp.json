@@ -18,11 +18,11 @@
     },
     {
       "name": "fasta",
-      "label": "Sequences (FASTA)",
+      "label": "Protein sequences",
       "kind": "file",
       "default": ">demo_protein\nMKTVRQERLKSIVRILERSKEPVSGAQLAEELSVSRQVIVQDIAYLRSLGYNIVATPRGYVLAGG",
       "required": true,
-      "help": "One or more records. Each is predicted independently.",
+      "help": "FASTA, one raw amino-acid sequence, or multiple raw sequences separated by >!. Each is predicted independently.",
       "options": [],
       "rows": null,
       "minimum": null,
