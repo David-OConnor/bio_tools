@@ -50,6 +50,7 @@ mod rfdiffusion3;
 mod tap;
 mod thermompnn;
 mod tlimmuno;
+mod xtb;
 
 /// A tool with an unattended or partially unattended installation recipe.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -90,11 +91,12 @@ pub enum Tool {
     Placer,
     Gromacs,
     BoltzAdme,
+    Xtb,
 }
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 36] = [
+    pub const ALL: [Self; 37] = [
         Self::RdKit,
         Self::AlphaFold3,
         Self::OpenDde,
@@ -129,6 +131,7 @@ impl Tool {
         Self::Anarcii,
         Self::Placer,
         Self::Gromacs,
+        Self::Xtb,
         Self::BoltzAdme,
         Self::AntiFold,
     ];
@@ -172,6 +175,7 @@ impl Tool {
             Self::Placer => "placer",
             Self::Gromacs => "gromacs",
             Self::BoltzAdme => "boltz-adme",
+            Self::Xtb => "xtb",
         }
     }
 
@@ -230,6 +234,7 @@ impl Tool {
             Self::Placer => "PLACER",
             Self::Gromacs => "GROMACS",
             Self::BoltzAdme => "Boltz ADME",
+            Self::Xtb => "xTB",
         }
     }
 
@@ -265,6 +270,7 @@ impl Tool {
             Self::CatPred => &["CatPred"],
             Self::Placer => &["PLACER"],
             Self::Gromacs => &["gromacs"],
+            Self::Xtb => &["xtb"],
             _ => &[],
         }
     }
@@ -386,6 +392,7 @@ impl FromStr for Tool {
             "placer" => Self::Placer,
             "gromacs" => Self::Gromacs,
             "boltzadme" => Self::BoltzAdme,
+            "xtb" => Self::Xtb,
             _ => {
                 return Err(InstallError::InvalidConfiguration(format!(
                     "unknown tool slug {value:?}"

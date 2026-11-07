@@ -14,7 +14,7 @@ use crate::{
         boltz_adme, boltz2, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat,
         enzymemap, esmc, esmfold2, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
         ligandmpnn, mber, netsolp, opendde, orca, pdbbind, placer, proteinmpnn, proteinmpnn_ddg,
-        protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn, tlimmuno,
+        protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn, tlimmuno, xtb,
     },
 };
 
@@ -348,6 +348,7 @@ pub const ALL: &[&CatalogEntry] = &[
     &bindcraft::ENTRY,
     &gromacs::ENTRY,
     &orca::ENTRY,
+    &xtb::ENTRY,
     &igblast::ENTRY,
     &biophi::ENTRY,
     &antifold::ENTRY,

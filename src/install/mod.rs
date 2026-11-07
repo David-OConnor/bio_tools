@@ -32,6 +32,7 @@ mod package_cache;
 pub(crate) mod protein_mpnn;
 mod python_tools;
 mod uninstall;
+mod xtb;
 
 pub use uninstall::UninstallReport;
 
@@ -443,6 +444,9 @@ impl Installer {
 
     /// Locate a tool's installed console entry point in its managed environment.
     pub fn executable_path(&self, tool: Tool) -> PathBuf {
+        if tool == Tool::Xtb {
+            return xtb::executable(self);
+        }
         self.venv_script(tool.slug(), tool.console_script())
     }
     /// Build a command for a tool's console entry point in its managed environment.
@@ -523,6 +527,7 @@ impl Installer {
             Tool::ProteinMpnn => protein_mpnn::install_protein(self),
             Tool::LigandMpnn => protein_mpnn::install_ligand(self),
             Tool::IgBlast => igblast::install(self),
+            Tool::Xtb => xtb::install(self),
             Tool::HighFold
             | Tool::BindCraft
             | Tool::AntiFold

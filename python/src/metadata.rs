@@ -166,6 +166,7 @@ python_enum!(
         Lgpl21OrLater = 4,
         PublicDomain = 5,
         Other = 6,
+        Lgpl3OrLater = 7,
     }
 );
 

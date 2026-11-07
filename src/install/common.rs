@@ -908,7 +908,7 @@ impl Installer {
         fs::create_dir_all(destination).map_err(|error| {
             InstallError::io(format!("unable to create {}", destination.display()), error)
         })?;
-        let mut command = Command::new("tar");
+        let mut command = tar_command();
         if archive
             .extension()
             .is_some_and(|extension| extension == "gz")
@@ -1049,13 +1049,26 @@ pub(crate) fn scrub_python_environment(command: &mut Command) {
     }
 }
 
+/// On Windows, the system's bsdtar: Git's GNU tar can be first on PATH, and it can't read zips.
+fn tar_command() -> Command {
+    if cfg!(target_os = "windows")
+        && let Some(root) = env::var_os("SystemRoot")
+    {
+        let bsdtar = Path::new(&root).join("System32").join("tar.exe");
+        if bsdtar.is_file() {
+            return Command::new(bsdtar);
+        }
+    }
+    Command::new("tar")
+}
+
 fn append_to_path(path: &Path, suffix: &str) -> PathBuf {
     let mut value = path.as_os_str().to_os_string();
     value.push(suffix);
     PathBuf::from(value)
 }
 
-fn executable_name(name: &str) -> OsString {
+pub(super) fn executable_name(name: &str) -> OsString {
     if cfg!(target_os = "windows") {
         format!("{name}.exe").into()
     } else {

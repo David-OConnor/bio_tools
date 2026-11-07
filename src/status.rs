@@ -216,15 +216,19 @@ pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
     let detail = if detail.is_empty() {
         format!("{} answered its status probe.", tool.name())
     } else {
-        detail
-            .lines()
-            .next()
-            .unwrap_or_default()
-            .chars()
-            .take(200)
-            .collect()
+        headline(tool, &detail).trim().chars().take(200).collect()
     };
     pass(detail, probe_device(installer, tool))
+}
+
+/// The line of a probe's output to show. xTB leads with a banner.
+fn headline(tool: Tool, output: &str) -> &str {
+    let version = output.lines().find(|line| line.contains("xtb version"));
+
+    version
+        .filter(|_| tool == Tool::Xtb)
+        .or(output.lines().next())
+        .unwrap_or_default()
 }
 
 fn preliminary_check(installer: &Installer, tool: Tool) -> Result<bool, ToolStatus> {
@@ -341,7 +345,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         ]));
     }
     let arguments: &[&str] = match tool {
-        Tool::OpenDde => &["--version"],
+        Tool::OpenDde | Tool::Xtb => &["--version"],
         Tool::Boltz2
         | Tool::Chai1
         | Tool::Protenix
