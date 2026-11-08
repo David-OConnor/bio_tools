@@ -25,6 +25,7 @@ mod boltzgen;
 mod chai1;
 mod common;
 mod conda_tools;
+mod gromacs;
 mod igblast;
 mod model_cache;
 mod opendde;
@@ -181,6 +182,7 @@ pub struct InstallConfig {
     pub prewarm_opendde: bool,
     pub igblast_version: String,
     pub netsolp_models_url: Option<String>,
+    /// conda-forge release, on Linux. Windows has one pinned release; see `gromacs.rs`.
     pub gromacs_version: String,
     pub gromacs_prefix: Option<PathBuf>,
 }
@@ -447,6 +449,9 @@ impl Installer {
         if tool == Tool::Xtb {
             return xtb::executable(self);
         }
+        if tool == Tool::Gromacs {
+            return gromacs::executable(self);
+        }
         self.venv_script(tool.slug(), tool.console_script())
     }
     /// Build a command for a tool's console entry point in its managed environment.
@@ -528,6 +533,7 @@ impl Installer {
             Tool::LigandMpnn => protein_mpnn::install_ligand(self),
             Tool::IgBlast => igblast::install(self),
             Tool::Xtb => xtb::install(self),
+            Tool::Gromacs => gromacs::install(self),
             Tool::HighFold
             | Tool::BindCraft
             | Tool::AntiFold

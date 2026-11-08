@@ -345,7 +345,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         ]));
     }
     let arguments: &[&str] = match tool {
-        Tool::OpenDde | Tool::Xtb => &["--version"],
+        Tool::OpenDde | Tool::Xtb | Tool::Gromacs => &["--version"],
         Tool::Boltz2
         | Tool::Chai1
         | Tool::Protenix
@@ -358,14 +358,6 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         Tool::IgBlast => {
             let executable = installer.tools_root().join("igblast/bin/igblastn");
             return Some(CommandSpec::new(executable).arg("-version"));
-        }
-        Tool::Gromacs => {
-            let prefix = installer
-                .config
-                .gromacs_prefix
-                .clone()
-                .unwrap_or_else(|| installer.tools_root().join("gromacs"));
-            return Some(CommandSpec::new(prefix.join("bin/gmx")).arg("--version"));
         }
         Tool::BindCraft | Tool::Genie3 => {
             return named_conda_probe(installer, tool);

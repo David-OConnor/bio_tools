@@ -218,7 +218,6 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             },
         ),
         Tool::Placer => install_placer(installer),
-        Tool::Gromacs => install_gromacs(installer),
         Tool::BoltzAdme => install_recipe(
             installer,
             UvRecipe::simple(Tool::BoltzAdme.slug(), "3.13", &["boltz-api~=0.45.0"], &[]),
@@ -1011,68 +1010,4 @@ fn install_placer(installer: &mut Installer) -> Result<(), InstallError> {
     )?;
     let target = installer.tools_root().join("PLACER");
     installer.clone_or_update("https://github.com/baker-laboratory/PLACER", &target)
-}
-
-fn install_gromacs(installer: &mut Installer) -> Result<(), InstallError> {
-    let version = installer.config.gromacs_version.clone();
-    let prefix = installer
-        .config
-        .gromacs_prefix
-        .clone()
-        .unwrap_or_else(|| installer.tools_root().join("gromacs"));
-    let executable = prefix.join("bin/gmx");
-    if executable.is_file() {
-        let mut version_command = Command::new(&executable);
-        version_command.arg("--version");
-        if installer.capture(&mut version_command).is_ok_and(|output| {
-            String::from_utf8_lossy(&output.stdout).contains(&version)
-                || String::from_utf8_lossy(&output.stderr).contains(&version)
-        }) {
-            installer.note(format!("GROMACS {version} is already installed"));
-            return Ok(());
-        }
-    }
-
-    let scratch = ScratchDir::new_in(installer.tools_root(), "gromacs")?;
-    let tarball = format!("gromacs-{version}.tar.gz");
-    let archive = scratch.path().join(&tarball);
-    installer.download(
-        &format!("https://ftp.gromacs.org/gromacs/{tarball}"),
-        &archive,
-    )?;
-    installer.extract_archive(&archive, scratch.path())?;
-    let source = scratch.path().join(format!("gromacs-{version}"));
-    let build = source.join("build");
-    fs::create_dir_all(&build)
-        .map_err(|error| InstallError::io("unable to create the GROMACS build directory", error))?;
-
-    let mut configure = Command::new("cmake");
-    configure
-        .arg("..")
-        .arg("-DGMX_BUILD_OWN_FFTW=ON")
-        .arg(format!("-DCMAKE_INSTALL_PREFIX={}", prefix.display()))
-        .current_dir(&build);
-    installer.checked(&mut configure)?;
-    let jobs = std::thread::available_parallelism()
-        .map(usize::from)
-        .unwrap_or(1)
-        .to_string();
-    let mut build_command = Command::new("cmake");
-    build_command
-        .args(["--build", ".", "--parallel", &jobs])
-        .current_dir(&build);
-    installer.checked(&mut build_command)?;
-    let mut install_command = Command::new("cmake");
-    install_command.args(["--install", "."]).current_dir(&build);
-    installer.checked(&mut install_command)?;
-
-    if !executable.is_file() {
-        return Err(InstallError::InvalidConfiguration(format!(
-            "GROMACS built, but {} was not created",
-            executable.display()
-        )));
-    }
-    let mut verify = Command::new(executable);
-    verify.arg("--version");
-    installer.checked(&mut verify)
 }

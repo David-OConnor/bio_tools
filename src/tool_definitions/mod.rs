@@ -309,6 +309,11 @@ impl Tool {
 
     /// Whether upstream publishes the required binaries and wheels for the current platform.
     pub const fn is_supported(self) -> bool {
+        // Only CUDA builds are installed, and macOS has none.
+        if matches!(self, Self::Gromacs) {
+            return !cfg!(target_os = "macos");
+        }
+
         cfg!(target_os = "linux")
             || !matches!(
                 self,
@@ -328,7 +333,6 @@ impl Tool {
                     | Self::Genie3
                     | Self::CatPred
                     | Self::Placer
-                    | Self::Gromacs
             )
     }
 

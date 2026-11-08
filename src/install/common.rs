@@ -322,7 +322,7 @@ impl Installer {
         Ok(backend)
     }
 
-    fn nvidia_driver_version(&self) -> Option<String> {
+    pub(crate) fn nvidia_driver_version(&self) -> Option<String> {
         let executable = find_nvidia_smi()?;
         let mut list = Command::new(&executable);
         list.arg("-L");
