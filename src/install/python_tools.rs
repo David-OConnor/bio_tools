@@ -114,7 +114,13 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::EsmC => install_recipe(
             installer,
             UvRecipe {
-                verify: Some(("python", &["-c", "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer"])),
+                verify: Some((
+                    "python",
+                    &[
+                        "-c",
+                        "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer",
+                    ],
+                )),
                 ..UvRecipe::simple(Tool::EsmC.slug(), "3.12", &["esm==3.4.1"], &[])
             },
         ),
@@ -221,6 +227,14 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
         Tool::BoltzAdme => install_recipe(
             installer,
             UvRecipe::simple(Tool::BoltzAdme.slug(), "3.13", &["boltz-api~=0.45.0"], &[]),
+        ),
+        // `gemmi-program` is the native CLI alone, built per platform; it imports no Python.
+        Tool::Gemmi => install_recipe(
+            installer,
+            UvRecipe {
+                verify: Some(("gemmi", &["--version"])),
+                ..UvRecipe::simple(Tool::Gemmi.slug(), "3.12", &["gemmi-program"], &["gemmi"])
+            },
         ),
         _ => Err(InstallError::InvalidConfiguration(format!(
             "{} has no uv/executable recipe",

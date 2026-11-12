@@ -226,7 +226,10 @@ fn wheel_in_use(archive: &Path) -> bool {
         .flatten()
         .flatten()
         .map(|entry| entry.path())
-        .find(|path| path.extension().is_some_and(|extension| extension == "dist-info"))
+        .find(|path| {
+            path.extension()
+                .is_some_and(|extension| extension == "dist-info")
+        })
         .map(|dist_info| dist_info.join("METADATA"));
     // Keep what this cannot tell about: a wrong guess the other way costs a download.
     metadata
@@ -268,8 +271,7 @@ fn link_count(path: &Path) -> Option<u64> {
 
     #[link(name = "kernel32")]
     unsafe extern "system" {
-        fn GetFileInformationByHandle(file: *mut c_void, information: *mut FileInformation)
-        -> i32;
+        fn GetFileInformationByHandle(file: *mut c_void, information: *mut FileInformation) -> i32;
     }
 
     let file = fs::File::open(path).ok()?;

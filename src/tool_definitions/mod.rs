@@ -26,6 +26,7 @@ mod dlkcat;
 mod enzymemap;
 mod esmc;
 mod esmfold2;
+mod gemmi;
 mod genie3;
 mod germinal;
 mod gromacs;
@@ -92,11 +93,12 @@ pub enum Tool {
     Gromacs,
     BoltzAdme,
     Xtb,
+    Gemmi,
 }
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 37] = [
+    pub const ALL: [Self; 38] = [
         Self::RdKit,
         Self::AlphaFold3,
         Self::OpenDde,
@@ -132,6 +134,7 @@ impl Tool {
         Self::Placer,
         Self::Gromacs,
         Self::Xtb,
+        Self::Gemmi,
         Self::BoltzAdme,
         Self::AntiFold,
     ];
@@ -176,6 +179,7 @@ impl Tool {
             Self::Gromacs => "gromacs",
             Self::BoltzAdme => "boltz-adme",
             Self::Xtb => "xtb",
+            Self::Gemmi => "gemmi",
         }
     }
 
@@ -235,6 +239,7 @@ impl Tool {
             Self::Gromacs => "GROMACS",
             Self::BoltzAdme => "Boltz ADME",
             Self::Xtb => "xTB",
+            Self::Gemmi => "Gemmi",
         }
     }
 
@@ -397,6 +402,7 @@ impl FromStr for Tool {
             "gromacs" => Self::Gromacs,
             "boltzadme" => Self::BoltzAdme,
             "xtb" => Self::Xtb,
+            "gemmi" => Self::Gemmi,
             _ => {
                 return Err(InstallError::InvalidConfiguration(format!(
                     "unknown tool slug {value:?}"

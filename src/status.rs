@@ -320,13 +320,18 @@ fn alphafold3_command(
 /// a coarse status check.
 fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
     if tool == Tool::RdKit {
-        return Some(installer.tool_python_command(tool).args(["-E", "-c", crate::rdkit::PROBE]));
+        return Some(
+            installer
+                .tool_python_command(tool)
+                .args(["-E", "-c", crate::rdkit::PROBE]),
+        );
     }
     // The executable's name comes from `Tool::console_script`, which is not always the slug; only
     // the probe argument is decided here.
     if tool == Tool::EsmC {
         return Some(installer.tool_python_command(tool).args([
-            "-c", "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer",
+            "-c",
+            "from esm.models.esmc import EsmcForMaskedLM, EsmcTokenizer",
         ]));
     }
     if tool == Tool::CatPred {
@@ -345,7 +350,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         ]));
     }
     let arguments: &[&str] = match tool {
-        Tool::OpenDde | Tool::Xtb | Tool::Gromacs => &["--version"],
+        Tool::OpenDde | Tool::Xtb | Tool::Gromacs | Tool::Gemmi => &["--version"],
         Tool::Boltz2
         | Tool::Chai1
         | Tool::Protenix

@@ -362,8 +362,8 @@ impl Installer {
             .join("uv-bin")
             .join(executable_name("uv"));
 
-        let fallback =
-            super::home_dir().map(|home| home.join(".local").join("bin").join(executable_name("uv")));
+        let fallback = super::home_dir()
+            .map(|home| home.join(".local").join("bin").join(executable_name("uv")));
 
         let candidates = self
             .config

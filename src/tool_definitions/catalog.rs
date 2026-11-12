@@ -10,9 +10,9 @@ use std::fmt;
 use crate::{
     LaunchType, LicenseCategory, ProcessExpense, Spec, SpecData, ToolCategory,
     tool_definitions::{
-        Tool, abmpnn, alphafold3, antibody_annotator, antifold, bindcraft, biophi,
-        boltz_adme, boltz2, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat,
-        enzymemap, esmc, esmfold2, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
+        Tool, abmpnn, alphafold3, antibody_annotator, antifold, bindcraft, biophi, boltz_adme,
+        boltz2, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat, enzymemap, esmc,
+        esmfold2, gemmi, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
         ligandmpnn, mber, netsolp, opendde, orca, pdbbind, placer, proteinmpnn, proteinmpnn_ddg,
         protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn, tlimmuno, xtb,
     },
@@ -349,6 +349,7 @@ pub const ALL: &[&CatalogEntry] = &[
     &gromacs::ENTRY,
     &orca::ENTRY,
     &xtb::ENTRY,
+    &gemmi::ENTRY,
     &igblast::ENTRY,
     &biophi::ENTRY,
     &antifold::ENTRY,

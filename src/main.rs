@@ -35,7 +35,10 @@ fn format_status(status: &bio_tools::install::ToolStatus) -> String {
 
 macro_rules! version_line {
     () => {
-        concat!("Bio Tools CLI application, version ", env!("CARGO_PKG_VERSION"))
+        concat!(
+            "Bio Tools CLI application, version ",
+            env!("CARGO_PKG_VERSION")
+        )
     };
 }
 

@@ -55,6 +55,7 @@ pub enum ToolCategory {
     BackboneGeneration,
     MoleculeDynamics,
     QuantumChemistry,
+    Crystallography,
     AntibodyDesign,
     SequencePrediction,
     SequenceAnalysis,
@@ -73,6 +74,7 @@ impl fmt::Display for ToolCategory {
             Self::BackboneGeneration => "Backbone design",
             Self::MoleculeDynamics => "Molecular simulation",
             Self::QuantumChemistry => "Quantum chemistry",
+            Self::Crystallography => "Crystallography",
             Self::AntibodyDesign => "Antibody design",
             Self::SequencePrediction => "Sequence prediction",
             Self::SequenceAnalysis => "Sequence analysis",
@@ -124,6 +126,7 @@ pub enum License {
     Bsd3Clause,
     Lgpl21OrLater,
     Lgpl3OrLater,
+    Mpl2,
     PublicDomain,
     /// A non-standard, tool-specific, or otherwise unlisted license: no
     /// fixed official page exists for it, so [`CatalogEntry::license_url`]
@@ -139,6 +142,7 @@ impl fmt::Display for License {
             Self::Bsd3Clause => "BSD-3-Clause",
             Self::Lgpl21OrLater => "LGPL-2.1-or-later",
             Self::Lgpl3OrLater => "LGPL-3.0-or-later",
+            Self::Mpl2 => "MPL-2.0",
             Self::PublicDomain => "Public domain",
             Self::Other => "Other",
         })
@@ -150,7 +154,7 @@ impl License {
         use License::*;
         match self {
             Mit | ApacheV2 | Bsd3Clause | PublicDomain => LicenseCategory::Permissive,
-            Lgpl21OrLater | Lgpl3OrLater => LicenseCategory::Copyleft,
+            Lgpl21OrLater | Lgpl3OrLater | Mpl2 => LicenseCategory::Copyleft,
             Other => LicenseCategory::Proprietary,
         }
     }
@@ -165,6 +169,7 @@ impl License {
             Self::Bsd3Clause => Some("https://opensource.org/license/bsd-3-clause"),
             Self::Lgpl21OrLater => Some("https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"),
             Self::Lgpl3OrLater => Some("https://www.gnu.org/licenses/lgpl-3.0.html"),
+            Self::Mpl2 => Some("https://www.mozilla.org/en-US/MPL/2.0/"),
             Self::PublicDomain => None,
             Self::Other => None,
         }

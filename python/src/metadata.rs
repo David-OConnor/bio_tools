@@ -129,6 +129,7 @@ python_enum!(
         BindingData = 11,
         Placeholder = 12,
         BackboneGeneration = 13,
+        Crystallography = 14,
     }
 );
 
@@ -167,6 +168,7 @@ python_enum!(
         PublicDomain = 5,
         Other = 6,
         Lgpl3OrLater = 7,
+        Mpl2 = 8,
     }
 );
 

@@ -348,7 +348,11 @@ mod tests {
         assert_eq!(environment.len(), CACHES.len());
         for (variable, path) in &environment {
             // Created rather than merely named: Chai-1 locks its download directory on first use.
-            assert!(path.is_dir(), "{variable} was not created at {}", path.display());
+            assert!(
+                path.is_dir(),
+                "{variable} was not created at {}",
+                path.display()
+            );
             if std::env::var_os(variable).is_none() {
                 assert!(path.starts_with(&cache_root));
                 assert_eq!(path.parent(), Some(cache_root.as_path()));
