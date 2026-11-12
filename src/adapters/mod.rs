@@ -7,6 +7,7 @@ use std::{fs, io, path::{Path, PathBuf}, hash::{Hash, Hasher}};
 pub mod rpc;
 
 const FILES: &[(&str, &[u8])] = &[
+    ("bio_tool_adapters/gromacs.py", include_bytes!("python/bio_tool_adapters/gromacs.py")),
     ("bio_tools_desktop.py", include_bytes!("python/bio_tools_desktop.py")),
     ("bio_tool_adapters/desktop.py", include_bytes!("python/bio_tool_adapters/desktop.py")),
     ("bio_tool_adapters/__init__.py", include_bytes!("python/bio_tool_adapters/__init__.py")),

@@ -2,39 +2,53 @@
   "fields": [
     {
       "name": "pdb",
-      "label": "PDB structure",
+      "label": "Molecule coordinates",
       "kind": "file",
-      "default": "ATOM      1  N   ALA A   1      -0.525   1.363   0.000  1.00  0.00           N\nATOM      2  CA  ALA A   1       0.000   0.000   0.000  1.00  0.00           C\nATOM      3  C   ALA A   1       1.526   0.000   0.000  1.00  0.00           C\nATOM      4  O   ALA A   1       2.153  -1.057   0.000  1.00  0.00           O\nATOM      5  CB  ALA A   1      -0.507  -0.771  -1.216  1.00  0.00           C\nTER\nEND",
+      "default": "",
       "required": true,
-      "help": "Defaults to a minimal alanine example when no file is chosen.",
+      "help": "PDB, GRO, mmCIF, Mol2 or SDF with 3D coordinates. Include every atom required by a supplied topology in the same order. SDF/Mol2 require a matching topology; pdb2gmx only parameterizes supported residues.",
       "options": [],
       "rows": null,
       "minimum": null,
       "maximum": null,
       "step": null,
       "maxlength": null,
-      "accept": ".pdb,.ent",
-      "task": ""
+      "accept": ".pdb,.ent,.gro,.cif,.mmcif,.mol2,.sdf,.mol",
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters,text"
     },
     {
-      "name": "force_field",
-      "label": "Force field",
+      "name": "structure_format",
+      "label": "Coordinate format",
       "kind": "select",
-      "default": "amber99sb-ildn",
+      "default": "auto",
       "required": false,
       "help": "",
       "options": [
         {
-          "value": "amber99sb-ildn",
-          "label": "AMBER99SB-ILDN"
+          "value": "auto",
+          "label": "auto"
         },
         {
-          "value": "charmm27",
-          "label": "CHARMM27"
+          "value": "pdb",
+          "label": "pdb"
         },
         {
-          "value": "oplsaa",
-          "label": "OPLS-AA/L"
+          "value": "gro",
+          "label": "gro"
+        },
+        {
+          "value": "mmcif",
+          "label": "mmcif"
+        },
+        {
+          "value": "mol2",
+          "label": "mol2"
+        },
+        {
+          "value": "sdf",
+          "label": "sdf"
         }
       ],
       "rows": null,
@@ -43,7 +57,192 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters,text"
+    },
+    {
+      "name": "topology",
+      "label": "Topology (.top)",
+      "kind": "file",
+      "default": "",
+      "required": false,
+      "help": "Optional for supported biomolecules in form mode: pdb2gmx builds it. Required for raw MDP and small molecules. Include force-field parameters, water and ions if adding solvent.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".top",
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters,text"
+    },
+    {
+      "name": "supporting_files",
+      "label": "Topology includes (.zip)",
+      "kind": "file",
+      "default": "",
+      "required": false,
+      "help": "ITP files, position restraints and custom .ff directories, with relative include paths preserved. API: base64 ZIP.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".zip",
+      "task": "",
+      "group": "Input",
+      "input_modes": "parameters,text"
+    },
+    {
+      "name": "index",
+      "label": "Index groups (.ndx)",
+      "kind": "file",
+      "default": "",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".ndx",
+      "task": "",
+      "group": "Input",
+      "input_modes": "text"
+    },
+    {
+      "name": "input_bundle",
+      "label": "Complete GROMACS input (.zip)",
+      "kind": "file",
+      "default": "",
+      "required": true,
+      "help": "GRO/PDB coordinates, TOP, MDP and all ITP includes. Optional index.ndx and state.cpt. Keep relative paths; no absolute includes. Runs grompp then mdrun without changing your MDP. API: base64 ZIP; 100 MB expanded maximum.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".zip",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "name": "coordinates_path",
+      "label": "Coordinates path inside ZIP",
+      "kind": "text",
+      "default": "conf.gro",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "name": "topology_path",
+      "label": "Topology path inside ZIP",
+      "kind": "text",
+      "default": "topol.top",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "name": "mdp_path",
+      "label": "MDP path inside ZIP",
+      "kind": "text",
+      "default": "md.mdp",
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "name": "mdp",
+      "label": "Raw MDP",
+      "kind": "textarea",
+      "default": "",
+      "required": true,
+      "help": "Used exactly as entered. Set nstxout-compressed > 0 for XTC or nstxout > 0 for TRR playback. All other settings come from this MDP; no automatic preparation or minimization.",
+      "options": [],
+      "rows": 18,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "MDP",
+      "input_modes": "text"
+    },
+    {
+      "name": "force_field",
+      "label": "Force field for pdb2gmx",
+      "kind": "select",
+      "default": "amber99sb-ildn",
+      "required": false,
+      "help": "Used only when no topology is supplied. Custom parameters can be supplied in TOP/ITP files.",
+      "options": [
+        {
+          "value": "amber99sb-ildn",
+          "label": "amber99sb-ildn"
+        },
+        {
+          "value": "amber03",
+          "label": "amber03"
+        },
+        {
+          "value": "amber99sb",
+          "label": "amber99sb"
+        },
+        {
+          "value": "charmm27",
+          "label": "charmm27"
+        },
+        {
+          "value": "oplsaa",
+          "label": "oplsaa"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "System preparation",
+      "input_modes": "parameters"
     },
     {
       "name": "water_model",
@@ -55,15 +254,15 @@
       "options": [
         {
           "value": "tip3p",
-          "label": "TIP3P"
+          "label": "tip3p"
         },
         {
           "value": "spce",
-          "label": "SPC/E"
+          "label": "spce"
         },
         {
           "value": "none",
-          "label": "No water model"
+          "label": "none"
         }
       ],
       "rows": null,
@@ -72,11 +271,13 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "System preparation",
+      "input_modes": "parameters"
     },
     {
       "name": "box_type",
-      "label": "Box type",
+      "label": "Periodic box",
       "kind": "select",
       "default": "dodecahedron",
       "required": false,
@@ -84,15 +285,15 @@
       "options": [
         {
           "value": "dodecahedron",
-          "label": "Dodecahedron"
+          "label": "dodecahedron"
         },
         {
           "value": "cubic",
-          "label": "Cubic"
+          "label": "cubic"
         },
         {
           "value": "octahedron",
-          "label": "Octahedron"
+          "label": "octahedron"
         }
       ],
       "rows": null,
@@ -101,13 +302,15 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "System preparation",
+      "input_modes": "parameters"
     },
     {
       "name": "box_distance",
       "label": "Solute-to-box distance (nm)",
       "kind": "number",
-      "default": 1.0,
+      "default": 1.2,
       "required": false,
       "help": "",
       "options": [],
@@ -117,11 +320,13 @@
       "step": 0.1,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "System preparation",
+      "input_modes": "parameters"
     },
     {
       "name": "solvate",
-      "label": "Add solvent",
+      "label": "Add water",
       "kind": "checkbox",
       "default": true,
       "required": false,
@@ -133,8 +338,587 @@
       "step": null,
       "maxlength": null,
       "accept": "",
-      "task": ""
+      "task": "",
+      "group": "System preparation",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "neutralize",
+      "label": "Neutralize with counterions",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "Applied when adding water; replaces SOL molecules with sodium or chloride.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "System preparation",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "salt_concentration",
+      "label": "NaCl concentration (mol/L)",
+      "kind": "number",
+      "default": 0.15,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 5,
+      "step": 0.01,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "System preparation",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "minimize",
+      "label": "Minimize energy before dynamics",
+      "kind": "checkbox",
+      "default": true,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Minimization and equilibration",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "em_steps",
+      "label": "Maximum minimization steps",
+      "kind": "number",
+      "default": 5000,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 1000000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Minimization and equilibration",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "emtol",
+      "label": "Minimization force tolerance (kJ/mol/nm)",
+      "kind": "number",
+      "default": 1000,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0.01,
+      "maximum": 100000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Minimization and equilibration",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "nvt_steps",
+      "label": "NVT equilibration steps",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "0 skips this stage. Runs before NPT and production; velocities continue through checkpoints.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 100000000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Minimization and equilibration",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "npt_steps",
+      "label": "NPT equilibration steps",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "0 skips this stage. Uses isotropic C-rescale pressure coupling.",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 100000000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Minimization and equilibration",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "integrator",
+      "label": "Integrator",
+      "kind": "select",
+      "default": "md",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "md",
+          "label": "md"
+        },
+        {
+          "value": "md-vv",
+          "label": "md-vv"
+        },
+        {
+          "value": "sd",
+          "label": "sd"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "nsteps",
+      "label": "Production steps",
+      "kind": "number",
+      "default": 5000,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 1000000000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "dt",
+      "label": "Time step (ps)",
+      "kind": "number",
+      "default": 0.002,
+      "required": false,
+      "help": "0.002 ps = 2 fs. Choose a time step compatible with your constraints and force field.",
+      "options": [],
+      "rows": null,
+      "minimum": 1e-06,
+      "maximum": 0.02,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "ensemble",
+      "label": "Production ensemble",
+      "kind": "select",
+      "default": "nvt",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "nvt",
+          "label": "nvt"
+        },
+        {
+          "value": "npt",
+          "label": "npt"
+        },
+        {
+          "value": "nve",
+          "label": "nve"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "temperature",
+      "label": "Temperature (K)",
+      "kind": "number",
+      "default": 300,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 2000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "tcoupl",
+      "label": "Thermostat",
+      "kind": "select",
+      "default": "v-rescale",
+      "required": false,
+      "help": "NVT/NPT only. Stochastic dynamics uses its built-in thermostat.",
+      "options": [
+        {
+          "value": "v-rescale",
+          "label": "v-rescale"
+        },
+        {
+          "value": "nose-hoover",
+          "label": "nose-hoover"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "tau_t",
+      "label": "Temperature coupling time (ps)",
+      "kind": "number",
+      "default": 0.1,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0.001,
+      "maximum": 100,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "pressure",
+      "label": "Reference pressure (bar)",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "NPT only; isotropic C-rescale pressure coupling.",
+      "options": [],
+      "rows": null,
+      "minimum": 0.01,
+      "maximum": 10000,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "tau_p",
+      "label": "Pressure coupling time (ps)",
+      "kind": "number",
+      "default": 5,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0.1,
+      "maximum": 100,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "compressibility",
+      "label": "Compressibility (bar⁻¹)",
+      "kind": "number",
+      "default": 4.5e-05,
+      "required": false,
+      "help": "NPT only. The default is for water near room temperature.",
+      "options": [],
+      "rows": null,
+      "minimum": 1e-10,
+      "maximum": 1,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Dynamics",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "constraints",
+      "label": "Bond constraints",
+      "kind": "select",
+      "default": "h-bonds",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "none",
+          "label": "none"
+        },
+        {
+          "value": "h-bonds",
+          "label": "h-bonds"
+        },
+        {
+          "value": "all-bonds",
+          "label": "all-bonds"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Interactions",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "coulombtype",
+      "label": "Electrostatics",
+      "kind": "select",
+      "default": "PME",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "PME",
+          "label": "PME"
+        },
+        {
+          "value": "Cut-off",
+          "label": "Cut-off"
+        },
+        {
+          "value": "Reaction-Field",
+          "label": "Reaction-Field"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Interactions",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "cutoff",
+      "label": "Coulomb and van der Waals cutoff (nm)",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "Verlet neighbour lists with periodic boundaries. Must fit within half the shortest box vector.",
+      "options": [],
+      "rows": null,
+      "minimum": 0.1,
+      "maximum": 5,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Interactions",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "epsilon_rf",
+      "label": "Reaction-field dielectric",
+      "kind": "number",
+      "default": 78.3,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Interactions",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "output_stride",
+      "label": "Write a frame every N steps",
+      "kind": "number",
+      "default": 100,
+      "required": false,
+      "help": "Writes both XTC and full-precision TRR positions; also sets energy/log output intervals.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 1000000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "seed",
+      "label": "Random seed",
+      "kind": "number",
+      "default": -1,
+      "required": false,
+      "help": "-1 chooses a random seed. Used for initial velocities and stochastic dynamics.",
+      "options": [],
+      "rows": null,
+      "minimum": -1,
+      "maximum": 2147483647,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Output",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "device",
+      "label": "Nonbonded calculation device",
+      "kind": "select",
+      "default": "auto",
+      "required": false,
+      "help": "Auto lets GROMACS use available acceleration. GPU requires a working GPU build/device; minimization uses CPU nonbonded kernels.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "auto"
+        },
+        {
+          "value": "gpu",
+          "label": "gpu"
+        },
+        {
+          "value": "cpu",
+          "label": "cpu"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Execution",
+      "input_modes": ""
+    },
+    {
+      "name": "threads",
+      "label": "OpenMP threads (0 = automatic)",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "",
+      "options": [],
+      "rows": null,
+      "minimum": 0,
+      "maximum": 256,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Execution",
+      "input_modes": ""
     }
   ],
-  "tasks": []
+  "tasks": [],
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "parameters",
+    "options": [
+      {
+        "value": "parameters",
+        "label": "Set parameters here"
+      },
+      {
+        "value": "text",
+        "label": "Raw MDP and input files"
+      },
+      {
+        "value": "upload",
+        "label": "Complete input ZIP"
+      }
+    ]
+  },
+  "field_groups": [
+    {
+      "label": "Input",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/flow.html"
+    },
+    {
+      "label": "MDP",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/mdp-options.html"
+    },
+    {
+      "label": "System preparation",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/flow.html"
+    },
+    {
+      "label": "Minimization and equilibration",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/mdp-options.html"
+    },
+    {
+      "label": "Dynamics",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/mdp-options.html"
+    },
+    {
+      "label": "Interactions",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/mdp-options.html"
+    },
+    {
+      "label": "Output",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/mdp-options.html"
+    },
+    {
+      "label": "Execution",
+      "docs_url": "https://manual.gromacs.org/current/user-guide/flow.html"
+    }
+  ]
 }
