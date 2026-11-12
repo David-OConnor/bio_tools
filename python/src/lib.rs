@@ -641,10 +641,20 @@ fn chai1_kalign(py: Python<'_>, process_executables: PathBuf) -> PyResult<PathBu
     .map_err(install_error)
 }
 
+/// Download a PubChem compound's SDF, preferring its 3D record.
+#[pyfunction]
+fn pubchem_load_sdf(py: Python<'_>, cid: u32) -> PyResult<String> {
+    use bio_apis::pubchem::{StructureSearchNamespace, load_sdf};
+
+    py.detach(|| load_sdf(StructureSearchNamespace::Cid, &cid.to_string()))
+        .map_err(|error| pyo3::exceptions::PyOSError::new_err(format!("{error:?}")))
+}
+
 #[pymodule]
 fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     metadata::register(m)?;
+    m.add_function(wrap_pyfunction!(pubchem_load_sdf, m)?)?;
     m.add_function(wrap_pyfunction!(adapter_package_path, m)?)?;
     m.add_function(wrap_pyfunction!(model_cache_environment, m)?)?;
     m.add_function(wrap_pyfunction!(chai1_example_msas, m)?)?;

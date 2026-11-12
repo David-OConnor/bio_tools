@@ -425,7 +425,7 @@
       "rows": null,
       "minimum": 0.01,
       "maximum": 100000,
-      "step": 1,
+      "step": "any",
       "maxlength": null,
       "accept": "",
       "task": "",
