@@ -11,6 +11,8 @@ import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+import bio_tools
+
 from . import (
     ToolInputError,
     ToolUnavailable,
@@ -119,7 +121,7 @@ def validate_includes(root: Path) -> None:
                 )
 
 
-def structure_file(payload: dict[str, Any], root: Path) -> str:
+def read_structure(payload: dict[str, Any]) -> tuple[str, str]:
     # MOL/SDF headers may begin with blank lines; their line positions matter.
     content = str(payload.get("pdb") or "")
     if not content.strip() or len(content) > MAX_INPUT:
@@ -145,6 +147,53 @@ def structure_file(payload: dict[str, Any], root: Path) -> str:
             fmt = "pdb"
         else:
             fmt = "gro"
+    return content, fmt
+
+
+def ligand_records(content: str, fmt: str) -> list[tuple[str, int]]:
+    from rdkit import Chem
+
+    if fmt == "sdf":
+        blocks = [
+            block
+            for block in re.split(r"(?m)^\$\$\$\$[ \t]*\r?\n?", content)
+            if block.strip()
+        ]
+    else:
+        header = "@<TRIPOS>MOLECULE"
+        blocks = [header + block for block in content.split(header)[1:]]
+    if not blocks:
+        raise ToolInputError("Supply at least one 3D molecule.")
+
+    records = []
+    for i, block in enumerate(blocks, start=1):
+        try:
+            mol = (
+                Chem.MolFromMol2Block(block, removeHs=False)
+                if fmt == "mol2"
+                else Chem.MolFromMolBlock(block, removeHs=False)
+            )
+            if mol is None or not mol.GetNumConformers() or not mol.GetConformer().Is3D():
+                raise ValueError("Supply a molecule with 3D coordinates.")
+            mol = Chem.AddHs(mol, addCoords=True)
+            records.append((Chem.MolToMolBlock(mol), Chem.GetFormalCharge(mol)))
+        except (RuntimeError, ValueError) as exc:
+            raise ToolInputError(f"Cannot read molecule {i}: {exc}") from exc
+
+    return records
+
+
+def prepare_ligands(
+    content: str, fmt: str, force_field: str, water: str, solvate: bool
+) -> tuple[str, str, str]:
+    records = ligand_records(content, fmt)
+    try:
+        return bio_tools.gromacs_prepare_ligands(records, force_field, water, solvate)
+    except ValueError as exc:
+        raise ToolInputError(str(exc)) from exc
+
+
+def structure_file(content: str, fmt: str, root: Path) -> str:
     if fmt == "mmcif":
         from Bio.PDB import MMCIFParser, PDBIO
 
@@ -195,10 +244,6 @@ def structure_file(payload: dict[str, Any], root: Path) -> str:
             content, fmt = Chem.MolToPDBBlock(mol), "pdb"
         except Exception as exc:
             raise ToolInputError(f"Cannot read molecule: {exc}") from exc
-        if not str(payload.get("topology", "")).strip():
-            raise ToolInputError(
-                "SDF/Mol2 input requires a matching GROMACS topology and any ITP includes. Atom order and hydrogens must match."
-            )
     filename = f"input.{fmt}"
     (root / filename).write_text(content + "\n", encoding="utf-8")
     return filename
@@ -373,7 +418,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
                             raise ToolInputError(
                                 "The topology ZIP must not contain simulation output files."
                             )
-            coordinates = structure_file(payload, work)
+            content, fmt = read_structure(payload)
             topology, mdp = "topol.top", "md.mdp"
             top = text(
                 payload, "topology", required=mode == "text", max_length=MAX_INPUT
@@ -381,6 +426,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
             if top:
                 (work / topology).write_text(top + "\n", encoding="utf-8")
             if mode == "text":
+                coordinates = structure_file(content, fmt, work)
                 (work / mdp).write_text(
                     text(payload, "mdp", max_length=MAX_INPUT) + "\n", encoding="utf-8"
                 )
@@ -390,8 +436,9 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
                     payload, "force_field", FORCE_FIELDS, "amber99sb-ildn"
                 )
                 water = choice(
-                    payload, "water_model", {"tip3p", "spce", "none"}, "tip3p"
+                    payload, "water_model", {"auto", "tip3p", "spce", "none"}, "tip3p"
                 )
+                solvate = boolean(payload, "solvate", True) and water != "none"
                 box = choice(
                     payload,
                     "box_type",
@@ -401,6 +448,17 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
                 distance = decimal(
                     payload, "box_distance", default=1.2, minimum=0.1, maximum=10
                 )
+                template = "spc216.gro"
+                if not top and fmt in {"sdf", "mol2"}:
+                    top, gro, template = prepare_ligands(
+                        content, fmt, force_field, water, solvate
+                    )
+                    (work / topology).write_text(top, encoding="utf-8")
+                    coordinates = "input.gro"
+                    (work / coordinates).write_text(gro, encoding="utf-8")
+                else:
+                    coordinates = structure_file(content, fmt, work)
+
                 validate_includes(work)
                 if not top:
                     command(
@@ -414,7 +472,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
                         "-ff",
                         force_field,
                         "-water",
-                        water,
+                        "tip3p" if water == "auto" else water,
                         "-ignh",
                     )
                     coordinates = "processed.gro"
@@ -431,13 +489,13 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
                     box,
                 )
                 coordinates = "boxed.gro"
-                if boolean(payload, "solvate", True) and water != "none":
+                if solvate:
                     command(
                         "solvate",
                         "-cp",
                         coordinates,
                         "-cs",
-                        "spc216.gro",
+                        template,
                         "-o",
                         "solvated.gro",
                         "-p",
@@ -450,21 +508,27 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
                 emtol = decimal(
                     payload, "emtol", default=1000, minimum=0.01, maximum=100000
                 )
-                (work / "em.mdp").write_text(
+                em_mdp = (
                     f"integrator = steep\nnsteps = {em_steps}\nemtol = {emtol}\nemstep = 0.01\n"
-                    f"cutoff-scheme = Verlet\ncoulombtype = {p['coulombtype']}\n"
-                    f"rcoulomb = {p['cutoff']}\nrvdw = {p['cutoff']}\npbc = xyz\n",
-                    encoding="utf-8",
+                    f"cutoff-scheme = Verlet\n"
+                    f"rcoulomb = {p['cutoff']}\nrvdw = {p['cutoff']}\npbc = xyz\n"
+                )
+                (work / "em.mdp").write_text(
+                    em_mdp + f"coulombtype = {p['coulombtype']}\n", encoding="utf-8"
                 )
                 salt = decimal(
                     payload, "salt_concentration", default=0.15, minimum=0, maximum=5
                 )
                 neutralize = boolean(payload, "neutralize", True)
                 if (neutralize or salt) and coordinates == "solvated.gro":
+                    # genion needs a TPR before neutralization. This MDP is never simulated.
+                    (work / "ions.mdp").write_text(
+                        em_mdp + "coulombtype = Cut-off\n", encoding="utf-8"
+                    )
                     command(
                         "grompp",
                         "-f",
-                        "em.mdp",
+                        "ions.mdp",
                         "-c",
                         coordinates,
                         "-p",

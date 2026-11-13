@@ -6,7 +6,7 @@
       "kind": "file",
       "default": "",
       "required": true,
-      "help": "PDB, GRO, mmCIF, Mol2 or SDF with 3D coordinates. Include every atom required by a supplied topology in the same order. SDF/Mol2 require a matching topology; pdb2gmx only parameterizes supported residues.",
+      "help": "Load 3D SDF or Tripos Mol2 files to prepare small molecules automatically. You can select several files of the same format. Use PDB, mmCIF, or GRO for supported biomolecules. When supplying a topology, use matching coordinates and hydrogens.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -67,7 +67,7 @@
       "kind": "file",
       "default": "",
       "required": false,
-      "help": "Optional for supported biomolecules in form mode: pdb2gmx builds it. Required for raw MDP and small molecules. Include force-field parameters, water and ions if adding solvent.",
+      "help": "Optional in form mode for supported biomolecules and 3D SDF or Mol2 files. Required with a raw MDP. Include force-field parameters, water and ions if adding solvent to a supplied topology.",
       "options": [],
       "rows": null,
       "minimum": null,
@@ -207,31 +207,31 @@
     },
     {
       "name": "force_field",
-      "label": "Force field for pdb2gmx",
+      "label": "Force field",
       "kind": "select",
       "default": "amber99sb-ildn",
       "required": false,
-      "help": "Used only when no topology is supplied. Custom parameters can be supplied in TOP/ITP files.",
+      "help": "Amber choices use GAFF2 for small molecules. OPLS-AA needs local parameters for the molecule. Biomolecules use the selected GROMACS force field.",
       "options": [
         {
           "value": "amber99sb-ildn",
-          "label": "amber99sb-ildn"
+          "label": "Amber99SB-ILDN / GAFF2"
         },
         {
           "value": "amber03",
-          "label": "amber03"
+          "label": "Amber03 / GAFF2"
         },
         {
           "value": "amber99sb",
-          "label": "amber99sb"
+          "label": "Amber99SB / GAFF2"
         },
         {
           "value": "charmm27",
-          "label": "charmm27"
+          "label": "CHARMM27"
         },
         {
           "value": "oplsaa",
-          "label": "oplsaa"
+          "label": "OPLS-AA"
         }
       ],
       "rows": null,
@@ -250,8 +250,12 @@
       "kind": "select",
       "default": "tip3p",
       "required": false,
-      "help": "",
+      "help": "For automatically prepared small molecules, use the force-field default to select Amber OPC or OPLS TIP4P.",
       "options": [
+        {
+          "value": "auto",
+          "label": "Force-field default"
+        },
         {
           "value": "tip3p",
           "label": "tip3p"
@@ -689,19 +693,19 @@
       "kind": "select",
       "default": "h-bonds",
       "required": false,
-      "help": "",
+      "help": "Flexible hydrogen bonds may need a smaller time step. Solvent constraints come from the water topology.",
       "options": [
         {
           "value": "none",
-          "label": "none"
+          "label": "None (flexible hydrogens)"
         },
         {
           "value": "h-bonds",
-          "label": "h-bonds"
+          "label": "Bonds to hydrogen"
         },
         {
           "value": "all-bonds",
-          "label": "all-bonds"
+          "label": "All bonds"
         }
       ],
       "rows": null,

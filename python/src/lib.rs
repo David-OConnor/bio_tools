@@ -1,3 +1,4 @@
+mod gromacs;
 mod metadata;
 mod run;
 
@@ -655,6 +656,7 @@ fn bio_tools(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     metadata::register(m)?;
     m.add_function(wrap_pyfunction!(pubchem_load_sdf, m)?)?;
+    m.add_function(wrap_pyfunction!(gromacs::gromacs_prepare_ligands, m)?)?;
     m.add_function(wrap_pyfunction!(adapter_package_path, m)?)?;
     m.add_function(wrap_pyfunction!(model_cache_environment, m)?)?;
     m.add_function(wrap_pyfunction!(chai1_example_msas, m)?)?;
