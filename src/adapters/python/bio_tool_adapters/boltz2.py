@@ -296,5 +296,5 @@ def check_status() -> ToolStatus:
         return ToolStatus(CheckResult.NOT_INSTALLED, str(exc))
     status = probe_cli([boltz])
     if status.result == CheckResult.PASS:
-        status.device = torch_device(environment_python("boltz"))
+        status.device = torch_device(environment_python("boltz"), mps=True)
     return status

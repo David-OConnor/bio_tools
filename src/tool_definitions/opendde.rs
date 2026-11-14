@@ -41,7 +41,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         summary: "Structure prediction for proteins, DNA/RNA, ligands, and ions. Supports co-folding.",
         description: "OpenDDE is an all-atom biomolecular foundation model that turns co-folding into a scalable engine for structure prediction, design, \
          and optimization in drug discovery. It models proteins, nucleic acids, and small molecules in one all-atom system.",
-        availability: "Installed by setup_system.sh into its own uv environment; model weights download during installation",
+        availability: "Installed by setup_system.sh into its own uv environment; model weights download during installation. \
+         Runs on CUDA, Apple Silicon's MPS, or CPU",
         license_details: "Apache 2.0 (Aureka Research). Commercial use is permitted, with the licence's attribution and notice conditions.",
         repo_url: Some("https://github.com/aurekaresearch/OpenDDE"),
         home_url: Some("https://aurekaresearch.github.io/OpenDDE-Website/"),

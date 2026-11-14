@@ -6,6 +6,7 @@ import hashlib
 import os
 import re
 import string
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -352,8 +353,12 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     ).strip()
     if not re.fullmatch(r"https://[^\s]+", msa_server_url):
         raise ToolInputError("msa_server_url must be an HTTPS URL.")
-    device = str(payload.get("device") or "cuda:0").strip()
-    if not re.fullmatch(r"cuda:\d+", device):
+    # macOS runs on the CPU: the installed Torch predates the MPS support Chai-1 needs.
+    macos = sys.platform == "darwin"
+    device = str(payload.get("device") or ("cpu" if macos else "cuda:0")).strip()
+    if macos and device != "cpu":
+        raise ToolInputError("Chai-1 runs on the CPU on macOS; set the device to cpu.")
+    if not macos and not re.fullmatch(r"cuda:\d+", device):
         raise ToolInputError("Chai-1 needs a CUDA device such as cuda:0.")
     if msa_directory:
         directory = Path(msa_directory).resolve()
@@ -489,5 +494,5 @@ def check_status() -> ToolStatus:
     if status.result != CheckResult.PASS:
         return status
     return require_gpu_status(
-        status, torch_device(environment_python("chai1")), "Chai-1"
+        status, torch_device(environment_python("chai1")), "Chai-1", cpu_on_macos=True
     )

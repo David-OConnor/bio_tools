@@ -85,6 +85,10 @@ const FILES: &[(&str, &[u8])] = &[
         include_bytes!("python/bio_tool_adapters/opendde.py"),
     ),
     (
+        "bio_tool_adapters/openfold3.py",
+        include_bytes!("python/bio_tool_adapters/openfold3.py"),
+    ),
+    (
         "bio_tool_adapters/tool_scripts/opendde_predict.py",
         include_bytes!("python/bio_tool_adapters/tool_scripts/opendde_predict.py"),
     ),

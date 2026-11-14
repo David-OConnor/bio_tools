@@ -665,4 +665,5 @@ def check_status() -> ToolStatus:
         ),
         torch_device(python),
         "LigandMPNN",
+        cpu_on_macos=True,
     )

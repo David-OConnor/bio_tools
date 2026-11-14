@@ -46,7 +46,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         towards accurate molecular design. Boltz-2 is the first deep learning model to approach the accuracy of physics-based \
         free-energy perturbation (FEP) methods, while running 1000x faster — making accurate in silico screening practical for \
         early-stage drug discovery.",
-        availability: "Installed by setup_system.sh into its own uv environment; model weights download on first execution",
+        availability: "Installed by setup_system.sh into its own uv environment; model weights download on first execution. \
+         Runs on CUDA, or Apple Silicon's MPS on macOS",
         license_details: "MIT, covering the model weights as well as the code: unrestricted academic and commercial use.",
         repo_url: Some("https://github.com/jwohlwend/boltz"),
         home_url: Some("https://boltz.bio/"),

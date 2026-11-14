@@ -10,9 +10,7 @@
 //! genetic databases (~630 GB unpacked) are never fetched: runs get their MSAs from the ColabFold
 //! MMseqs2 server by default, and only the optional local data pipeline needs them.
 //!
-//! HMMER is built too, with upstream's `--seq_limit` patch to jackhmmer, because the local data
-//! pipeline shells out to it. It is optional: a failed HMMER build is reported and the install
-//! still succeeds, since the default ColabFold route never calls it.
+//! When local databases are configured, build HMMER with upstream's `--seq_limit` patch.
 //!
 //! Installation guide: <https://github.com/google-deepmind/alphafold3/blob/v3.0.4/docs/installation.md>
 //! Dockerfile: <https://github.com/google-deepmind/alphafold3/blob/v3.0.4/docker/Dockerfile>
@@ -122,7 +120,9 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
     scrub_python_environment(&mut verify);
     installer.checked(&mut verify)?;
 
-    if let Err(error) = ensure_hmmer(installer, &source) {
+    if databases_dir(installer).is_dir()
+        && let Err(error) = ensure_hmmer(installer, &source)
+    {
         installer.note(format!(
             "HMMER was not built ({error}). It is only needed for AlphaFold 3's local data \
              pipeline; runs using the ColabFold MSA server or no MSAs are unaffected."
@@ -157,6 +157,17 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
         ));
     }
     Ok(())
+}
+
+fn databases_dir(installer: &Installer) -> PathBuf {
+    std::env::var_os("ALPHAFOLD3_DATABASE_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            installer
+                .tools_root()
+                .join(ASSET_DIRECTORY)
+                .join("databases")
+        })
 }
 
 /// Where Google publishes the parameters. Fetched only on the operator's explicit acceptance of

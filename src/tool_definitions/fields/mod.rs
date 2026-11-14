@@ -32,6 +32,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "mber" => Some(include_str!("mber.json")),
         "netsolp" => Some(include_str!("netsolp.json")),
         "opendde" => Some(include_str!("opendde.json")),
+        "openfold3" => Some(include_str!("openfold3.json")),
         "orca" => Some(include_str!("orca.json")),
         "pdbbind" => Some(include_str!("pdbbind.json")),
         "placer" => Some(include_str!("placer.json")),

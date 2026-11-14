@@ -17,6 +17,7 @@ from __future__ import annotations
 import logging
 import os
 import shutil
+import sys
 from contextvars import ContextVar
 from functools import lru_cache
 from pathlib import Path
@@ -310,6 +311,7 @@ def run_command(
             env={
                 **model_cache_environment(),
                 **_triton_cache_environment(command[0]),
+                **_mps_fallback_environment(),
                 **(env or {}),
             },
             check=True,
@@ -328,6 +330,16 @@ def run_command(
         "stderr": completed.stderr,
         "run_log_dir": str(completed.run_log_dir),
     }
+
+
+def _mps_fallback_environment() -> dict[str, str]:
+    """Run ops Apple's MPS lacks on the CPU instead of failing; Boltz-2 needs
+    `linalg_svd`. macOS only. An operator's own setting wins.
+    """
+
+    if sys.platform != "darwin" or "PYTORCH_ENABLE_MPS_FALLBACK" in os.environ:
+        return {}
+    return {"PYTORCH_ENABLE_MPS_FALLBACK": "1"}
 
 
 def _triton_cache_environment(executable: str) -> dict[str, str]:
@@ -401,11 +413,17 @@ def _device_probe(
     return device if device in {"GPU", "CPU"} else None
 
 
-def torch_device(python: str | Path) -> str | None:
-    """Whether `python`'s PyTorch build reports a usable GPU, without importing torch here."""
+def torch_device(python: str | Path, *, mps: bool = False) -> str | None:
+    """Whether `python`'s PyTorch build reports a usable GPU, without importing torch here.
 
+    `mps`: count Apple's MPS as a GPU, for a tool that runs on it.
+    """
+
+    gpu = "torch.cuda.is_available()"
+    if mps:
+        gpu += " or torch.backends.mps.is_available()"
     return _device_probe(
-        python, "import torch; print('GPU' if torch.cuda.is_available() else 'CPU')"
+        python, f"import torch; print('GPU' if {gpu} else 'CPU')"
     )
 
 

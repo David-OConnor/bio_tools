@@ -277,8 +277,8 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     samples = integer(payload, "samples", default=5, minimum=1, maximum=64)
     steps = integer(payload, "steps", default=200, minimum=1, maximum=1_000)
     cycles = integer(payload, "cycles", default=10, minimum=1, maximum=100)
-    dtype = _choice(payload, "dtype", {"fp32", "bf16"}, "fp32")
-    device = _choice(payload, "device", {"auto", "cuda", "cpu"}, "auto")
+    dtype = _choice(payload, "dtype", {"fp32", "bf16"}, "bf16")
+    device = _choice(payload, "device", {"auto", "cuda", "mps", "cpu"}, "auto")
 
     use_msa = boolean(payload, "use_msa", True)
     use_rna_msa = boolean(payload, "use_rna_msa")
@@ -388,5 +388,5 @@ def check_status() -> ToolStatus:
         return ToolStatus(CheckResult.NOT_INSTALLED, str(exc))
     status = probe_cli([opendde])
     if status.result == CheckResult.PASS:
-        status.device = torch_device(environment_python("opendde"))
+        status.device = torch_device(environment_python("opendde"), mps=True)
     return status

@@ -148,6 +148,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "igblast" => Some(include_str!("igblast.json")),
         "ligandmpnn" => Some(include_str!("ligandmpnn.json")),
         "opendde" => Some(include_str!("opendde.json")),
+        "openfold3" => Some(include_str!("openfold3.json")),
         "proteinmpnn" => Some(include_str!("proteinmpnn.json")),
         "proteinmpnn_ddg" => Some(include_str!("proteinmpnn_ddg.json")),
         "protenix" => Some(include_str!("protenix.json")),

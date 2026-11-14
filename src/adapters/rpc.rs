@@ -72,6 +72,14 @@ fn dispatch(request: Value) -> Result<Value, String> {
                 .map(|path| json!(path))
                 .map_err(|error| error.to_string())
         }
+        "model_cache_environment" => {
+            let installer =
+                crate::install::Installer::for_process_executables(text(&request, "root")?)
+                    .map_err(|error| error.to_string())?;
+            let environment: std::collections::BTreeMap<_, _> =
+                installer.model_cache_environment().into_iter().collect();
+            Ok(json!(environment))
+        }
         "run" => execute(&request),
         _ => Err(format!("Unknown adapter operation: {op}")),
     }

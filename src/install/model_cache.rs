@@ -62,6 +62,11 @@ pub(super) const CACHES: &[Cache] = &[
         owner: Some(Tool::OpenDde),
     },
     Cache {
+        variable: "OPENFOLD_CACHE",
+        directory: "openfold3",
+        owner: Some(Tool::OpenFold3),
+    },
+    Cache {
         variable: "PROTENIX_ROOT_DIR",
         directory: "protenix",
         owner: Some(Tool::Protenix),
@@ -99,7 +104,7 @@ impl Installer {
     }
 
     /// The download directory `tool` owns, if it has one.
-    pub(super) fn tool_cache_dir(&self, tool: Tool) -> Option<PathBuf> {
+    pub(crate) fn tool_cache_dir(&self, tool: Tool) -> Option<PathBuf> {
         owned(tool).next().map(|cache| self.cache_path(cache))
     }
 

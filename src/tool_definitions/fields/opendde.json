@@ -186,9 +186,9 @@
       "name": "dtype",
       "label": "Inference precision",
       "kind": "select",
-      "default": "fp32",
+      "default": "bf16",
       "required": false,
-      "help": "OpenDDE defaults to FP32; BF16 can reduce memory use on supported devices.",
+      "help": "OpenDDE defaults to BF16. FP32 matches releases before 1.2. On MPS, BF16 needs macOS 14 or newer and falls back to FP32 below that.",
       "options": [
         {
           "value": "fp32",
@@ -214,7 +214,7 @@
       "kind": "select",
       "default": "auto",
       "required": false,
-      "help": "Auto selects CUDA when available and otherwise CPU.",
+      "help": "Auto selects CUDA, then Apple MPS, then CPU.",
       "options": [
         {
           "value": "auto",
@@ -223,6 +223,10 @@
         {
           "value": "cuda",
           "label": "CUDA"
+        },
+        {
+          "value": "mps",
+          "label": "Apple MPS"
         },
         {
           "value": "cpu",

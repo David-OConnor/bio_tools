@@ -32,6 +32,7 @@ mod opendde;
 mod package_cache;
 pub(crate) mod protein_mpnn;
 mod python_tools;
+pub(crate) use python_tools::OPENFOLD3_CHECKPOINT;
 mod uninstall;
 mod xtb;
 
@@ -182,7 +183,7 @@ pub struct InstallConfig {
     pub prewarm_opendde: bool,
     pub igblast_version: String,
     pub netsolp_models_url: Option<String>,
-    /// conda-forge release, on Linux. Windows has one pinned release; see `gromacs.rs`.
+    /// conda-forge release, on Linux and macOS. Windows has one pinned release; see `gromacs.rs`.
     pub gromacs_version: String,
     pub gromacs_prefix: Option<PathBuf>,
 }
@@ -263,6 +264,14 @@ fn triton_cache_dir(slug: &str) -> Option<PathBuf> {
     let base = first_env_path(&["TRITON_CACHE_DIR"])
         .or_else(|| home_dir().map(|home| home.join(".triton").join("cache")))?;
     Some(base.join(slug))
+}
+
+/// Run ops Apple's MPS lacks on the CPU instead of failing; Boltz-2 needs `linalg_svd`. macOS
+/// only. An operator's own setting wins.
+fn mps_fallback_environment() -> Option<(&'static str, &'static str)> {
+    const NAME: &str = "PYTORCH_ENABLE_MPS_FALLBACK";
+
+    (cfg!(target_os = "macos") && std::env::var_os(NAME).is_none()).then_some((NAME, "1"))
 }
 
 fn first_env_path(names: &[&str]) -> Option<PathBuf> {
@@ -480,7 +489,8 @@ impl Installer {
         let command = command
             .env("VIRTUAL_ENV", environment)
             .env("PATH", path)
-            .envs(self.model_cache_environment());
+            .envs(self.model_cache_environment())
+            .envs(mps_fallback_environment());
         match triton_cache_dir(tool.slug()) {
             Some(cache) => command.env("TRITON_CACHE_DIR", cache),
             None => command,
@@ -515,7 +525,7 @@ impl Installer {
         if !tool.is_supported() {
             return Err(InstallError::Unsupported {
                 tool,
-                reason: "the required upstream wheels or binaries are Linux-only".to_owned(),
+                reason: "upstream publishes no wheels or binaries for this platform".to_owned(),
             });
         }
 

@@ -1,0 +1,217 @@
+{
+  "fields": [
+    {
+      "required": false,
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 80,
+      "accept": "",
+      "task": "",
+      "name": "job_name",
+      "label": "Job name",
+      "kind": "text",
+      "default": "ubiquitin",
+      "help": "Names the query and its output directory.",
+      "group": "Input",
+      "input_modes": "parameters"
+    },
+    {
+      "required": true,
+      "options": [
+        {
+          "value": "protein",
+          "label": "Protein"
+        },
+        {
+          "value": "ligand",
+          "label": "Ligand"
+        },
+        {
+          "value": "dna",
+          "label": "DNA"
+        },
+        {
+          "value": "rna",
+          "label": "RNA"
+        },
+        {
+          "value": "ion",
+          "label": "Ion"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "name": "sequence_molecules",
+      "label": "Molecules",
+      "kind": "molecule_builder",
+      "default": "[{\"type\":\"protein\",\"id\":\"A\",\"count\":1,\"sequence\":\"MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG\"}]",
+      "help": "Give each chain a unique ID and list one ID per copy. Use SMILES or a CCD_ code for ligands.",
+      "group": "Input",
+      "input_modes": "parameters",
+      "molecule_features": "id,count,modifications,protein_paired_msa,protein_unpaired_msa,protein_templates,rna_unpaired_msa"
+    },
+    {
+      "required": true,
+      "options": [],
+      "rows": 18,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 1000000,
+      "accept": "",
+      "task": "",
+      "name": "input_json",
+      "label": "OpenFold3 queries (JSON)",
+      "kind": "textarea",
+      "default": "{\n  \"queries\": {\n    \"ubiquitin\": {\n      \"chains\": [\n        {\n          \"molecule_type\": \"protein\",\n          \"chain_ids\": [\n            \"A\"\n          ],\n          \"sequence\": \"MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG\"\n        }\n      ]\n    }\n  }\n}",
+      "help": "Native OpenFold3 JSON with a queries object. Each query contains a chains list.",
+      "group": "Input",
+      "input_modes": "text",
+      "help_note": "Use absolute paths on the runner for text MSAs (.a3m or .sto) and raw templates."
+    },
+    {
+      "required": false,
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": ".json",
+      "task": "",
+      "name": "inputs_file",
+      "label": "Queries file (JSON)",
+      "kind": "file",
+      "default": "",
+      "help": "The JSON file defining one or more OpenFold3 queries.",
+      "group": "Input",
+      "input_modes": "upload"
+    },
+    {
+      "required": false,
+      "options": [
+        {
+          "value": "colabfold",
+          "label": "ColabFold"
+        },
+        {
+          "value": "precomputed",
+          "label": "Precomputed files"
+        },
+        {
+          "value": "none",
+          "label": "No MSAs"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "name": "msa_source",
+      "label": "MSA source",
+      "kind": "select",
+      "default": "colabfold",
+      "help": "ColabFold sends protein sequences to the configured MSA server. Precomputed uses paths on the runner. Running without MSAs can reduce accuracy.",
+      "group": "Inference"
+    },
+    {
+      "required": false,
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "name": "use_templates",
+      "label": "Use protein templates",
+      "kind": "checkbox",
+      "default": false,
+      "help": "Use ColabFold template hits or template inputs in the query.",
+      "group": "Inference"
+    },
+    {
+      "required": false,
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 64,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "name": "samples",
+      "label": "Samples per seed",
+      "kind": "number",
+      "default": 1,
+      "help": "Number of structures generated per seed.",
+      "group": "Inference"
+    },
+    {
+      "required": false,
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 32,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "name": "num_model_seeds",
+      "label": "Model seeds",
+      "kind": "number",
+      "default": 1,
+      "help": "Number of independently seeded predictions per query.",
+      "group": "Inference"
+    },
+    {
+      "required": false,
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "name": "low_memory",
+      "label": "Low memory mode",
+      "kind": "checkbox",
+      "default": true,
+      "help": "Use OpenFold3’s low-memory configuration. Multiple samples can take longer.",
+      "group": "Runtime"
+    }
+  ],
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "parameters",
+    "options": [
+      {
+        "value": "parameters",
+        "label": "Set parameters here"
+      },
+      {
+        "value": "text",
+        "label": "Enter JSON"
+      },
+      {
+        "value": "upload",
+        "label": "Upload JSON"
+      }
+    ]
+  },
+  "tasks": []
+}

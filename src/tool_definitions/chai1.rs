@@ -39,7 +39,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         description: "A multi-modal foundation model for molecular structure prediction that performs at \
         the state-of-the-art across a variety of benchmarks. Chai-1 enables unified prediction of proteins, \
         small molecules, DNA, RNA, glycosylations, and more.",
-        availability: "Linux and a CUDA GPU with bfloat16 support are required; model weights download on first use",
+        availability: "Linux with a CUDA GPU that supports bfloat16, or Apple Silicon macOS on the CPU (slow); \
+         model weights download on first use",
         license_details: "Apache 2.0 for both the code and the model weights; upstream states this covers commercial use including drug discovery. Earlier releases used the narrower Chai Discovery Community Licence.",
         repo_url: Some("https://github.com/chaidiscovery/chai-lab"),
         home_url: Some("https://www.chaidiscovery.com/"),

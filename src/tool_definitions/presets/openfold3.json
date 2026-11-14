@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ubiquitin",
+    "label": "Ubiquitin · 76 aa",
+    "description": "Official ubiquitin example. One prediction without an MSA server request.",
+    "source_url": "https://github.com/aqlaboratory/openfold-3/blob/0.5.1/examples/example_inference_inputs/query_ubiquitin.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"queries\": {\n    \"ubiquitin\": {\n      \"chains\": [\n        {\n          \"molecule_type\": \"protein\",\n          \"chain_ids\": [\n            \"A\"\n          ],\n          \"sequence\": \"MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG\"\n        }\n      ]\n    }\n  }\n}",
+      "msa_source": "none",
+      "samples": 1
+    }
+  },
+  {
+    "id": "ubiquitin_colabfold",
+    "label": "Ubiquitin with ColabFold",
+    "description": "The same ubiquitin example with a protein MSA from ColabFold.",
+    "source_url": "https://github.com/aqlaboratory/openfold-3/blob/0.5.1/examples/example_inference_inputs/query_ubiquitin.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"queries\": {\n    \"ubiquitin\": {\n      \"chains\": [\n        {\n          \"molecule_type\": \"protein\",\n          \"chain_ids\": [\n            \"A\"\n          ],\n          \"sequence\": \"MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG\"\n        }\n      ]\n    }\n  }\n}",
+      "msa_source": "colabfold",
+      "samples": 1
+    }
+  },
+  {
+    "id": "leucine_zipper",
+    "label": "GCN4 leucine zipper · homodimer",
+    "description": "Official 2ZTA homodimer example. One prediction without an MSA server request.",
+    "source_url": "https://github.com/aqlaboratory/openfold-3/blob/0.5.1/examples/example_inference_inputs/query_homomer.json",
+    "values": {
+      "input_mode": "text",
+      "input_json": "{\n  \"queries\": {\n    \"leucine_zipper\": {\n      \"chains\": [\n        {\n          \"molecule_type\": \"protein\",\n          \"chain_ids\": [\n            \"A\",\n            \"B\"\n          ],\n          \"sequence\": \"XRMKQLEDKVEELLSKNYHLENEVARLKKLVGER\"\n        }\n      ]\n    }\n  }\n}",
+      "msa_source": "none",
+      "samples": 1
+    }
+  }
+]

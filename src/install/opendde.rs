@@ -67,10 +67,11 @@ fn install_backend(installer: &mut Installer, backend: TorchBackend) -> Result<(
         &["torch==2.7.1", "torchvision==0.22.1", "torchaudio==2.7.1"],
         backend,
     )?;
+    // 1.1.1 adds Apple MPS.
     let package = if backend == TorchBackend::Cuda126 {
-        "opendde[gpu]~=1.0.2"
+        "opendde[gpu]~=1.2.0"
     } else {
-        "opendde~=1.0.2"
+        "opendde~=1.2.0"
     };
     installer.pip_install(SLUG, &[package], PipOptions::default())
 }
@@ -118,7 +119,8 @@ fn prewarm(installer: &Installer, executable: &PathBuf) -> Result<(), InstallErr
             "1",
         ])
         .current_dir(scratch.path())
-        .envs(installer.model_cache_environment());
+        .envs(installer.model_cache_environment())
+        .envs(super::mps_fallback_environment());
     if installer.succeeds(&mut command) {
         installer.note("OpenDDE model data cached; the first prediction can start immediately");
     } else {

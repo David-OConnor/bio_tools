@@ -310,7 +310,7 @@ def _runner() -> Path:
     if not runner.is_file():
         raise ToolUnavailable(
             f"AlphaFold 3's run_alphafold.py is not at {runner}. Run `python install_tools.py "
-            "alphafold3` (setup_system.sh does this through bio_tools), or set ALPHAFOLD3_RUNNER."
+            "alphafold3` or install it through bio_tools, or set ALPHAFOLD3_RUNNER."
         )
     return runner
 
@@ -379,7 +379,7 @@ def _environment(attention: str, unified_memory: bool) -> dict[str, str]:
     else:
         environment |= {
             "XLA_PYTHON_CLIENT_PREALLOCATE": os.environ.get(
-                "XLA_PYTHON_CLIENT_PREALLOCATE", "true"
+                "XLA_PYTHON_CLIENT_PREALLOCATE", "false"
             ),
             "XLA_CLIENT_MEM_FRACTION": os.environ.get("XLA_CLIENT_MEM_FRACTION", "0.95"),
         }

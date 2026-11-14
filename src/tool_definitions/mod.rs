@@ -38,6 +38,7 @@ mod ligandmpnn;
 mod mber;
 mod netsolp;
 mod opendde;
+mod openfold3;
 mod orca;
 mod pdbbind;
 mod placer;
@@ -58,6 +59,7 @@ mod xtb;
 pub enum Tool {
     RdKit,
     AlphaFold3,
+    OpenFold3,
     OpenDde,
     Boltz2,
     Chai1,
@@ -98,9 +100,10 @@ pub enum Tool {
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 38] = [
+    pub const ALL: [Self; 39] = [
         Self::RdKit,
         Self::AlphaFold3,
+        Self::OpenFold3,
         Self::OpenDde,
         Self::Boltz2,
         Self::Chai1,
@@ -144,6 +147,7 @@ impl Tool {
         match self {
             Self::RdKit => "rdkit",
             Self::AlphaFold3 => "alphafold3",
+            Self::OpenFold3 => "openfold3",
             Self::OpenDde => "opendde",
             Self::Boltz2 => "boltz2",
             Self::Chai1 => "chai1",
@@ -190,6 +194,7 @@ impl Tool {
     /// distribution (`chai-lab`) or a single supported model (`ABodyBuilder2`, `mber-vhh`).
     pub const fn console_script(self) -> &'static str {
         match self {
+            Self::OpenFold3 => "run_openfold",
             Self::Boltz2 => "boltz",
             Self::Chai1 => "chai-lab",
             Self::EsmC | Self::EsmFold2 | Self::RdKit => "python",
@@ -204,6 +209,7 @@ impl Tool {
         match self {
             Self::RdKit => "RDKit",
             Self::AlphaFold3 => "AlphaFold 3",
+            Self::OpenFold3 => "OpenFold3",
             Self::OpenDde => "OpenDDE",
             Self::Boltz2 => "Boltz-2",
             Self::Chai1 => "Chai-1",
@@ -314,15 +320,14 @@ impl Tool {
 
     /// Whether upstream publishes the required binaries and wheels for the current platform.
     pub const fn is_supported(self) -> bool {
-        // Only CUDA builds are installed, and macOS has none.
-        if matches!(self, Self::Gromacs) {
-            return !cfg!(target_os = "macos");
-        }
-
         cfg!(target_os = "linux")
+            // On the CPU; see the Chai-1 recipe.
+            || (matches!(self, Self::Chai1)
+                && cfg!(all(target_os = "macos", target_arch = "aarch64")))
             || !matches!(
                 self,
                 Self::AlphaFold3
+                    | Self::OpenFold3
                     | Self::Chai1
                     | Self::Protenix
                     | Self::EsmFold2
@@ -367,6 +372,7 @@ impl FromStr for Tool {
             .collect();
         let tool = match normalized.as_str() {
             "alphafold3" => Self::AlphaFold3,
+            "openfold3" => Self::OpenFold3,
             "opendde" => Self::OpenDde,
             "boltz" | "boltz2" => Self::Boltz2,
             "chai1" => Self::Chai1,

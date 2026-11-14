@@ -13,8 +13,9 @@ use crate::{
         Tool, abmpnn, alphafold3, antibody_annotator, antifold, bindcraft, biophi, boltz_adme,
         boltz2, boltzgen, catpred, chai1, deepimmuno, deepsp, deepstabp, dlkcat, enzymemap, esmc,
         esmfold2, gemmi, genie3, germinal, gromacs, highfold, igblast, igdesign, immunebuilder,
-        ligandmpnn, mber, netsolp, opendde, orca, pdbbind, placer, proteinmpnn, proteinmpnn_ddg,
-        protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn, tlimmuno, xtb,
+        ligandmpnn, mber, netsolp, opendde, openfold3, orca, pdbbind, placer, proteinmpnn,
+        proteinmpnn_ddg, protenix, rdkit, retrobiocat, rfantibody, rfdiffusion3, tap, thermompnn,
+        tlimmuno, xtb,
     },
 };
 
@@ -333,6 +334,7 @@ impl CatalogEntry {
 pub const ALL: &[&CatalogEntry] = &[
     &rdkit::ENTRY,
     &alphafold3::ENTRY,
+    &openfold3::ENTRY,
     &opendde::ENTRY,
     &boltz2::ENTRY,
     &chai1::ENTRY,

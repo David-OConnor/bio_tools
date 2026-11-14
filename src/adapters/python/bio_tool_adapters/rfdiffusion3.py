@@ -1133,6 +1133,6 @@ def check_status() -> ToolStatus:
         return ToolStatus(CheckResult.NOT_INSTALLED, str(exc))
     return require_gpu_status(
         probe_cli([rfd3]),
-        torch_device(environment_python("rfd3")),
+        torch_device(environment_python("rfd3"), mps=True),
         "RFdiffusion3",
     )

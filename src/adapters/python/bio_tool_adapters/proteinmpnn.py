@@ -899,4 +899,5 @@ def check_status() -> ToolStatus:
         ToolStatus(CheckResult.PASS, output),
         torch_device(python),
         "ProteinMPNN",
+        cpu_on_macos=True,
     )

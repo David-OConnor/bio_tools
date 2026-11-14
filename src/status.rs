@@ -201,6 +201,7 @@ pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
     let detail = output_detail(&output);
     if !output.status.success()
         && (tool == Tool::EsmC
+            || tool == Tool::OpenFold3
             || detail.is_empty()
             || detail
                 .trim_start()
@@ -218,7 +219,11 @@ pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
     } else {
         headline(tool, &detail).trim().chars().take(200).collect()
     };
-    pass(detail, probe_device(installer, tool))
+    let device = probe_device(installer, tool);
+    if tool == Tool::OpenFold3 && device.as_deref() != Some("GPU") {
+        return error("OpenFold3's PyTorch environment could not verify CUDA access.");
+    }
+    pass(detail, device)
 }
 
 /// The line of a probe's output to show. xTB leads with a banner.
@@ -350,6 +355,7 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
         ]));
     }
     let arguments: &[&str] = match tool {
+        Tool::OpenFold3 => &["predict", "--help"],
         Tool::OpenDde | Tool::Xtb | Tool::Gromacs | Tool::Gemmi => &["--version"],
         Tool::Boltz2
         | Tool::Chai1
@@ -457,6 +463,14 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
         .iter()
         .map(|(path, description)| (root.join(path), *description))
         .collect();
+    if tool == Tool::OpenFold3
+        && let Some(cache) = installer.tool_cache_dir(tool)
+    {
+        paths.push((
+            cache.join(crate::install::OPENFOLD3_CHECKPOINT),
+            "OpenBind-0 checkpoint",
+        ));
+    }
     if tool == Tool::LigandMpnn {
         paths.extend(
             crate::install::protein_mpnn::LIGAND_CHECKPOINTS
@@ -483,6 +497,7 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
         Tool::OpenDde
             | Tool::Boltz2
             | Tool::Chai1
+            | Tool::OpenFold3
             | Tool::Protenix
             | Tool::EsmC
             | Tool::EsmFold2
@@ -513,6 +528,10 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
     }
     let snippet = if framework == "jax" {
         "import jax; print('GPU' if any(d.platform == 'gpu' for d in jax.devices()) else 'CPU')"
+    } else if matches!(tool, Tool::OpenDde | Tool::Boltz2 | Tool::RfDiffusion3) {
+        // These also run on Apple's MPS.
+        "import torch; print('GPU' if torch.cuda.is_available() \
+         or torch.backends.mps.is_available() else 'CPU')"
     } else {
         "import torch; print('GPU' if torch.cuda.is_available() else 'CPU')"
     };

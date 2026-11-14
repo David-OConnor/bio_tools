@@ -8,6 +8,7 @@ import logging
 
 import bio_tools
 import shlex
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -174,13 +175,16 @@ def probe_python_package(
 
 
 def require_gpu_status(
-    status: ToolStatus, device: str | None, runtime: str
+    status: ToolStatus, device: str | None, runtime: str, *, cpu_on_macos: bool = False
 ) -> ToolStatus:
-    """Turn an otherwise passing check into an error when CUDA is unavailable."""
+    """Turn an otherwise passing check into an error when CUDA is unavailable.
+
+    `cpu_on_macos`: the tool runs on the CPU on macOS, so nothing is required there.
+    """
 
     if status.result != CheckResult.PASS:
         return status
-    if device == "GPU":
+    if device == "GPU" or (cpu_on_macos and sys.platform == "darwin"):
         status.device = device
         return status
     # None and "CPU" are different findings and must not share a message: a

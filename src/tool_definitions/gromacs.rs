@@ -20,7 +20,7 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         description: "GROMACS is one of the most widely used open-source and free software codes in chemistry, used \
         primarily for dynamical simulations of biomolecules. It provides a rich set of calculation types, preparation \
         and analysis tools.",
-        availability: "Managed prebuilt CUDA GROMACS installation, or a configured external executable",
+        availability: "Managed prebuilt GROMACS installation (CUDA on Linux and Windows; CPU-only on macOS), or a configured external executable",
         license_details: "LGPL 2.1 or later. Free for commercial use, but distributing a modified GROMACS -- or anything statically linked against it -- carries the licence's reciprocal obligations. Invoking the binaries, which is all this adapter does, does not.",
         repo_url: Some("https://gitlab.com/gromacs/gromacs"),
         home_url: Some("https://www.gromacs.org/"),

@@ -18,6 +18,7 @@ const ESMFOLD2_STREAMING_LOADER_PATCH: &str =
 /// explanation; in short, it gives atomworks a conformer-generation time limit that Windows can
 /// apply, without which every RFdiffusion3 design over a ligand or a nucleic acid aborts.
 const ATOMWORKS_FORK_FREE_TIMEOUT: &str = include_str!("patches/atomworks_fork_free_timeout.py");
+pub(crate) const OPENFOLD3_CHECKPOINT: &str = "of3-ob-2025-06-30-174k.pt";
 
 struct FetchedScript {
     name: &'static str,
@@ -82,12 +83,20 @@ impl<'a> UvRecipe<'a> {
 pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), InstallError> {
     match tool {
         Tool::Chai1 => {
+            // macOS runs on the CPU, from PyPI's Torch. Chai-1's TorchScript diffusion module
+            // fails on MPS before Torch 2.7, which chai_lab 0.6.1 excludes.
+            let cuda = !cfg!(target_os = "macos");
+            let extra_indexes: &'static [&'static str] = if cuda {
+                &["https://download.pytorch.org/whl/cu124"]
+            } else {
+                &[]
+            };
             install_recipe(
                 installer,
                 UvRecipe {
-                    extra_indexes: &["https://download.pytorch.org/whl/cu124"],
-                    index_strategy: Some("unsafe-best-match"),
-                    gpu_probe: Some(
+                    extra_indexes,
+                    index_strategy: cuda.then_some("unsafe-best-match"),
+                    gpu_probe: cuda.then_some(
                         "import torch; assert torch.cuda.is_available() and \
                          torch.cuda.is_bf16_supported(), 'Chai-1 requires a CUDA GPU with bfloat16'",
                     ),
@@ -103,6 +112,7 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             installer.ensure_chai1_kalign()?;
             Ok(())
         }
+        Tool::OpenFold3 => install_openfold3(installer),
         Tool::Protenix => install_protenix(installer),
         Tool::RdKit => install_recipe(
             installer,
@@ -479,6 +489,34 @@ pub(super) fn protenix_cache_files(root: &Path) -> Vec<PathBuf> {
     found
 }
 
+fn install_openfold3(installer: &mut Installer) -> Result<(), InstallError> {
+    const TOOL: Tool = Tool::OpenFold3;
+    const CHECKPOINT_URL: &str = concat!(
+        "https://openfold3-data.s3.amazonaws.com/openfold3-parameters/",
+        "of3-ob-2025-06-30-174k.pt",
+    );
+
+    install_recipe(
+        installer,
+        UvRecipe {
+            torch: &["torch==2.10.0"],
+            gpu_probe: Some("import torch; torch.zeros(1, device='cuda')"),
+            verify: Some((TOOL.console_script(), &["predict", "--help"])),
+            ..UvRecipe::simple(
+                TOOL.slug(),
+                "3.12",
+                &["openfold3==0.5.1"],
+                &["run_openfold"],
+            )
+        },
+    )?;
+
+    let cache = installer
+        .tool_cache_dir(TOOL)
+        .expect("OpenFold3 has a model cache");
+    installer.download(CHECKPOINT_URL, &cache.join(OPENFOLD3_CHECKPOINT))
+}
+
 fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
     install_recipe(
         installer,
@@ -615,7 +653,8 @@ fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
             // whatever PyPI serves by default -- a CUDA build on a host that may have no GPU.
             upgrade: false,
             gpu_probe: Some(
-                "import torch; assert torch.cuda.is_available(), 'RFdiffusion3 requires CUDA'",
+                "import torch; assert torch.cuda.is_available() or \
+                 torch.backends.mps.is_available(), 'RFdiffusion3 requires CUDA or Apple MPS'",
             ),
             ..UvRecipe::simple(
                 Tool::RfDiffusion3.slug(),
@@ -624,7 +663,8 @@ fn install_rfd3(installer: &mut Installer) -> Result<(), InstallError> {
                 // The extra adds pydantic, which the input specification is built out of; the
                 // model code itself is in the base distribution alongside RF3 and MPNN.
                 &[
-                    "rc-foundry[rfd3]",
+                    // 0.2 adds Apple MPS, selected automatically with float32.
+                    "rc-foundry[rfd3]>=0.2",
                     // Foundry 0.2 uses AtomWorks 2 APIs removed in 3.0. Keep fresh
                     // installs compatible on Linux and Windows until Foundry migrates.
                     "atomworks[ml]>=2.1.1,<3",

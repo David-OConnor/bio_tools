@@ -1,7 +1,8 @@
-//! GROMACS from prebuilt CUDA binaries; it is never compiled here.
+//! GROMACS from prebuilt binaries; it is never compiled here.
 //!
-//! The project publishes source only. Linux uses conda-forge. conda-forge skips Windows, which
-//! uses <https://github.com/Arifmaulanaazis/Gromacs-Prebuild-Windows>.
+//! The project publishes source only. Linux and macOS use conda-forge. conda-forge skips Windows,
+//! which uses <https://github.com/Arifmaulanaazis/Gromacs-Prebuild-Windows>. Linux and Windows get
+//! CUDA builds. macOS gets a CPU build: conda-forge has no GPU build there.
 
 use std::{
     env, fs,
@@ -72,9 +73,14 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
     Ok(())
 }
 
-/// Every prebuilt option here is x86-64 CUDA. `CONDA_OVERRIDE_CUDA` is honoured because it is how
-/// micromamba is told to install CUDA packages on a host without a GPU, such as an image build.
+/// Outside macOS, every prebuilt option is x86-64 CUDA. `CONDA_OVERRIDE_CUDA` is honoured because
+/// it is how micromamba is told to install CUDA packages on a host without a GPU, such as an image
+/// build. The macOS CPU build covers both architectures.
 fn check_hardware(installer: &Installer) -> Result<(), InstallError> {
+    if cfg!(target_os = "macos") {
+        return Ok(());
+    }
+
     if env::consts::ARCH != "x86_64" {
         return Err(InstallError::InvalidConfiguration(format!(
             "no prebuilt CUDA GROMACS exists for {}",
@@ -98,14 +104,21 @@ fn install_conda_package(
 ) -> Result<(), InstallError> {
     clear_previous(installer, target)?;
 
+    // `nompi` is the thread-MPI build, whose binary is the `gmx` the adapters call. Its `bin/gmx`
+    // is a wrapper that picks the best SIMD build for this CPU, so needs no activation.
+    // `nompi_h` excludes the double-precision CPU build.
+    let build = if cfg!(target_os = "macos") {
+        "nompi_h*"
+    } else {
+        "nompi_cuda_*"
+    };
+
     let mut create = installer.micromamba_command()?;
     create
         .args(["create", "--yes", "--prefix"])
         .arg(target)
         .args(["-c", CONDA_FORGE])
-        // `nompi` is the thread-MPI build, whose binary is the `gmx` the adapters call. Its `bin/gmx`
-        // is a wrapper that picks the best SIMD build for this CPU, so needs no activation.
-        .arg(format!("gromacs={version}=nompi_cuda_*"));
+        .arg(format!("gromacs={version}={build}"));
     installer.checked(&mut create)
 }
 
@@ -197,8 +210,10 @@ fn clear_previous(installer: &Installer, target: &Path) -> Result<(), InstallErr
         .map_err(|error| InstallError::io(format!("unable to clear {}", target.display()), error))
 }
 
-/// Runs the installed `gmx` and rejects a CPU-only or FFTPACK build, whatever it was labelled.
+/// Runs the installed `gmx` and rejects an FFTPACK build, or a CPU-only one outside macOS, whatever
+/// it was labelled.
 fn verify_full_performance(installer: &Installer, executable: &Path) -> Result<(), InstallError> {
+    let cpu_only = cfg!(target_os = "macos");
     let output = installer.capture(Command::new(executable).arg("--version"))?;
     let report = format!(
         "{}{}",
@@ -213,11 +228,17 @@ fn verify_full_performance(installer: &Installer, executable: &Path) -> Result<(
         .lines()
         .any(|line| line.contains("FFT library") && line.to_lowercase().contains("fftpack"));
 
-    if has_cuda && !has_slow_fft {
+    if (has_cuda || cpu_only) && !has_slow_fft {
         Ok(())
     } else {
+        let required = if cpu_only {
+            "a fast FFT library is required"
+        } else {
+            "CUDA and a fast FFT library are required"
+        };
+
         Err(InstallError::InvalidConfiguration(format!(
-            "{} is not a full-performance build (CUDA and a fast FFT library are required):\n{report}",
+            "{} is not a full-performance build ({required}):\n{report}",
             executable.display()
         )))
     }

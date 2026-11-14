@@ -58,6 +58,13 @@ fn main() {
 
 fn real_main() -> Result<(), Box<dyn Error>> {
     let mut args = env::args_os().skip(1).collect::<Vec<_>>();
+    if args.first().and_then(|arg| arg.to_str()) == Some("--bio-tools-adapter-rpc") {
+        let [_, request, response] = args.as_slice() else {
+            return Err("the adapter host requires request and response paths".into());
+        };
+        bio_tools::adapters::rpc::serve(Path::new(request), Path::new(response))?;
+        return Ok(());
+    }
     if args.is_empty() || matches!(args[0].to_str(), Some("-h" | "--help" | "help")) {
         println!("{USAGE}");
         return Ok(());

@@ -49,8 +49,8 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         description: "RFdiffusion3 is a practical first step in protein design workflows: It generates coordinates \
         of the backbone atoms for a protein based on contraints (For example, to spacially deconflict with specific \
         molecules). Its output can be fed into ProteinMPNN or LigandMPNN to generate an amino acid sequence.",
-        availability: "Installed by setup_system.sh, which fetches the public model checkpoint; an NVIDIA GPU is required. \
-         Runs on Windows as well as Linux, from the same set of packages.",
+        availability: "Installed by setup_system.sh, which fetches the public model checkpoint. Needs an NVIDIA GPU \
+         on Linux or Windows, or Apple Silicon's MPS on macOS.",
         license_details: "BSD 3-Clause from the Institute for Protein Design, University of Washington, covering the inference code, the training code, and the public checkpoint alike: unrestricted academic and commercial use.",
         repo_url: Some("https://github.com/RosettaCommons/foundry"),
         home_url: Some(

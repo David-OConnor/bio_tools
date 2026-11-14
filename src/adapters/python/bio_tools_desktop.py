@@ -94,6 +94,10 @@ def chai1_example_msas(root):
     return _rpc('chai1_example_msas', root=root)
 
 
+def model_cache_environment(root):
+    return _rpc('model_cache_environment', root=root)
+
+
 class CommandSpec:
     def __init__(self, command, **options):
         self.arguments = {'command': [os.fspath(argument) for argument in command], **options}
