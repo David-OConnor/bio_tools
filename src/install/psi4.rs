@@ -15,6 +15,21 @@ use crate::{
 const TOOL: Tool = Tool::Psi4;
 const PSI4: &str = "psi4==1.11";
 const PYTHON: &str = "python=3.15";
+/// Optional add-ons Psi4 1.11's conda-forge build supports: DFT-D3, DFT-D4, gCP,
+/// geomeTRIC, EFP and Basis Set Exchange.
+/// https://psicode.org/psi4manual/master/interfacing.html
+const ADD_ONS: &[&str] = &[
+    "basis_set_exchange",
+    "dftd3-python",
+    "dftd4-python",
+    // dftd4-python reads its functional parameters with a TOML parser it does not depend on.
+    "tomli",
+    "gcp-correction",
+    "geometric",
+    "pylibefp",
+];
+/// ADC (adcc) and ddX solvation (pyddx) have no Windows builds.
+const UNIX_ADD_ONS: &[&str] = &["adcc", "pyddx"];
 
 pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
     let prefix = installer.environment_path(TOOL);
@@ -27,7 +42,11 @@ pub(super) fn install(installer: &mut Installer) -> Result<(), InstallError> {
     command
         .args([action, "--yes", "--prefix"])
         .arg(prefix)
-        .args(["--override-channels", "-c", CONDA_FORGE, PSI4, PYTHON]);
+        .args(["--override-channels", "-c", CONDA_FORGE, PSI4, PYTHON])
+        .args(ADD_ONS);
+    if !cfg!(windows) {
+        command.args(UNIX_ADD_ONS);
+    }
     if cfg!(all(windows, target_arch = "aarch64")) {
         // Psi4 publishes only win-64. Windows 11 on ARM can run it via x64 emulation.
         command.env("CONDA_SUBDIR", "win-64");

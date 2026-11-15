@@ -54,13 +54,83 @@
     }
   },
   {
+    "id": "tu1_h2o_energy",
+    "label": "Water · HF energy (tu1-h2o-energy)",
+    "description": "Sample HF/cc-pVDZ H2O computation.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/tu1-h2o-energy/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "# Any line starting with the # character is a comment line\n#! Sample HF/cc-pVDZ H2O computation\n\nmemory 600 mb\n\nmolecule h2o {\n  O\n  H 1 0.96\n  H 1 0.96 2 104.5\n}\n\nset basis cc-pVDZ\nenergy('scf')\n"
+    }
+  },
+  {
     "id": "methylene_triplet",
-    "label": "Triplet methylene · Psithon",
-    "description": "Open-shell CH₂ single-point energy with UHF/6-31G**, using the tutorial's Z-matrix.",
+    "label": "Triplet methylene · UHF energy (tu2-ch2-energy)",
+    "description": "Sample UHF/6-31G** CH2 computation.",
     "source_url": "https://github.com/psi4/psi4/blob/master/samples/tu2-ch2-energy/input.dat",
     "values": {
       "input_mode": "text",
-      "psi4_input": "molecule methylene {\n  0 3\n  C\n  H 1 R\n  H 1 R 2 A\n  R = 1.075\n  A = 133.93\n}\n\nset reference uhf\nenergy('scf/6-31g**')\n"
+      "psi4_input": "#! Sample UHF/6-31G** CH2 computation\n\nmolecule ch2 {\n  0 3\n  C\n  H 1 R\n  H 1 R 2 A\n\n  R = 1.075\n  A = 133.93\n}\n\nset basis 6-31G**\nset reference uhf\nenergy ('scf')\n"
+    }
+  },
+  {
+    "id": "tu3_h2o_opt",
+    "label": "Water · HF optimization (tu3-h2o-opt)",
+    "description": "Optimize H2O HF/cc-pVDZ.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/tu3-h2o-opt/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "#! Optimize H2O HF/cc-pVDZ\n\n\nmolecule h2o {\n  O\n  H 1 0.96\n  H 1 0.96 2 104.5\n}\n\nset basis cc-pVDZ\noptimize('scf')\n"
+    }
+  },
+  {
+    "id": "tu4_h2o_freq",
+    "label": "Water · HF optimization and frequencies (tu4-h2o-freq)",
+    "description": "Optimization followed by frequencies H2O HF/cc-pVDZ.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/tu4-h2o-freq/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "#! Optimization followed by frequencies H2O HF/cc-pVDZ\n\nmolecule h2o {\n  O\n  H 1 0.96\n  H 1 0.96 2 104.5\n}\n\nset basis cc-pVDZ\noptimize('scf')\nscf_e, scf_wfn = frequencies('scf', return_wfn=True, dertype=1)\n"
+    }
+  },
+  {
+    "id": "dft_freq",
+    "label": "Water · B3LYP frequencies (dft-freq)",
+    "description": "Frequencies for H2O B3LYP/6-31G* at optimized geometry.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/dft-freq/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "#! Frequencies for H2O B3LYP/6-31G* at optimized geometry\n\nmolecule h2o {\n  O\n  H 1 0.96864\n  H 1 0.96864 2 103.586\n}\n\nset basis 6-31G*\nscf_e, scf_wfn = frequencies('b3lyp', return_wfn=True)\n"
+    }
+  },
+  {
+    "id": "opt4",
+    "label": "Water · HF/cc-pVTZ optimization (opt4)",
+    "description": "SCF cc-pVTZ geometry optimization, with Z-matrix input.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/opt4/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "#! SCF cc-pVTZ geometry optimzation, with Z-matrix input\n\n# These values are from a tightly converged QChem run\n\nmolecule h2o {\n     O\n     H 1 1.0\n     H 1 1.0 2 104.5\n# QChem optimized geometry\n#  O           0.000000    0.000000    0.091671\n#  H          -0.751206    0.000000   -0.474387\n#  H           0.751206    0.000000   -0.474387\n}\n\nset {\n  basis cc-pvtz\n  e_convergence 10\n  d_convergence 10\n  scf_type pk\n}\n\nthisenergy = optimize('scf')\n"
+    }
+  },
+  {
+    "id": "mints6",
+    "label": "Alanine · DF-HF energy (mints6)",
+    "description": "Patch of a glycine with a methyl group, to make alanine, then DF-SCF energy calculation with the cc-pVDZ basis set.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/mints6/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "#! Patch of a glycine with a methyl group, to make alanine, then DF-SCF\n#! energy calculation with the cc-pVDZ basis set\n\n\nmolecule alanine {\n    N           -1.527107413251     0.745960643462     0.766603000356\n    C           -0.075844098953     0.811790225041     0.711418672248\n    C            0.503195220163    -0.247849447550    -0.215671574613\n    O           -0.351261319421    -0.748978309671    -1.089590304723\n    O            1.639498336738    -0.571249748886    -0.174705953194\n    H           -1.207655674855    -0.365913941094    -0.918035522052\n    # First, remove the H from the alpha carbon.  This line could be deleted\n    # and is only included for completeness\n    #H            0.429560656538     0.717651915252     1.673774709694\n    # Now patch it, using a Z Matrix specification.  This patch can be applied\n    # anywhere in the coord specification, as long as it appears lower than\n    # the atoms referenced, as is usual for Z-Matrices\n    C  2  rCC   3  aCCC   1  dCCCN\n    H  7  rCH1  2  aHCC1  3  dHCCC1\n    H  7  rCH2  2  aHCC2  3  dHCCC2\n    H  7  rCH3  2  aHCC3  3  dHCCC3\n    H            0.221781602033     1.772570540211     0.286988509018\n    H           -1.833601608592     0.108401996052     1.481873213172\n    H           -1.925572581453     1.640882152784     0.986471814808\n\n    aCCC = 108.0\n    rCC = 1.4\n    dCCCN = 120\n    rCH1 = 1.08\n    rCH2 = 1.08\n    rCH3 = 1.08\n    aHCC1 = 109.0\n    aHCC2 = 109.0\n    aHCC3 = 109.0\n    dHCCC1 = 0.0\n    dHCCC2 = 120.0\n    dHCCC3 = 240.0\n}\n\n\nset  {\n    basis cc-pVDZ\n    scf_type df\n}\n\nE = energy('scf')\n"
+    }
+  },
+  {
+    "id": "dfscf_bz2",
+    "label": "Benzene dimer · DF-HF energy (dfscf-bz2)",
+    "description": "Benzene Dimer DF-HF/cc-pVDZ.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/dfscf-bz2/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "#! Benzene Dimer DF-HF/cc-pVDZ\n\n\nmolecule bz2 {\n    X\n    X   1  RXX\n    X   2  RXX  1  90.0\n    C   3  RCC  2  90.0  1   0.0\n    C   3  RCC  2  90.0  1  60.0\n    C   3  RCC  2  90.0  1 120.0\n    C   3  RCC  2  90.0  1 180.0\n    C   3  RCC  2  90.0  1 240.0\n    C   3  RCC  2  90.0  1 300.0\n    H   3  RCH  2  90.0  1   0.0\n    H   3  RCH  2  90.0  1  60.0\n    H   3  RCH  2  90.0  1 120.0\n    H   3  RCH  2  90.0  1 180.0\n    H   3  RCH  2  90.0  1 240.0\n    H   3  RCH  2  90.0  1 300.0\n    X   3  RXX  2  90.0  1   0.0\n    X   3  D   16  90.0  2 180.0\n    X   3  DRXX 16 90.0  2 180.0\n    X  18  RXX 17  90.0 16   0.0\n    C  17  RCC 18  90.0 19   0.0\n    C  17  RCC 18  90.0 19  60.0\n    C  17  RCC 18  90.0 19 120.0\n    C  17  RCC 18  90.0 19 180.0\n    C  17  RCC 18  90.0 19 240.0\n    C  17  RCC 18  90.0 19 300.0\n    H  17  RCH 18  90.0 19   0.0\n    H  17  RCH 18  90.0 19  60.0\n    H  17  RCH 18  90.0 19 120.0\n    H  17  RCH 18  90.0 19 180.0\n    H  17  RCH 18  90.0 19 240.0\n    H  17  RCH 18  90.0 19 300.0\n\n    RCC  = 1.3915\n    RCH  = 2.4715\n    RXX  = 1.00\n    D    = 3.9\n    DRXX = 4.90\n\n}\n\nset {\n  basis cc-pVDZ\n  scf_type df\n  guess sad\n}\n\nthisenergy = energy('scf')\n"
     }
   }
 ]

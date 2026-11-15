@@ -1,4 +1,10 @@
-"""Run declarative molecular calculations through the managed Psi4 CLI."""
+"""Run a Psithon input or PsiAPI script with the managed Psi4.
+
+Psithon runs through Psi4's own `psi4` command, preprocessor included. PsiAPI
+runs as a Python script. Both run in-process under a small runner that records
+Psi4's variables, frequencies and final geometry when the input finishes.
+Psithon and PsiAPI are Python: an input can do anything Python can.
+"""
 
 from __future__ import annotations
 
@@ -11,71 +17,139 @@ from typing import Any
 from . import ToolExecutionError, ToolUnavailable, catalog_spec, run_command
 from .environments import environment_path
 from .field_processing import document_input, text
-from .psi4_input import FIELDS, MAX_INPUT, from_boxes, runtime_settings
+from .psi4_input import (
+    FIELDS,
+    MAX_INPUT,
+    PSIAPI,
+    from_boxes,
+    input_format,
+    memory_mib,
+    threads,
+)
 from .psi4_input import to_boxes as to_boxes
 
 SPEC = catalog_spec("psi4", fields=list(FIELDS.values()))
 
-# Psithon can contain Python. Only this fixed script and parsed data literals
-# reach the executable, and the CLI preprocessor is disabled.
-_JOB = """\
+# Runs inside Psi4's environment. argv[1] is the job description.
+_RUNNER = '''\
+import atexit
 import csv
 import json
 import math
+import runpy
+import sys
 from pathlib import Path
 
+job = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+summary = Path(job["summary"])
+
+import numpy
 import psi4
+from psi4.driver import driver
 from psi4.driver.qcdb.vib import filter_nonvib, filter_omega_to_real
 
-molecule = psi4.geometry(settings["geometry"])
-if settings["molecule_name"]:
-    molecule.set_name(settings["molecule_name"])
-psi4.set_options(settings["options"])
-model = settings["method"] + "/" + settings["basis"]
-calculation = settings["calculation"]
-result = {}
+# frequency() and hessian() analyse vibrations through this function.
+analyses = []
+_vibanal_wfn = driver.vibanal_wfn
 
-if calculation in {"optimize", "optimize_frequency"}:
-    energy = psi4.optimize(model, molecule=molecule)
-    molecule.save_xyz_file("optimized.xyz", True)
-    if calculation == "optimize_frequency":
-        result["optimized_energy_hartree"] = float(energy)
 
-if calculation in {"frequency", "optimize_frequency"}:
-    kwargs = {}
-    if settings["frequency_derivative"] != "auto":
-        kwargs["dertype"] = int(settings["frequency_derivative"])
-    energy, wfn = psi4.frequency(model, molecule=molecule, return_wfn=True, **kwargs)
-    analysis = filter_nonvib(wfn.frequency_analysis)
+def _recorded_vibanal_wfn(*args, **kwargs):
+    analysis = _vibanal_wfn(*args, **kwargs)
+    analyses.append(analysis)
+    return analysis
+
+
+driver.vibanal_wfn = _recorded_vibanal_wfn
+
+
+def _finite(value):
+    value = float(value)
+    return value if math.isfinite(value) else None
+
+
+def _array(matrix):
+    try:
+        values = numpy.asarray(matrix.to_array(dense=True), dtype=float)
+    except Exception:
+        return None
+    if values.size > 1000:
+        return None
+    return numpy.where(numpy.isfinite(values), values, None).tolist()
+
+
+def _modes(analysis):
+    analysis = filter_nonvib(analysis)
     frequencies = filter_omega_to_real(analysis["omega"].data)
-    ir = analysis.get("IR_intensity")
+    intensities = analysis.get("IR_intensity")
     modes = []
     for index, frequency in enumerate(frequencies):
-        intensity = float(ir.data[index]) if ir is not None else None
+        intensity = None if intensities is None else _finite(intensities.data[index])
         modes.append({
             "mode": index + 1,
-            "symmetry": str(analysis["gamma"].data[index]),
+            "symmetry": str(analysis["gamma"].data[index] or ""),
             "frequency_cm1": float(frequency),
             "imaginary": bool(frequency < 0),
-            "ir_intensity_km_mol": intensity if intensity is not None and math.isfinite(intensity) else None,
+            "ir_intensity_km_mol": intensity,
         })
-    result["vibrational_modes"] = modes
-    with open("frequencies.csv", "w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=[
-            "mode", "symmetry", "frequency_cm1", "imaginary", "ir_intensity_km_mol",
-        ])
-        writer.writeheader()
-        writer.writerows(modes)
-elif calculation == "energy":
-    energy = psi4.energy(model, molecule=molecule)
-
-result["energy_hartree"] = float(energy)
-Path("energy-hartree.txt").write_text(str(result["energy_hartree"]) + "\\n", encoding="ascii")
-Path("summary.json").write_text(json.dumps(result, allow_nan=False), encoding="ascii")
-"""
+    return modes
 
 
-def _invocation() -> tuple[list[str], dict[str, str]]:
+def _summarize():
+    try:
+        result = {
+            "variables": {
+                name: _finite(value)
+                for name, value in sorted(psi4.core.scalar_variables().items())
+            },
+            "array_variables": {
+                name: values
+                for name, matrix in sorted(psi4.core.array_variables().items())
+                if (values := _array(matrix)) is not None
+            },
+        }
+        if analyses:
+            result["vibrational_modes"] = modes = _modes(analyses[-1])
+            with open(summary / "frequencies.csv", "w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=list(modes[0]) if modes else ["mode"])
+                writer.writeheader()
+                writer.writerows(modes)
+        try:
+            molecule = psi4.core.get_active_molecule()
+        except Exception:
+            molecule = None
+        if molecule is not None and molecule.natom():
+            molecule.save_xyz_file(str(summary / "geometry.xyz"), False)
+        text = json.dumps(result, allow_nan=False)
+        (summary / "summary.json").write_text(text, encoding="utf-8")
+    except Exception as error:
+        print(f"Could not summarize the Psi4 run: {error!r}", file=sys.stderr)
+
+
+# Registered after Psi4's own exit handlers, so this runs before they clean up.
+atexit.register(_summarize)
+
+if job["format"] == "psiapi":
+    psi4.set_output_file(job["output"], False)
+    psi4.set_num_threads(job["threads"], quiet=True)
+    psi4.set_memory(job["memory"], quiet=True)
+    psi4.core.IOManager.shared_object().set_default_path(job["scratch"])
+    sys.argv = [job["input"]]
+    sys.path.insert(0, str(Path(job["input"]).parent))
+    runpy.run_path(job["input"], run_name="__main__")
+else:
+    sys.argv = [
+        job["launcher"],
+        "--nthread", str(job["threads"]),
+        "--memory", job["memory"],
+        "--scratch", job["scratch"],
+        job["input"],
+        job["output"],
+    ]
+    runpy.run_path(job["launcher"], run_name="__main__")
+'''
+
+
+def _invocation() -> tuple[list[str], Path, dict[str, str]]:
     prefix = environment_path("psi4").absolute()
     if os.name == "nt":
         scripts = prefix / "Scripts"
@@ -94,7 +168,17 @@ def _invocation() -> tuple[list[str], dict[str, str]]:
     path = os.pathsep.join(str(directory) for directory in paths)
     if inherited := os.environ.get("PATH"):
         path += os.pathsep + inherited
-    return [str(python), "-I", str(launcher)], {"CONDA_PREFIX": str(prefix), "PATH": path}
+    # UTF-8 mode: Psi4's CLI reads the input with the platform's default encoding.
+    command = [str(python), "-I", "-X", "utf8"]
+    return command, launcher, {"CONDA_PREFIX": str(prefix), "PATH": path}
+
+
+def _files(directory: Path, skip: Path | None = None) -> list[str]:
+    return sorted(
+        path.relative_to(directory).as_posix()
+        for path in directory.rglob("*")
+        if path.is_file() and path != skip
+    )
 
 
 def run(payload: dict[str, Any]) -> dict[str, Any]:
@@ -103,49 +187,55 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         upload_field="psi4_input_file", max_length=MAX_INPUT,
     )
     document = text(payload, "psi4_input", max_length=MAX_INPUT)
-    settings = runtime_settings(document)
-    calculation = settings["calculation"]
-    generated = ["psi4.out", "energy-hartree.txt", "summary.json", "input.dat"]
-    if calculation in {"optimize", "optimize_frequency"}:
-        generated.append("optimized.xyz")
-    if calculation in {"frequency", "optimize_frequency"}:
-        generated.append("frequencies.csv")
+    language = input_format(payload)
+    thread_count = threads(payload)
+    memory = memory_mib(payload)
 
-    command, environment = _invocation()
+    command, launcher, environment = _invocation()
     with tempfile.TemporaryDirectory(prefix="bio-tools-psi4-") as directory:
-        work = Path(directory)
-        (work / "scratch").mkdir()
-        (work / "input.dat").write_text(document + "\n", encoding="utf-8")
-        (work / "job.py").write_text(f"settings = {ascii(settings)}\n{_JOB}", encoding="ascii")
+        root = Path(directory)
+        # Psi4 writes its results in `psi4`, and its scratch files outside it.
+        work, scratch, summary = root / "psi4", root / "scratch", root / "summary"
+        for folder in (work, scratch, summary):
+            folder.mkdir()
+        source = work / ("input.py" if language == PSIAPI else "input.dat")
+        source.write_text(document + "\n", encoding="utf-8")
+        runner = root / "runner.py"
+        runner.write_text(_RUNNER, encoding="utf-8")
+        job = root / "job.json"
+        job.write_text(json.dumps({
+            "format": language,
+            "launcher": str(launcher),
+            "input": str(source),
+            "output": str(work / "output.dat"),
+            "scratch": str(scratch),
+            "summary": str(summary),
+            "threads": thread_count,
+            "memory": f"{memory} MiB",
+        }), encoding="utf-8")
+
         result = run_command(
-            [
-                *command,
-                "--skip-preprocessor",
-                "--scratch", "scratch",
-                "--nthread", settings["threads"],
-                "--memory", f"{settings['memory_mib']} MiB",
-                "job.py", "psi4.out",
-            ],
+            [*command, str(runner), str(job)],
             cwd=work,
-            env=environment,
-            artifacts=[Path(name) for name in ["job.py", *generated]],
+            env={**environment, "PSI_SCRATCH": str(scratch)},
+            artifacts=[work, summary],
         )
         try:
-            summary = json.loads((work / "summary.json").read_text(encoding="ascii"))
+            computed = json.loads((summary / "summary.json").read_text(encoding="utf-8"))
         except (OSError, ValueError) as exc:
-            raise ToolExecutionError("Psi4 did not write a readable calculation summary.") from exc
+            raise ToolExecutionError("Psi4 finished without a readable summary.") from exc
+        generated = _files(work, skip=source) + [
+            f"summary/{name}" for name in _files(summary)
+        ]
 
+    energy = computed["variables"].get("CURRENT ENERGY")
     return {
         "status": "completed",
-        "calculation": calculation,
-        "method": settings["method"],
-        "basis": settings["basis"],
-        "reference": settings["options"]["reference"],
-        "charge": int(settings["charge"]),
-        "multiplicity": int(settings["multiplicity"]),
-        "threads": int(settings["threads"]),
-        "memory_mib": float(settings["memory_mib"]),
+        "input_format": language,
+        "threads": thread_count,
+        "memory_mib": float(memory),
+        **({"energy_hartree": energy} if energy is not None else {}),
+        **computed,
         "generated_files": generated,
-        **summary,
         **result,
     }
