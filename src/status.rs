@@ -6,7 +6,7 @@ use std::{env, fs, path::PathBuf, time::Duration};
 
 pub use crate::install::{StatusKind, ToolStatus};
 use crate::{
-    install::{InstallError, Installer},
+    install::{InstallError, Installer, openfold3},
     run::{CaptureLimits, CommandOutput, CommandSpec, ExitPolicy, RunError},
     tool_definitions::Tool,
 };
@@ -219,11 +219,24 @@ pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
     } else {
         headline(tool, &detail).trim().chars().take(200).collect()
     };
-    let device = probe_device(installer, tool);
-    if tool == Tool::OpenFold3 && device.as_deref() != Some("GPU") {
-        return error("OpenFold3's PyTorch environment could not verify CUDA access.");
+    if tool == Tool::OpenFold3 {
+        let probe = match run_probe(openfold3::device_command(installer)) {
+            Ok(output) if output.status.success() => output,
+            Ok(output) => return error(output_detail(&output)),
+            Err(cause) => return error(format!("Could not probe OpenFold3's backend: {cause}")),
+        };
+        let value: serde_json::Value = serde_json::from_slice(&probe.stdout).unwrap_or_default();
+        let device = match value["backend"].as_str() {
+            Some("cuda") => "CUDA",
+            Some("rocm") => "ROCm",
+            Some("mps") => "MPS",
+            Some("cpu") => "CPU",
+            _ => return error("OpenFold3 did not report its compute backend."),
+        };
+
+        return pass(detail, Some(device.to_owned()));
     }
-    pass(detail, device)
+    pass(detail, probe_device(installer, tool))
 }
 
 /// The line of a probe's output to show. xTB leads with a banner.
@@ -467,7 +480,7 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
         && let Some(cache) = installer.tool_cache_dir(tool)
     {
         paths.push((
-            cache.join(crate::install::OPENFOLD3_CHECKPOINT),
+            cache.join(openfold3::CHECKPOINT),
             "OpenBind-0 checkpoint",
         ));
     }
@@ -497,7 +510,6 @@ fn probe_device(installer: &Installer, tool: Tool) -> Option<String> {
         Tool::OpenDde
             | Tool::Boltz2
             | Tool::Chai1
-            | Tool::OpenFold3
             | Tool::Protenix
             | Tool::EsmC
             | Tool::EsmFold2

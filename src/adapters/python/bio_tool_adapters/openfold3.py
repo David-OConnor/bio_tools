@@ -19,10 +19,9 @@ from . import (
     run_command,
     text,
     tool_fields,
+    tool_python,
     tool_script,
-    torch_device,
 )
-from .environments import environment_python
 from .field_processing import (
     boolean,
     choice,
@@ -31,7 +30,7 @@ from .field_processing import (
     molecule_boxes,
     safe_name,
 )
-from .status_check import CheckResult, ToolStatus, probe_python_package, require_gpu_status
+from .status_check import CheckResult, ToolStatus, probe_command, probe_python_package
 
 SPEC = catalog_spec("openfold3", fields=tool_fields("openfold3"))
 
@@ -39,6 +38,8 @@ _TYPES = frozenset({"protein", "dna", "rna", "ligand", "ion"})
 _MSA_PATHS = ("main_msa_file_paths", "paired_msa_file_paths")
 _TEMPLATE_PATHS = ("template_alignment_file_path", "template_cif_paths")
 _CHECKPOINT = "of3-ob-2025-06-30-174k.pt"
+_DEVICE_PROBE = Path(__file__).resolve().parent / "tool_scripts" / "openfold3_device.py"
+_BACKEND_LABELS = {"cpu": "CPU", "cuda": "CUDA", "mps": "MPS", "rocm": "ROCm"}
 
 
 def from_boxes(payload: dict[str, Any]) -> str:
@@ -165,6 +166,23 @@ def _checkpoint() -> Path:
     return checkpoint.resolve()
 
 
+def _device(python: str) -> dict[str, Any]:
+    code, output = probe_command([python, "-I", str(_DEVICE_PROBE)], timeout=300)
+    if code == 0:
+        for line in reversed(output.splitlines()):
+            if not line.startswith("{"):
+                continue
+            try:
+                device = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(device, dict) and device.get("backend") in _BACKEND_LABELS:
+                return device
+
+    detail = output.splitlines()[-1] if output.strip() else "The device probe returned no output."
+    raise ToolUnavailable(f"Could not determine the OpenFold3 backend. {detail}")
+
+
 def run(payload: dict[str, Any]) -> dict[str, Any]:
     payload = document_input(payload, "input_json", from_boxes=from_boxes)
     msa_source = choice(payload, "msa_source", ("colabfold", "precomputed", "none"), "colabfold")
@@ -173,10 +191,21 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     samples = integer(payload, "samples", default=1, minimum=1, maximum=64)
     seeds = integer(payload, "num_model_seeds", default=1, minimum=1, maximum=32)
 
-    config: dict[str, Any] = {"output_writer_settings": {"structure_format": "cif"}}
+    runner = _runner()
+    checkpoint = _checkpoint()
+    device = _device(tool_python("openfold3", "OPENFOLD3_PYTHON"))
+    config: dict[str, Any] = {
+        "pl_trainer_args": {"accelerator": device["device"], "devices": 1},
+        "output_writer_settings": {"structure_format": "cif"},
+    }
+    model_update: dict[str, Any] = {"presets": ["predict"]}
     if boolean(payload, "low_memory", True):
-        config["model_update"] = {"presets": ["predict", "low_mem"]}
+        model_update["presets"].append("low_mem")
         config["data_module_args"] = {"num_workers": 0}
+    model_update["custom"] = {
+        "settings": {"memory": {"eval": {"use_triton_triangle_kernels": device["triton"]}}}
+    }
+    config["model_update"] = model_update
     if server_url := os.environ.get("OPENFOLD3_MSA_SERVER_URL"):
         config["msa_computation_settings"] = {"server_url": server_url}
 
@@ -189,8 +218,8 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         config_path.write_text(json.dumps(config, indent=2), encoding="utf-8")
         result = run_command(
             [
-                _runner(), "predict", "--query-json", str(query_path),
-                "--inference-ckpt-path", str(_checkpoint()),
+                runner, "predict", "--query-json", str(query_path),
+                "--inference-ckpt-path", str(checkpoint),
                 "--runner-yaml", str(config_path), "--output-dir", str(output),
                 "--use-msa-server", str(msa_source == "colabfold").lower(),
                 "--use-templates", str(use_templates).lower(),
@@ -210,6 +239,7 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         "input": {"json": document},
         "generated_files": generated,
         "msa_source": msa_source,
+        "device": _BACKEND_LABELS[device["backend"]],
         **result,
     }
     warnings = []
@@ -227,12 +257,17 @@ def check_status() -> ToolStatus:
     try:
         _runner()
         _checkpoint()
+        python = tool_python("openfold3", "OPENFOLD3_PYTHON")
     except ToolUnavailable as exc:
         return ToolStatus(CheckResult.NOT_INSTALLED, str(exc))
 
-    python = environment_python("openfold3")
     status = probe_python_package(python, "openfold3", "openfold3.entry_points.experiment_runner")
     if status.result != CheckResult.PASS:
         return status
 
-    return require_gpu_status(status, torch_device(python), "OpenFold3")
+    try:
+        status.device = _BACKEND_LABELS[_device(python)["backend"]]
+    except ToolUnavailable as exc:
+        return ToolStatus(CheckResult.ERROR, str(exc))
+
+    return status

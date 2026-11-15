@@ -320,6 +320,13 @@ impl Tool {
 
     /// Whether upstream publishes the required binaries and wheels for the current platform.
     pub const fn is_supported(self) -> bool {
+        if matches!(self, Self::OpenFold3) {
+            return cfg!(all(
+                any(target_os = "linux", target_os = "macos"),
+                any(target_arch = "x86_64", target_arch = "aarch64")
+            ));
+        }
+
         cfg!(target_os = "linux")
             // On the CPU; see the Chai-1 recipe.
             || (matches!(self, Self::Chai1)
@@ -327,7 +334,6 @@ impl Tool {
             || !matches!(
                 self,
                 Self::AlphaFold3
-                    | Self::OpenFold3
                     | Self::Chai1
                     | Self::Protenix
                     | Self::EsmFold2

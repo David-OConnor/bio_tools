@@ -29,10 +29,10 @@ mod gromacs;
 mod igblast;
 mod model_cache;
 mod opendde;
+pub(crate) mod openfold3;
 mod package_cache;
 pub(crate) mod protein_mpnn;
 mod python_tools;
-pub(crate) use python_tools::OPENFOLD3_CHECKPOINT;
 mod uninstall;
 mod xtb;
 
@@ -537,6 +537,7 @@ impl Installer {
         let result = match tool {
             Tool::AlphaFold3 => alphafold3::install(self),
             Tool::OpenDde => opendde::install(self),
+            Tool::OpenFold3 => openfold3::install(self),
             Tool::Boltz2 => boltz2::install(self),
             Tool::BoltzGen => boltzgen::install(self),
             Tool::ProteinMpnn => protein_mpnn::install_protein(self),

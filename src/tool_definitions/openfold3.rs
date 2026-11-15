@@ -30,9 +30,10 @@ pub const ENTRY: CatalogEntry = CatalogEntry {
         biomolecular complexes. Protein MSAs can come from ColabFold or precomputed files. \
         The ColabFold mode sends protein sequences to the configured MSA server. Set \
         OPENFOLD3_MSA_SERVER_URL on the runner to use a private ColabFold server.",
-        availability: "The managed installation uses Linux and NVIDIA CUDA. It installs \
-        OpenFold3 0.5.1 and caches the approximately 2 GB OpenBind-0 checkpoint. No local \
-        sequence databases are required.",
+        availability: "Linux supports NVIDIA CUDA, AMD ROCm on x86-64, and CPU. macOS supports \
+        Apple Silicon with MPS and Intel Macs with CPU. Set OPENFOLD3_BACKEND to auto, cuda, \
+        rocm, mps, or cpu to select the backend. The installer caches the approximately 2 GB \
+        OpenBind-0 checkpoint. No local sequence databases are required.",
         license_details: "Apache 2.0 for both the OpenFold3 code and the OpenBind-0 checkpoint.",
         repo_url: Some("https://github.com/aqlaboratory/openfold-3"),
         home_url: Some("https://portal.openfold.omsf.io/"),

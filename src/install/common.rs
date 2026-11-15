@@ -13,6 +13,8 @@ use super::{InstallError, Installer, TorchBackendPreference};
 use crate::tool_definitions::Tool;
 
 const CUDA_126_INDEX: &str = "https://download.pytorch.org/whl/cu126";
+const CUDA_128_INDEX: &str = "https://download.pytorch.org/whl/cu128";
+const ROCM_72_INDEX: &str = "https://download.pytorch.org/whl/rocm7.2";
 const CPU_TORCH_INDEX: &str = "https://download.pytorch.org/whl/cpu";
 const MICROMAMBA_RELEASES: &str =
     "https://github.com/mamba-org/micromamba-releases/releases/latest/download";
@@ -33,6 +35,8 @@ const PYTHON_ENVIRONMENT_VARIABLES: [&str; 7] = [
 pub(crate) enum TorchBackend {
     Cpu,
     Cuda126,
+    Cuda128,
+    Rocm72,
 }
 
 impl TorchBackend {
@@ -40,6 +44,8 @@ impl TorchBackend {
         match self {
             Self::Cpu => CPU_TORCH_INDEX,
             Self::Cuda126 => CUDA_126_INDEX,
+            Self::Cuda128 => CUDA_128_INDEX,
+            Self::Rocm72 => ROCM_72_INDEX,
         }
     }
 
@@ -47,6 +53,8 @@ impl TorchBackend {
         match self {
             Self::Cpu => "CPU",
             Self::Cuda126 => "CUDA 12.6",
+            Self::Cuda128 => "CUDA 12.8",
+            Self::Rocm72 => "ROCm 7.2",
         }
     }
 }
@@ -1237,7 +1245,7 @@ fn quote_argument(argument: &str) -> String {
     }
 }
 
-fn version_at_least(current: &str, minimum: &str) -> bool {
+pub(super) fn version_at_least(current: &str, minimum: &str) -> bool {
     let parts = |version: &str| {
         version
             .split('.')

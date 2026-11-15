@@ -18,7 +18,6 @@ const ESMFOLD2_STREAMING_LOADER_PATCH: &str =
 /// explanation; in short, it gives atomworks a conformer-generation time limit that Windows can
 /// apply, without which every RFdiffusion3 design over a ligand or a nucleic acid aborts.
 const ATOMWORKS_FORK_FREE_TIMEOUT: &str = include_str!("patches/atomworks_fork_free_timeout.py");
-pub(crate) const OPENFOLD3_CHECKPOINT: &str = "of3-ob-2025-06-30-174k.pt";
 
 struct FetchedScript {
     name: &'static str,
@@ -112,7 +111,6 @@ pub(super) fn install(installer: &mut Installer, tool: Tool) -> Result<(), Insta
             installer.ensure_chai1_kalign()?;
             Ok(())
         }
-        Tool::OpenFold3 => install_openfold3(installer),
         Tool::Protenix => install_protenix(installer),
         Tool::RdKit => install_recipe(
             installer,
@@ -487,34 +485,6 @@ pub(super) fn protenix_cache_files(root: &Path) -> Vec<PathBuf> {
         found.extend(weights);
     }
     found
-}
-
-fn install_openfold3(installer: &mut Installer) -> Result<(), InstallError> {
-    const TOOL: Tool = Tool::OpenFold3;
-    const CHECKPOINT_URL: &str = concat!(
-        "https://openfold3-data.s3.amazonaws.com/openfold3-parameters/",
-        "of3-ob-2025-06-30-174k.pt",
-    );
-
-    install_recipe(
-        installer,
-        UvRecipe {
-            torch: &["torch==2.10.0"],
-            gpu_probe: Some("import torch; torch.zeros(1, device='cuda')"),
-            verify: Some((TOOL.console_script(), &["predict", "--help"])),
-            ..UvRecipe::simple(
-                TOOL.slug(),
-                "3.12",
-                &["openfold3==0.5.1"],
-                &["run_openfold"],
-            )
-        },
-    )?;
-
-    let cache = installer
-        .tool_cache_dir(TOOL)
-        .expect("OpenFold3 has a model cache");
-    installer.download(CHECKPOINT_URL, &cache.join(OPENFOLD3_CHECKPOINT))
 }
 
 fn install_protenix(installer: &mut Installer) -> Result<(), InstallError> {
