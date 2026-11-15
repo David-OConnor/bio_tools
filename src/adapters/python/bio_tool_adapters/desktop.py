@@ -17,6 +17,7 @@ SUPPORTED = {
     'boltz2': 'boltz2', 'chai1': 'chai1', 'esmfold2': 'esmfold2',
     'protenix': 'protenix', 'esmc': 'esmc', 'catpred': 'catpred',
     'alphafold3': 'alphafold3', 'openfold3': 'openfold3', 'gromacs': 'gromacs',
+    'psi4': 'psi4',
 }
 
 

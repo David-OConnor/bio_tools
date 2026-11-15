@@ -32,6 +32,7 @@ mod opendde;
 pub(crate) mod openfold3;
 mod package_cache;
 pub(crate) mod protein_mpnn;
+pub(crate) mod psi4;
 mod python_tools;
 mod uninstall;
 mod xtb;
@@ -461,20 +462,26 @@ impl Installer {
         if tool == Tool::Gromacs {
             return gromacs::executable(self);
         }
+        if tool == Tool::Psi4 {
+            return psi4::launcher(self);
+        }
         self.venv_script(tool.slug(), tool.console_script())
     }
     /// Build a command for a tool's console entry point in its managed environment.
     ///
-    /// The child receives `VIRTUAL_ENV` and a `PATH` whose first directory is the
-    /// tool environment's scripts directory. This is equivalent to activating the
-    /// environment before running its console script, and lets dependencies such
-    /// as PyTorch find helper executables installed beside the script.
+    /// Set the runtime's environment variables and prepend its directories to `PATH`.
     pub fn tool_command(&self, tool: Tool) -> CommandSpec {
+        if tool == Tool::Psi4 {
+            return psi4::python_command(self).arg(self.executable_path(tool));
+        }
         self.with_tool_environment(tool, CommandSpec::new(self.executable_path(tool)))
     }
 
     /// Build a command for the managed Python interpreter of a tool.
     pub fn tool_python_command(&self, tool: Tool) -> CommandSpec {
+        if tool == Tool::Psi4 {
+            return psi4::python_command(self);
+        }
         self.with_tool_environment(tool, CommandSpec::new(self.venv_python(tool.slug())))
     }
 
@@ -544,6 +551,7 @@ impl Installer {
             Tool::LigandMpnn => protein_mpnn::install_ligand(self),
             Tool::IgBlast => igblast::install(self),
             Tool::Xtb => xtb::install(self),
+            Tool::Psi4 => psi4::install(self),
             Tool::Gromacs => gromacs::install(self),
             Tool::HighFold
             | Tool::BindCraft

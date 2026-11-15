@@ -169,6 +169,7 @@ python_enum!(
         Other = 6,
         Lgpl3OrLater = 7,
         Mpl2 = 8,
+        Lgpl3Only = 9,
     }
 );
 

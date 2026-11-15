@@ -436,9 +436,7 @@ impl Installer {
         Ok(managed)
     }
 
-    /// Shared package cache for every managed environment. Environments hardlink out of it, so all
-    /// micromamba invocations must agree on the location or each one redownloads its packages.
-    /// Without it micromamba falls back to `~/micromamba`, outside the layout we manage.
+    /// Managed micromamba root for shared configuration and cached packages.
     pub(crate) fn micromamba_root(&self) -> PathBuf {
         self.config.layout.environments_root.join("micromamba")
     }
@@ -518,6 +516,10 @@ impl Installer {
 
         let mut command = Command::new(micromamba);
         command.env("MAMBA_ROOT_PREFIX", &root);
+        if cfg!(windows) && env::var_os("CONDA_PKGS_DIRS").is_none() {
+            // Nested package paths can exceed Win32 limits inside a workspace cache.
+            command.env("CONDA_PKGS_DIRS", env::temp_dir().join("btpkgs"));
+        }
 
         Ok(command)
     }

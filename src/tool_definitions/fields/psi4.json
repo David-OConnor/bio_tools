@@ -1,0 +1,594 @@
+{
+  "fields": [
+    {
+      "name": "psi4_input",
+      "label": "Psithon input",
+      "kind": "textarea",
+      "default": "",
+      "required": true,
+      "help": "Enter one molecule block, optional memory and settings, then energy(), optimize() or frequency(). An optimization can be followed by frequencies at the same level of theory. Use a listed method and basis. Accepts declarative Psithon keywords and calculation calls.",
+      "options": [],
+      "rows": 17,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 35000,
+      "accept": "",
+      "task": "",
+      "group": "Input deck",
+      "input_modes": "text"
+    },
+    {
+      "name": "psi4_input_file",
+      "label": "Psithon input file",
+      "kind": "file",
+      "default": "",
+      "required": true,
+      "help": "Enter one molecule block, optional memory and settings, then energy(), optimize() or frequency(). An optimization can be followed by frequencies at the same level of theory. Use a listed method and basis. Accepts declarative Psithon keywords and calculation calls.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 35000,
+      "accept": ".dat,.in,.inp,.txt",
+      "task": "",
+      "group": "Input deck",
+      "input_modes": "upload"
+    },
+    {
+      "name": "coordinates",
+      "label": "Molecular geometry",
+      "kind": "textarea",
+      "default": "O   0.000000   0.000000   0.000000\nH   0.000000   0.000000   0.960000\nH   0.929422   0.000000  -0.240365",
+      "required": true,
+      "help": "Enter Cartesian coordinates or a Z-matrix. Include any variable definitions below the atom lines. The default is angstroms. Psi4 geometry directives such as units bohr, symmetry c1, no_com, and no_reorient are supported.",
+      "options": [],
+      "rows": 8,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 20000,
+      "accept": "",
+      "task": "",
+      "group": "Molecule",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "molecule_name",
+      "label": "Molecule name",
+      "kind": "text",
+      "default": "",
+      "required": false,
+      "help": "Optional identifier used in the Psi4 input and output.",
+      "options": [],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": 60,
+      "accept": "",
+      "task": "",
+      "group": "Molecule",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "charge",
+      "label": "Molecular charge",
+      "kind": "number",
+      "default": 0,
+      "required": false,
+      "help": "Total charge in units of the elementary charge.",
+      "options": [],
+      "rows": null,
+      "minimum": -20,
+      "maximum": 20,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Molecule",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "multiplicity",
+      "label": "Spin multiplicity",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "2S + 1. Used with the charge to define the electron configuration.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 20,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Molecule",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "calculation",
+      "label": "Calculation",
+      "kind": "select",
+      "default": "energy",
+      "required": false,
+      "help": "Run frequencies at the supplied geometry or optimize the geometry first.",
+      "options": [
+        {
+          "value": "energy",
+          "label": "Single-point energy"
+        },
+        {
+          "value": "optimize",
+          "label": "Geometry optimization"
+        },
+        {
+          "value": "frequency",
+          "label": "Vibrational frequencies"
+        },
+        {
+          "value": "optimize_frequency",
+          "label": "Optimize then calculate frequencies"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "method",
+      "label": "Method",
+      "kind": "select",
+      "default": "hf",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "hf",
+          "label": "Hartree–Fock"
+        },
+        {
+          "value": "b3lyp",
+          "label": "B3LYP"
+        },
+        {
+          "value": "pbe0",
+          "label": "PBE0"
+        },
+        {
+          "value": "mp2",
+          "label": "MP2"
+        },
+        {
+          "value": "ccsd",
+          "label": "CCSD"
+        },
+        {
+          "value": "ccsd(t)",
+          "label": "CCSD(T)"
+        },
+        {
+          "value": "pbe",
+          "label": "PBE"
+        },
+        {
+          "value": "m06",
+          "label": "M06"
+        },
+        {
+          "value": "wb97x",
+          "label": "ωB97X"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "basis",
+      "label": "Basis set",
+      "kind": "select",
+      "default": "cc-pvdz",
+      "required": false,
+      "help": "",
+      "options": [
+        {
+          "value": "sto-3g",
+          "label": "STO-3G"
+        },
+        {
+          "value": "6-31g",
+          "label": "6-31G"
+        },
+        {
+          "value": "6-31g*",
+          "label": "6-31G*"
+        },
+        {
+          "value": "6-31g**",
+          "label": "6-31G** [6-31G(d,p)]"
+        },
+        {
+          "value": "cc-pvdz",
+          "label": "cc-pVDZ"
+        },
+        {
+          "value": "aug-cc-pvdz",
+          "label": "aug-cc-pVDZ"
+        },
+        {
+          "value": "cc-pvtz",
+          "label": "cc-pVTZ"
+        },
+        {
+          "value": "def2-svp",
+          "label": "def2-SVP"
+        },
+        {
+          "value": "def2-tzvp",
+          "label": "def2-TZVP"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "reference",
+      "label": "Reference wavefunction",
+      "kind": "select",
+      "default": "auto",
+      "required": false,
+      "help": "Choose the SCF reference appropriate for the method and spin state.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Automatic (RHF for singlets, UHF otherwise)"
+        },
+        {
+          "value": "rhf",
+          "label": "RHF"
+        },
+        {
+          "value": "uhf",
+          "label": "UHF"
+        },
+        {
+          "value": "rohf",
+          "label": "ROHF"
+        },
+        {
+          "value": "rks",
+          "label": "RKS"
+        },
+        {
+          "value": "uks",
+          "label": "UKS"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "scf_type",
+      "label": "SCF integral algorithm",
+      "kind": "select",
+      "default": "default",
+      "required": false,
+      "help": "Controls Psi4's SCF_TYPE option.",
+      "options": [
+        {
+          "value": "default",
+          "label": "Psi4 default"
+        },
+        {
+          "value": "df",
+          "label": "DF (density fitting)"
+        },
+        {
+          "value": "pk",
+          "label": "PK (conventional)"
+        },
+        {
+          "value": "direct",
+          "label": "DIRECT"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "scf_guess",
+      "label": "Initial SCF guess",
+      "kind": "select",
+      "default": "default",
+      "required": false,
+      "help": "Controls the initial orbitals. Psi4 chooses a guess automatically by default.",
+      "options": [
+        {
+          "value": "default",
+          "label": "Psi4 default"
+        },
+        {
+          "value": "sad",
+          "label": "SAD"
+        },
+        {
+          "value": "sadno",
+          "label": "SADNO"
+        },
+        {
+          "value": "core",
+          "label": "CORE"
+        },
+        {
+          "value": "huckel",
+          "label": "Hückel"
+        },
+        {
+          "value": "sap",
+          "label": "SAP"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "freeze_core",
+      "label": "Freeze core orbitals",
+      "kind": "select",
+      "default": "default",
+      "required": false,
+      "help": "Controls FREEZE_CORE for post-SCF correlation methods.",
+      "options": [
+        {
+          "value": "default",
+          "label": "Psi4 default"
+        },
+        {
+          "value": "true",
+          "label": "Yes"
+        },
+        {
+          "value": "false",
+          "label": "No"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "scf_maxiter",
+      "label": "Maximum SCF iterations",
+      "kind": "number",
+      "default": "",
+      "required": false,
+      "help": "Leave blank for Psi4's SCF MAXITER default.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 1000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "e_convergence",
+      "label": "SCF energy convergence",
+      "kind": "number",
+      "default": "",
+      "required": false,
+      "help": "Optional absolute energy threshold in hartree, for example 1e-8.",
+      "options": [],
+      "rows": null,
+      "minimum": 1e-14,
+      "maximum": 0.1,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "d_convergence",
+      "label": "SCF density convergence",
+      "kind": "number",
+      "default": "",
+      "required": false,
+      "help": "Optional RMS density threshold, for example 1e-8.",
+      "options": [],
+      "rows": null,
+      "minimum": 1e-14,
+      "maximum": 0.1,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Electronic structure",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "geom_maxiter",
+      "label": "Maximum optimization steps",
+      "kind": "number",
+      "default": "",
+      "required": false,
+      "help": "Leave blank for Psi4's GEOM_MAXITER default.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 1000,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Optimization and frequencies",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "frequency_derivative",
+      "label": "Frequency derivative",
+      "kind": "select",
+      "default": "auto",
+      "required": false,
+      "help": "Sets dertype for frequency calculations. Availability depends on the method.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Automatic (Psi4 chooses)"
+        },
+        {
+          "value": "2",
+          "label": "Analytic Hessian"
+        },
+        {
+          "value": "1",
+          "label": "Finite differences of gradients"
+        },
+        {
+          "value": "0",
+          "label": "Finite differences of energies"
+        }
+      ],
+      "rows": null,
+      "minimum": null,
+      "maximum": null,
+      "step": null,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Optimization and frequencies",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "threads",
+      "label": "CPU threads",
+      "kind": "number",
+      "default": 1,
+      "required": false,
+      "help": "Number of threads passed to Psi4.",
+      "options": [],
+      "rows": null,
+      "minimum": 1,
+      "maximum": 32,
+      "step": 1,
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Resources",
+      "input_modes": "parameters"
+    },
+    {
+      "name": "memory_mib",
+      "label": "Memory (MiB)",
+      "kind": "number",
+      "default": 500,
+      "required": false,
+      "help": "Memory available to Psi4 for the calculation.",
+      "options": [],
+      "rows": null,
+      "minimum": 256,
+      "maximum": 65536,
+      "step": "any",
+      "maxlength": null,
+      "accept": "",
+      "task": "",
+      "group": "Resources",
+      "input_modes": "parameters"
+    }
+  ],
+  "tasks": [],
+  "input_modes": {
+    "name": "input_mode",
+    "label": "Input mode",
+    "default": "parameters",
+    "options": [
+      {
+        "value": "parameters",
+        "label": "Set parameters here"
+      },
+      {
+        "value": "text",
+        "label": "Raw Psithon input"
+      },
+      {
+        "value": "upload",
+        "label": "Upload Psithon input"
+      }
+    ]
+  },
+  "field_groups": [
+    {
+      "label": "Input deck",
+      "docs_url": "https://psicode.org/psi4manual/master/psithoninput.html"
+    },
+    {
+      "label": "Molecule",
+      "docs_url": "https://psicode.org/psi4manual/master/psithonmol.html"
+    },
+    {
+      "label": "Electronic structure",
+      "docs_url": "https://psicode.org/psi4manual/master/scf.html"
+    },
+    {
+      "label": "Optimization and frequencies",
+      "docs_url": "https://psicode.org/psi4manual/master/freq.html"
+    },
+    {
+      "label": "Resources",
+      "docs_url": "https://psicode.org/psi4manual/master/external.html"
+    }
+  ]
+}

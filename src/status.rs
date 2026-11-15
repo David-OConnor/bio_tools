@@ -174,6 +174,12 @@ pub fn status_full(installer: &Installer, tool: Tool) -> ToolStatus {
     if tool == Tool::AlphaFold3 {
         return check_alphafold3(installer, was_installed);
     }
+    if tool == Tool::Psi4 {
+        return match crate::install::psi4::probe(installer) {
+            Ok(version) => pass(version, Some("CPU".to_owned())),
+            Err(cause) => error(cause.to_string()),
+        };
+    }
 
     let command = match probe_command(installer, tool) {
         Some(command) => command,
@@ -344,6 +350,9 @@ fn probe_command(installer: &Installer, tool: Tool) -> Option<CommandSpec> {
                 .args(["-E", "-c", crate::rdkit::PROBE]),
         );
     }
+    if tool == Tool::Psi4 {
+        return Some(crate::install::psi4::probe_command(installer));
+    }
     // The executable's name comes from `Tool::console_script`, which is not always the slug; only
     // the probe argument is decided here.
     if tool == Tool::EsmC {
@@ -476,6 +485,9 @@ fn required_paths(installer: &Installer, tool: Tool) -> Vec<(PathBuf, &'static s
         .iter()
         .map(|(path, description)| (root.join(path), *description))
         .collect();
+    if tool == Tool::Psi4 {
+        paths.push((installer.executable_path(tool), "Psi4 launcher"));
+    }
     if tool == Tool::OpenFold3
         && let Some(cache) = installer.tool_cache_dir(tool)
     {

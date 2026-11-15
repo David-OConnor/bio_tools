@@ -1,0 +1,66 @@
+[
+  {
+    "id": "water_energy",
+    "label": "Water · single-point energy",
+    "description": "Hartree–Fock with cc-pVDZ on the water geometry from the Psi4 tutorial.",
+    "source_url": "https://psicode.org/psi4manual/1.11.x/psiapi.html",
+    "values": {
+      "coordinates": "O   0.000000   0.000000   0.000000\nH   0.000000   0.000000   0.960000\nH   0.929422   0.000000  -0.240365",
+      "calculation": "energy",
+      "method": "hf",
+      "basis": "cc-pvdz",
+      "input_mode": "parameters"
+    }
+  },
+  {
+    "id": "water_optimize",
+    "label": "Water · geometry optimization",
+    "description": "Optimize water with Hartree–Fock and cc-pVDZ, as in the Psi4 tutorial.",
+    "source_url": "https://psicode.org/psi4manual/1.11.x/psiapi.html#iii-geometry-optimization-and-vibrational-frequency-analysis",
+    "values": {
+      "coordinates": "O   0.000000   0.000000   0.000000\nH   0.000000   0.000000   0.960000\nH   0.929422   0.000000  -0.240365",
+      "calculation": "optimize",
+      "method": "hf",
+      "basis": "cc-pvdz",
+      "input_mode": "parameters"
+    }
+  },
+  {
+    "id": "water_frequencies",
+    "label": "Water · vibrational frequencies",
+    "description": "Compute harmonic frequencies at the HF/cc-pVDZ optimized water geometry.",
+    "source_url": "https://psicode.org/psi4manual/1.11.x/psiapi.html#iii-geometry-optimization-and-vibrational-frequency-analysis",
+    "values": {
+      "coordinates": "O   0.051170495463  -0.039620431403   0.000000000000\nH   0.052522458084   0.906665359558   0.000000000000\nH  -0.864635354471  -0.277860361453   0.000000000000",
+      "calculation": "frequency",
+      "method": "hf",
+      "basis": "cc-pvdz",
+      "input_mode": "parameters"
+    }
+  },
+  {
+    "id": "water_optimize_frequency",
+    "label": "Water · optimize and calculate frequencies",
+    "description": "Optimize the tutorial water Z-matrix and calculate harmonic frequencies in the same HF/cc-pVDZ job.",
+    "source_url": "https://psicode.org/psi4manual/master/tutorial.html#geometry-optimization-and-vibrational-frequency-analysis",
+    "values": {
+      "input_mode": "parameters",
+      "molecule_name": "water",
+      "coordinates": "O\nH 1 0.96\nH 1 0.96 2 104.5",
+      "calculation": "optimize_frequency",
+      "method": "hf",
+      "basis": "cc-pvdz",
+      "frequency_derivative": "1"
+    }
+  },
+  {
+    "id": "methylene_triplet",
+    "label": "Triplet methylene · Psithon",
+    "description": "Open-shell CH₂ single-point energy with UHF/6-31G**, using the tutorial's Z-matrix.",
+    "source_url": "https://github.com/psi4/psi4/blob/master/samples/tu2-ch2-energy/input.dat",
+    "values": {
+      "input_mode": "text",
+      "psi4_input": "molecule methylene {\n  0 3\n  C\n  H 1 R\n  H 1 R 2 A\n  R = 1.075\n  A = 133.93\n}\n\nset reference uhf\nenergy('scf/6-31g**')\n"
+    }
+  }
+]

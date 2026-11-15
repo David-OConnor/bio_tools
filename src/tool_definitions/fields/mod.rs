@@ -39,6 +39,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "proteinmpnn" => Some(include_str!("proteinmpnn.json")),
         "proteinmpnn_ddg" => Some(include_str!("proteinmpnn_ddg.json")),
         "protenix" => Some(include_str!("protenix.json")),
+        "psi4" => Some(include_str!("psi4.json")),
         "rdkit" => Some(include_str!("rdkit.json")),
         "rfantibody" => Some(include_str!("rfantibody.json")),
         "rfd3" => Some(include_str!("rfdiffusion3.json")),

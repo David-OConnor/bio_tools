@@ -45,6 +45,7 @@ mod placer;
 mod proteinmpnn;
 mod proteinmpnn_ddg;
 mod protenix;
+mod psi4;
 mod rdkit;
 mod retrobiocat;
 mod rfantibody;
@@ -95,12 +96,13 @@ pub enum Tool {
     Gromacs,
     BoltzAdme,
     Xtb,
+    Psi4,
     Gemmi,
 }
 
 impl Tool {
     /// Every recipe in a stable, user-facing order.
-    pub const ALL: [Self; 39] = [
+    pub const ALL: [Self; 40] = [
         Self::RdKit,
         Self::AlphaFold3,
         Self::OpenFold3,
@@ -137,6 +139,7 @@ impl Tool {
         Self::Placer,
         Self::Gromacs,
         Self::Xtb,
+        Self::Psi4,
         Self::Gemmi,
         Self::BoltzAdme,
         Self::AntiFold,
@@ -183,6 +186,7 @@ impl Tool {
             Self::Gromacs => "gromacs",
             Self::BoltzAdme => "boltz-adme",
             Self::Xtb => "xtb",
+            Self::Psi4 => "psi4",
             Self::Gemmi => "gemmi",
         }
     }
@@ -245,6 +249,7 @@ impl Tool {
             Self::Gromacs => "GROMACS",
             Self::BoltzAdme => "Boltz ADME",
             Self::Xtb => "xTB",
+            Self::Psi4 => "Psi4",
             Self::Gemmi => "Gemmi",
         }
     }
@@ -320,6 +325,12 @@ impl Tool {
 
     /// Whether upstream publishes the required binaries and wheels for the current platform.
     pub const fn is_supported(self) -> bool {
+        if matches!(self, Self::Psi4) {
+            return cfg!(all(
+                any(target_os = "linux", target_os = "macos", target_os = "windows"),
+                any(target_arch = "x86_64", target_arch = "aarch64")
+            ));
+        }
         if matches!(self, Self::OpenFold3) {
             return cfg!(all(
                 any(target_os = "linux", target_os = "macos"),
@@ -414,6 +425,7 @@ impl FromStr for Tool {
             "gromacs" => Self::Gromacs,
             "boltzadme" => Self::BoltzAdme,
             "xtb" => Self::Xtb,
+            "psi4" => Self::Psi4,
             "gemmi" => Self::Gemmi,
             _ => {
                 return Err(InstallError::InvalidConfiguration(format!(

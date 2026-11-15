@@ -125,6 +125,7 @@ pub enum License {
     ApacheV2,
     Bsd3Clause,
     Lgpl21OrLater,
+    Lgpl3Only,
     Lgpl3OrLater,
     Mpl2,
     PublicDomain,
@@ -141,6 +142,7 @@ impl fmt::Display for License {
             Self::ApacheV2 => "Apache-2.0",
             Self::Bsd3Clause => "BSD-3-Clause",
             Self::Lgpl21OrLater => "LGPL-2.1-or-later",
+            Self::Lgpl3Only => "LGPL-3.0-only",
             Self::Lgpl3OrLater => "LGPL-3.0-or-later",
             Self::Mpl2 => "MPL-2.0",
             Self::PublicDomain => "Public domain",
@@ -154,7 +156,7 @@ impl License {
         use License::*;
         match self {
             Mit | ApacheV2 | Bsd3Clause | PublicDomain => LicenseCategory::Permissive,
-            Lgpl21OrLater | Lgpl3OrLater | Mpl2 => LicenseCategory::Copyleft,
+            Lgpl21OrLater | Lgpl3Only | Lgpl3OrLater | Mpl2 => LicenseCategory::Copyleft,
             Other => LicenseCategory::Proprietary,
         }
     }
@@ -168,7 +170,7 @@ impl License {
             Self::ApacheV2 => Some("https://www.apache.org/licenses/LICENSE-2.0"),
             Self::Bsd3Clause => Some("https://opensource.org/license/bsd-3-clause"),
             Self::Lgpl21OrLater => Some("https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"),
-            Self::Lgpl3OrLater => Some("https://www.gnu.org/licenses/lgpl-3.0.html"),
+            Self::Lgpl3Only | Self::Lgpl3OrLater => Some("https://www.gnu.org/licenses/lgpl-3.0.html"),
             Self::Mpl2 => Some("https://www.mozilla.org/en-US/MPL/2.0/"),
             Self::PublicDomain => None,
             Self::Other => None,

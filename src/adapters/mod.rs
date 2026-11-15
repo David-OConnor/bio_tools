@@ -105,6 +105,14 @@ const FILES: &[(&str, &[u8])] = &[
         include_bytes!("python/bio_tool_adapters/protenix.py"),
     ),
     (
+        "bio_tool_adapters/psi4.py",
+        include_bytes!("python/bio_tool_adapters/psi4.py"),
+    ),
+    (
+        "bio_tool_adapters/psi4_input.py",
+        include_bytes!("python/bio_tool_adapters/psi4_input.py"),
+    ),
+    (
         "bio_tool_adapters/rdkit.py",
         include_bytes!("python/bio_tool_adapters/rdkit.py"),
     ),
