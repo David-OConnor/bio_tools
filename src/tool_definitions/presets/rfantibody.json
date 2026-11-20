@@ -1,0 +1,30 @@
+[
+  {
+    "id": "gfp_antibody",
+    "label": "GFP · Antibody",
+    "description": "Generate one antibody design using chain A of the GFP structure 1EMA and the bundled hu-4D5-8_Fv framework.",
+    "source_url": "https://www.rcsb.org/structure/1EMA",
+    "values": {
+      "job_name": "gfp-antibody",
+      "task": "antibody",
+      "framework": "hu-4D5-8_Fv",
+      "target_file": "bio-tools://rfantibody/1ema.pdb",
+      "antigen_chains": "A",
+      "calculate_epitope_distance": false
+    }
+  },
+  {
+    "id": "gfp_nanobody",
+    "label": "GFP · Nanobody",
+    "description": "Generate one nanobody design using chain A of the GFP structure 1EMA and the bundled h-NbBCII10 framework.",
+    "source_url": "https://www.rcsb.org/structure/1EMA",
+    "values": {
+      "job_name": "gfp-nanobody",
+      "task": "nanobody",
+      "framework": "h-NbBCII10",
+      "target_file": "bio-tools://rfantibody/1ema.pdb",
+      "antigen_chains": "A",
+      "calculate_epitope_distance": false
+    }
+  }
+]

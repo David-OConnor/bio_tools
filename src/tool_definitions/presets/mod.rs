@@ -155,6 +155,7 @@ pub fn by_slug(slug: &str) -> Option<&'static str> {
         "psi4" => Some(include_str!("psi4.json")),
         "rdkit" => Some(include_str!("rdkit.json")),
         "rfd3" => Some(include_str!("rfdiffusion3.json")),
+        "rfantibody" => Some(include_str!("rfantibody.json")),
         "thermompnn" => Some(include_str!("thermompnn.json")),
         _ => None,
     }
@@ -288,6 +289,8 @@ pub fn asset(slug: &str, name: &str) -> Option<&'static str> {
             "rfdiffusion3/input_pdbs/symmetry_examples/6t8h_C3.pdb"
         )),
         ("rfd3", "provenance.json") => Some(include_str!("rfdiffusion3/provenance.json")),
+
+        ("rfantibody", "1ema.pdb") => Some(include_str!("rfantibody/1ema.pdb")),
 
         ("thermompnn", "examples/2OCJ.pdb") => Some(include_str!("thermompnn/examples/2OCJ.pdb")),
         ("thermompnn", "LICENSE") => Some(include_str!("thermompnn/LICENSE")),

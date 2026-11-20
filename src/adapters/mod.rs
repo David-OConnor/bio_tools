@@ -121,6 +121,10 @@ const FILES: &[(&str, &[u8])] = &[
         include_bytes!("python/bio_tool_adapters/tool_scripts/rdkit_analysis.py"),
     ),
     (
+        "bio_tool_adapters/rfantibody.py",
+        include_bytes!("python/bio_tool_adapters/rfantibody.py"),
+    ),
+    (
         "bio_tool_adapters/rfdiffusion3.py",
         include_bytes!("python/bio_tool_adapters/rfdiffusion3.py"),
     ),
